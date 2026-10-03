@@ -49,8 +49,8 @@ public static class HouseColliders
         ClearOpenDoorways(house);
     }
 
-    // Open doorways (the ones without a door, e.g. Living <-> Kitchen) must be completely free to walk through.
-    // This looks inside each one and switches off any collider it finds there (and says so in the Console).
+    // DIAGNOSTIC ONLY (it changes nothing): for each open doorway (the ones without a door, e.g. Living <-> Kitchen)
+    // it prints to the Console which colliders sit inside the opening. Use it to find out what blocks the way.
     static void ClearOpenDoorways(Transform house)
     {
         foreach (Transform doorway in house.GetComponentsInChildren<Transform>(true))
@@ -59,19 +59,16 @@ public static class HouseColliders
             MeshFilter frame = doorway.GetComponent<MeshFilter>();
             if (frame == null || frame.sharedMesh == null) continue;
 
-            // A box in the middle of the opening: a bit narrower than the frame, nearly door height.
             Bounds b = frame.sharedMesh.bounds;
             Vector3 centre = doorway.TransformPoint(new Vector3(b.center.x, 1.15f, b.center.z));
             Vector3 half = new Vector3(Mathf.Max(0.2f, b.extents.x - 0.2f), 0.95f, 0.35f);
 
             foreach (Collider c in Physics.OverlapBox(centre, half, doorway.rotation, ~0, QueryTriggerInteraction.Ignore))
             {
-                if (c.transform == doorway || c.transform.IsChildOf(doorway)) continue;       // the frame itself is fine
+                if (c.transform == doorway || c.transform.IsChildOf(doorway)) continue;
                 if (c.name.StartsWith("Floor")) continue;
                 if (c is CharacterController || c.GetComponentInParent<FirstPersonController>() != null) continue;
-
-                c.enabled = false;
-                Debug.Log("HouseColliders: switched off '" + c.name + "' that was blocking the open doorway '" + doorway.name + "'");
+                Debug.Log("HouseColliders (info): '" + c.name + "' (" + c.GetType().Name + ") is inside the open doorway '" + doorway.name + "'", c);
             }
         }
     }
