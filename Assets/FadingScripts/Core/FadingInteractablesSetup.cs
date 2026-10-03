@@ -41,7 +41,10 @@ public class FadingInteractablesSetup : MonoBehaviour
                 case "INT_Hallway_FamilyPhoto":    Add<FamilyPhoto>(g, photoTap); break;
                 case "INT_Hallway_Calendar":       Add<HallwayCalendar>(g, calendarRustle); break;
 
-                case "INT_Grandma_RockingChair":   Add<GrandmaRockingChair>(g, chairCreak); break;
+                case "INT_Grandma_RockingChair":
+                    // The Chapter0 scene already has its own rocking chair; don't make a second touchable one.
+                    if (FindFirstObjectByType<GrandmaRockingChair>() == null) Add<GrandmaRockingChair>(g, chairCreak);
+                    break;
                 case "INT_Grandma_Lamp":           Add<GrandmaLamp>(g, lampBuzz); break;
                 case "INT_Grandma_PhotoAlbum":     Add<GrandmaPhotoAlbum>(g, albumPage); break;
                 case "INT_Grandma_Clock":          Add<GrandmaClock>(g, clockChime); break;

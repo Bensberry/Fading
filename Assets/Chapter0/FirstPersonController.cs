@@ -13,6 +13,8 @@ public class FirstPersonController : MonoBehaviour
     [Tooltip("Higher = reaches full speed / stops faster.")]
     public float acceleration = 12f;
     public float gravity = -9.81f;
+    [Tooltip("Ghost: after landing on the floor once, the player stays at that height and can never fall again.")]
+    public bool ghostMode = true;
 
     [Header("Look Settings")]
     [Tooltip("Lower this value significantly (e.g., between 0.05 and 0.5)")]
@@ -26,6 +28,7 @@ public class FirstPersonController : MonoBehaviour
     private CharacterController controller;
     private Vector3 horizontalVelocity;
     private float verticalVelocity;
+    private bool hasLanded;
     private float verticalRotation = 0f;
     private Vector3 startPosition;
     private Quaternion startRotation;
@@ -85,13 +88,23 @@ public class FirstPersonController : MonoBehaviour
         // Smoothly speed up / slow down instead of jumping straight to full speed.
         horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, wanted, acceleration * Time.deltaTime);
 
-        // Gravity: a small constant push while grounded keeps isGrounded reliable.
-        if (controller.isGrounded && verticalVelocity < 0f) verticalVelocity = -2f;
-        verticalVelocity += gravity * Time.deltaTime;
+        UpdateVerticalVelocity();
 
         // ONE Move call per frame (two separate calls made isGrounded flicker).
         Vector3 total = horizontalVelocity + Vector3.up * verticalVelocity;
         controller.Move(total * Time.deltaTime);
+    }
+
+    void UpdateVerticalVelocity()
+    {
+        if (controller.isGrounded) hasLanded = true;
+
+        // Ghost: once we have settled on the floor, stay at this height for good.
+        if (ghostMode && hasLanded) { verticalVelocity = 0f; return; }
+
+        // Gravity: a small constant push while grounded keeps isGrounded reliable.
+        if (controller.isGrounded && verticalVelocity < 0f) verticalVelocity = -2f;
+        verticalVelocity += gravity * Time.deltaTime;
     }
 
     Vector3 ReadWantedDirection()
@@ -123,5 +136,6 @@ public class FirstPersonController : MonoBehaviour
         controller.enabled = true;
         horizontalVelocity = Vector3.zero;
         verticalVelocity = 0f;
+        hasLanded = false;
     }
 }
