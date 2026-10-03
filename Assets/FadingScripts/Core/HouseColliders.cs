@@ -46,6 +46,42 @@ public static class HouseColliders
             if (IsInside(t, SolidGroups, house)) AddMeshCollider(t.gameObject, filter.sharedMesh);
             else if (IsInside(t, BoxGroups, house) && !IsFlat(t)) AddBoxCollider(t.gameObject, filter.sharedMesh);
         }
+        ClearOpenDoorways(house);
+    }
+
+    // Open doorways (the ones without a door, e.g. Living <-> Kitchen) must be completely free to walk through.
+    // This looks inside each one and switches off any collider it finds there (and says so in the Console).
+    static void ClearOpenDoorways(Transform house)
+    {
+        foreach (Transform doorway in house.GetComponentsInChildren<Transform>(true))
+        {
+            if (!doorway.name.StartsWith("Doorway_") || HasDoorLeaf(doorway)) continue;
+            MeshFilter frame = doorway.GetComponent<MeshFilter>();
+            if (frame == null || frame.sharedMesh == null) continue;
+
+            // A box in the middle of the opening: a bit narrower than the frame, nearly door height.
+            Bounds b = frame.sharedMesh.bounds;
+            Vector3 centre = doorway.TransformPoint(new Vector3(b.center.x, 1.15f, b.center.z));
+            Vector3 half = new Vector3(Mathf.Max(0.2f, b.extents.x - 0.2f), 0.95f, 0.35f);
+
+            foreach (Collider c in Physics.OverlapBox(centre, half, doorway.rotation, ~0, QueryTriggerInteraction.Ignore))
+            {
+                if (c.transform == doorway || c.transform.IsChildOf(doorway)) continue;       // the frame itself is fine
+                if (c.name.StartsWith("Floor")) continue;
+                if (c is CharacterController || c.GetComponentInParent<FirstPersonController>() != null) continue;
+
+                c.enabled = false;
+                Debug.Log("HouseColliders: switched off '" + c.name + "' that was blocking the open doorway '" + doorway.name + "'");
+            }
+        }
+    }
+
+    // True if the doorway has a door in it (an INT_Door_... child). Those are opened with F, not walked through.
+    static bool HasDoorLeaf(Transform doorway)
+    {
+        foreach (Transform child in doorway.GetComponentsInChildren<Transform>(true))
+            if (child != doorway && child.name.StartsWith("INT_Door")) return true;
+        return false;
     }
 
     static void AddMeshCollider(GameObject g, Mesh mesh)
