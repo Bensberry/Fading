@@ -4,7 +4,7 @@ using UnityEngine.Rendering.Universal;
 
 // Goes in: nowhere by hand. ChapterRules adds it in every chapter.
 // The ghost slowly loses himself. One thing fades away in each chapter, and what is lost stays lost:
-//   Chapter 1  VISION   the colour drains out until the world is black and white, it gets blurry and the edges go dark
+//   Chapter 1  VISION   the colour drains out of the world and the edges of your sight go dark
 //   Chapter 2  SPEED    your body gets heavy, you walk and run slower
 //   Chapter 3  HEARING  every sound turns dull and quiet
 // At the start of a chapter the new loss creeps in slowly (RampSeconds) instead of switching on at once.
@@ -12,7 +12,7 @@ using UnityEngine.Rendering.Universal;
 public class AbilityLoss : MonoBehaviour
 {
     //                                   Ch0   Ch1   Ch2   Ch3
-    static readonly float[] Vision  = { 0f,   0.8f, 0.8f, 0.8f };
+    static readonly float[] Vision  = { 0f,   0.6f, 0.6f, 0.6f };
     static readonly float[] Speed   = { 0f,   0f,   0.4f, 0.4f };       // 0.4 = 40% slower
     static readonly float[] Hearing = { 0f,   0f,   0f,   0.7f };
 
@@ -33,7 +33,6 @@ public class AbilityLoss : MonoBehaviour
     float timer;
     ColorAdjustments colour;
     Vignette vignette;
-    DepthOfField blur;
     AudioLowPassFilter lowPass;
 
     public static void StartFor(GameObject host, int chapterNumber)
@@ -79,7 +78,7 @@ public class AbilityLoss : MonoBehaviour
         SetHearing(hearing);
     }
 
-    // ---------- vision: black and white + blurry + darker + a dark tunnel around the edges
+    // ---------- vision: desaturate + darken + a dark tunnel around the edges
     void FindEffects()
     {
         Volume volume = FindFirstObjectByType<Volume>();
@@ -93,25 +92,13 @@ public class AbilityLoss : MonoBehaviour
         VolumeProfile profile = volume.profile;          // a private copy, the project's asset is never changed
         if (!profile.TryGet(out colour)) colour = profile.Add<ColorAdjustments>(true);
         if (!profile.TryGet(out vignette)) vignette = profile.Add<Vignette>(true);
-        if (!profile.TryGet(out blur)) blur = profile.Add<DepthOfField>(true);
     }
 
     void SetVision(float loss)
     {
-        if (colour == null || vignette == null || blur == null) return;
-
-        // Colour goes first: by loss 0.8 the world is completely black and white.
-        colour.saturation.Override(-100f * Mathf.Clamp01(loss * 1.3f));
+        if (colour == null || vignette == null) return;
+        colour.saturation.Override(-90f * loss);
         colour.postExposure.Override(-0.9f * loss);
-        colour.contrast.Override(15f * loss);
-
-        // Blur: things far away go soft first; the closer things stay readable (the blur starts about 1.5 m from you).
-        blur.mode.Override(DepthOfFieldMode.Gaussian);
-        blur.gaussianStart.Override(Mathf.Lerp(40f, 1.5f, loss));
-        blur.gaussianEnd.Override(Mathf.Lerp(80f, 7f, loss));
-        blur.gaussianMaxRadius.Override(Mathf.Lerp(0.1f, 1.4f, loss));
-        blur.highQualitySampling.Override(true);
-
         vignette.color.Override(Color.black);
         vignette.smoothness.Override(0.7f);
         vignette.intensity.Override(0.15f + 0.5f * loss);
