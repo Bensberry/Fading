@@ -37,15 +37,28 @@ public static class HouseColliders
         Transform house = setup != null ? setup.transform : FindByName("FadingHouse");
         if (house == null) return;
 
+        int added = 0, repaired = 0;
         foreach (Transform t in house.GetComponentsInChildren<Transform>(true))
         {
             if (IsTouchable(t)) continue;
             MeshFilter filter = t.GetComponent<MeshFilter>();
-            if (filter == null || filter.sharedMesh == null || t.GetComponent<Collider>() != null) continue;
+            if (filter == null || filter.sharedMesh == null) continue;
+            Collider existing = t.GetComponent<Collider>();
 
-            if (IsInside(t, SolidGroups, house)) AddMeshCollider(t.gameObject, filter.sharedMesh);
-            else if (IsInside(t, BoxGroups, house) && !IsFlat(t)) AddBoxCollider(t.gameObject, filter.sharedMesh);
+            if (IsInside(t, SolidGroups, house))
+            {
+                // Walls, floors, frames...: the collider must have exactly the visible shape (holes for doorways included).
+                // A hand-added collider with no mesh, the wrong mesh or the wrong type does nothing / blocks openings, so fix it.
+                if (existing == null) { AddMeshCollider(t.gameObject, filter.sharedMesh); added++; }
+                else if (RepairMeshCollider(existing, filter.sharedMesh, t.gameObject)) repaired++;
+            }
+            else if (existing == null && IsInside(t, BoxGroups, house) && !IsFlat(t))
+            {
+                AddBoxCollider(t.gameObject, filter.sharedMesh);
+                added++;
+            }
         }
+        Debug.Log("HouseColliders: added " + added + " colliders, repaired " + repaired + " existing wall/floor colliders.");
         ClearOpenDoorways(house);
     }
 
@@ -79,6 +92,25 @@ public static class HouseColliders
         foreach (Transform child in doorway.GetComponentsInChildren<Transform>(true))
             if (child != doorway && child.name.StartsWith("INT_Door")) return true;
         return false;
+    }
+
+    // Makes an existing collider on a wall/floor correct. Returns true if it had to change something.
+    static bool RepairMeshCollider(Collider existing, Mesh mesh, GameObject g)
+    {
+        MeshCollider mc = existing as MeshCollider;
+        if (mc == null)
+        {
+            existing.enabled = false;                    // e.g. a Box Collider across a doorway: replace it by the true shape
+            AddMeshCollider(g, mesh);
+            return true;
+        }
+
+        bool ok = mc.sharedMesh == mesh && !mc.convex && !mc.isTrigger && mc.enabled;
+        mc.sharedMesh = mesh;
+        mc.convex = false;                               // a convex collider would fill every doorway
+        mc.isTrigger = false;
+        mc.enabled = true;
+        return !ok;
     }
 
     static void AddMeshCollider(GameObject g, Mesh mesh)
