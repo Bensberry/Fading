@@ -35,6 +35,7 @@ public class ChapterRules : MonoBehaviour
     static void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         if (scene.name != Chapter0 && scene.name != Chapter1) return;
+        LightFadeIn.StartIfPending();                  // coming from the main menu: start in the blinding light and fade out of it
         new GameObject("ChapterRules").AddComponent<ChapterRules>();
     }
 

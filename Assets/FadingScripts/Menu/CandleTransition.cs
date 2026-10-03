@@ -25,11 +25,11 @@ public class CandleTransition : MonoBehaviour
     [Tooltip("Only used if the candle starts unlit.")]
     public float igniteSeconds = 1.5f;
     [Tooltip("How long the flame swells when PLAY is clicked.")]
-    public float flareSeconds = 1.5f;
-    [Tooltip("How much brighter the light gets when PLAY is clicked.")]
-    public float flareMultiplier = 1.8f;
-    [Tooltip("How long the lit candle burns before the fade-out starts (about 1-2 seconds).")]
-    public float burnSeconds = 1.5f;
+    public float flareSeconds = 2.5f;
+    [Tooltip("How much brighter the light gets when PLAY is clicked. High = blinding.")]
+    public float flareMultiplier = 25f;
+    [Tooltip("How long the blinding candle holds before the scene changes.")]
+    public float burnSeconds = 0.5f;
 
     [Header("Match sound (when the candle is lit as the menu opens)")]
     [Tooltip("The match-strike sound. MainMenuController fills this in; put the file at Assets/Resources/Audio/MatchStrike.")]
@@ -218,7 +218,7 @@ public class CandleTransition : MonoBehaviour
     void SetLook(float flame01, float reveal01)
     {
         flameLight.intensity = lightIntensity * flame01;
-        flameLight.range = lightRange * Mathf.Lerp(1f, 1.3f, Mathf.InverseLerp(1f, flareMultiplier, boost));
+        flameLight.range = lightRange * Mathf.Lerp(1f, 2f, Mathf.InverseLerp(1f, flareMultiplier, boost));
         flameLight.enabled = flame01 > 0.001f;
         revealLight.intensity = revealIntensity * reveal01;
 

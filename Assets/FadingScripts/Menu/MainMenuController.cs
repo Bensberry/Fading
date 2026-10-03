@@ -29,8 +29,12 @@ public class MainMenuController : MonoBehaviour
     [Tooltip("The menu text slowly appears from the dark when the menu opens.")]
     public float menuFadeInSeconds = 2.5f;
     public float textFadeOutSeconds = 0.8f;
-    [Tooltip("Black fade after the candle flares, before the game scene appears.")]
+    [Tooltip("How long the screen takes to flood with light after PLAY.")]
     public float fadeDuration = 2f;
+    [Tooltip("Seconds after PLAY (and after the text is gone) before the white-out starts, while the flame is swelling.")]
+    public float whiteOutDelay = 0.8f;
+    [Tooltip("The blinding colour the screen fades to. The game scene starts in the same colour.")]
+    public Color blindingColor = new Color(1f, 0.95f, 0.85f);
 
     CandleTransition candle;
     Image fadeImage;
@@ -94,7 +98,7 @@ public class MainMenuController : MonoBehaviour
         rt.offsetMin = rt.offsetMax = Vector2.zero;
 
         Image image = g.GetComponent<Image>();
-        image.color = new Color(0f, 0f, 0f, 0f);
+        image.color = new Color(1f, 1f, 1f, 0f);
         image.raycastTarget = false;
         return image;
     }
@@ -125,11 +129,27 @@ public class MainMenuController : MonoBehaviour
         load.allowSceneActivation = false;
 
         yield return FadeText(1f, 0f, textFadeOutSeconds);          // the text disappears, leaving the candle
-        yield return candle.Play();                                  // the flame swells and burns
-        yield return FadeScreen(0f, 1f, fadeDuration);               // fade to black
 
+        // The flame swells until it is blinding; the screen floods with light while it does.
+        whiteOutDone = false;
+        StartCoroutine(WhiteOut());
+        yield return candle.Play();
+        while (!whiteOutDone) yield return null;
+
+        // The game scene starts in the same blinding light and slowly clears (see LightFadeIn).
+        LightFadeIn.lightColor = blindingColor;
+        LightFadeIn.pending = true;
         while (load.progress < 0.9f) yield return null;
         load.allowSceneActivation = true;
+    }
+
+    bool whiteOutDone;
+
+    IEnumerator WhiteOut()
+    {
+        yield return new WaitForSeconds(whiteOutDelay);
+        yield return FadeScreen(0f, 1f, fadeDuration);
+        whiteOutDone = true;
     }
 
     // ---------- fades
@@ -154,9 +174,9 @@ public class MainMenuController : MonoBehaviour
     {
         for (float t = 0f; t < seconds; t += Time.deltaTime)
         {
-            fadeImage.color = new Color(0f, 0f, 0f, Mathf.SmoothStep(from, to, t / seconds));
+            fadeImage.color = new Color(blindingColor.r, blindingColor.g, blindingColor.b, Mathf.SmoothStep(from, to, t / seconds));
             yield return null;
         }
-        fadeImage.color = new Color(0f, 0f, 0f, to);
+        fadeImage.color = new Color(blindingColor.r, blindingColor.g, blindingColor.b, to);
     }
 }
