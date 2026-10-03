@@ -197,6 +197,7 @@ GameObject:
   m_Component:
   - component: {fileID: 21}
   - component: {fileID: 22}
+  - component: {fileID: 23}
   m_Layer: 0
   m_Name: MainMenu
   m_TagString: Untagged
@@ -231,3 +232,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 79b380ceab3b45ea8a0a4a26ee2c31b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MainMenuController
+--- !u!114 &23
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 20}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1f1de13bc794ffabc943ee57414a6c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CandleTransition

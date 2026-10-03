@@ -23,13 +23,22 @@ public class CandleTransition : MonoBehaviour
     [Tooltip("Only used if the candle starts unlit.")]
     public float revealSeconds = 4f;
     [Tooltip("Only used if the candle starts unlit.")]
-    public float igniteSeconds = 2.5f;
+    public float igniteSeconds = 1.5f;
     [Tooltip("How long the flame swells when PLAY is clicked.")]
     public float flareSeconds = 1.5f;
     [Tooltip("How much brighter the light gets when PLAY is clicked.")]
     public float flareMultiplier = 1.8f;
     [Tooltip("How long the lit candle burns before the fade-out starts (about 1-2 seconds).")]
     public float burnSeconds = 1.5f;
+
+    [Header("Match sound (when the candle is lit as the menu opens)")]
+    [Tooltip("The match-strike sound. MainMenuController fills this in; put the file at Assets/Resources/Audio/MatchStrike.")]
+    public AudioClip matchSound;
+    [Range(0f, 1f)] public float matchVolume = 1f;
+    [Tooltip("Silence in the dark before the match is struck.")]
+    public float openDarkSeconds = 1f;
+    [Tooltip("TIMING: seconds from the START of the sound clip until the flame appears. Set this to the moment in your clip where the match flares up.")]
+    public float soundLeadSeconds = 0.4f;
 
     [Header("Light")]
     public Color lightColor = new Color(1f, 0.62f, 0.28f);
@@ -121,6 +130,40 @@ public class CandleTransition : MonoBehaviour
         root.SetActive(true);
         flameStrength = 1f;
         flickering = true;
+    }
+
+    // The menu opening: darkness, a match is struck (sound), then the wick catches and the flame grows.
+    public IEnumerator LightUp()
+    {
+        root.SetActive(true);
+        SetLook(0f, 0f);
+        yield return new WaitForSeconds(openDarkSeconds);
+
+        if (matchSound != null)
+        {
+            AudioSource source = gameObject.GetComponent<AudioSource>();
+            if (source == null) source = gameObject.AddComponent<AudioSource>();
+            source.playOnAwake = false;
+            source.spatialBlend = 0f;
+            source.PlayOneShot(matchSound, matchVolume);
+        }
+
+        // While the match scratches, the unlit candle is faintly revealed.
+        float lead = Mathf.Max(0.01f, soundLeadSeconds);
+        for (float t = 0f; t < lead; t += Time.deltaTime)
+        {
+            SetLook(0f, Mathf.SmoothStep(0f, 1f, t / lead));
+            yield return null;
+        }
+
+        // The flame appears and grows.
+        flickering = true;
+        for (float t = 0f; t < igniteSeconds; t += Time.deltaTime)
+        {
+            flameStrength = Mathf.SmoothStep(0f, 1f, t / igniteSeconds);
+            yield return null;
+        }
+        flameStrength = 1f;
     }
 
     // The sequence started by PLAY (the controller runs this).

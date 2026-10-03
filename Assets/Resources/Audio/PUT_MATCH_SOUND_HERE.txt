@@ -1,0 +1,4 @@
+Drop the match-strike sound here and name it exactly:  MatchStrike  (MatchStrike.wav or MatchStrike.mp3).
+It plays when the main menu opens and the candle is lit.
+Timing: on the MainMenu object > CandleTransition, set "Sound Lead Seconds" to how many seconds into your clip the flame should appear
+(the moment the match flares up). "Open Dark Seconds" is the silence before the strike.

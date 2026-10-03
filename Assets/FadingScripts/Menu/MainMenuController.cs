@@ -16,6 +16,12 @@ public class MainMenuController : MonoBehaviour
     [Header("Scene")]
     public string sceneName = "Chapter0";
 
+    [Header("Candle")]
+    [Tooltip("ON: the menu opens in darkness, a match is struck and the candle is lit. OFF: the candle is already burning.")]
+    public bool lightCandleOnOpen = true;
+    [Tooltip("The match-strike sound. Drag your audio here, or put it at Assets/Resources/Audio/MatchStrike.")]
+    public AudioClip matchSound;
+
     [Header("Look")]
     public MenuStyle style = new MenuStyle();
 
@@ -47,11 +53,26 @@ public class MainMenuController : MonoBehaviour
         fadeImage = MakeFadeOverlay(canvas.transform);
         SetTextVisibility(0f);
 
-        candle = gameObject.AddComponent<CandleTransition>();
+        // The CandleTransition component sits on this same object in the scene, so its settings can be tuned in the Inspector.
+        candle = GetComponent<CandleTransition>();
+        if (candle == null) candle = gameObject.AddComponent<CandleTransition>();
+        if (matchSound != null) candle.matchSound = matchSound;
+        else if (candle.matchSound == null) candle.matchSound = Resources.Load<AudioClip>("Audio/MatchStrike");
         candle.Build(Camera.main != null ? Camera.main : FindFirstObjectByType<Camera>());
-        candle.ShowLit();
 
-        StartCoroutine(FadeInText());
+        StartCoroutine(OpenMenu());
+    }
+
+    // The candle gets lit (or is already burning), then the title and options slowly appear.
+    IEnumerator OpenMenu()
+    {
+        if (lightCandleOnOpen) yield return candle.LightUp();
+        else
+        {
+            candle.ShowLit();
+            yield return new WaitForSeconds(0.5f);
+        }
+        yield return FadeText(0f, 1f, menuFadeInSeconds);
     }
 
     // ---------- setting up
@@ -112,12 +133,6 @@ public class MainMenuController : MonoBehaviour
     }
 
     // ---------- fades
-    IEnumerator FadeInText()
-    {
-        yield return new WaitForSeconds(0.5f);
-        yield return FadeText(0f, 1f, menuFadeInSeconds);
-    }
-
     IEnumerator FadeText(float from, float to, float seconds)
     {
         for (float t = 0f; t < seconds; t += Time.deltaTime)
