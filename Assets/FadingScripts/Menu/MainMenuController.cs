@@ -29,7 +29,8 @@ public class MainMenuController : MonoBehaviour
     [Range(0f, 1f)] public float quitHeight = 0.44f;
 
     [Header("Text hover effect")]
-    [Range(0f, 1f)] public float normalAlpha = 0.7f;
+    [Tooltip("How faded the text looks when the mouse is not on it. Lower = fainter.")]
+    [Range(0f, 1f)] public float normalAlpha = 0.35f;
     [Range(0f, 1f)] public float hoverAlpha = 1f;
     public float hoverScale = 1.05f;
 

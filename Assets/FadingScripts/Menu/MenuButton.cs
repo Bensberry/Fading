@@ -12,7 +12,7 @@ using UnityEngine.EventSystems;
 public class MenuButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
     [Header("Text Hover Effect")]
-    [Range(0f, 1f)] public float normalAlpha = 0.7f;
+    [Range(0f, 1f)] public float normalAlpha = 0.35f;
     [Range(0f, 1f)] public float hoverAlpha = 1f;
     public float hoverScale = 1.05f;
     [Tooltip("How fast the text eases to its hover look. Lower = slower and calmer.")]
