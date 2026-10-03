@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -5,7 +6,8 @@ using UnityEngine.SceneManagement;
 // The imported house (FadingHouse.glb) has no colliders, so the player could walk through walls or fall.
 // This adds them at runtime and does not change how anything looks:
 //   - big solid parts (floors, walls, ceiling, door frames, windows, ground...) get a Mesh Collider
-//   - furniture and packing boxes get a simple Box Collider
+//   - furniture and packing boxes get a Mesh Collider too (their exact shape; a box would wrongly fill L-shaped
+//     things like the kitchen backsplash and block the whole room)
 // Anything that already has a collider (including things added by hand) is left alone,
 // and so are the touchable INT_ objects (they make their own collider).
 public static class HouseColliders
@@ -31,11 +33,21 @@ public static class HouseColliders
         AddColliders();
     }
 
+    // Also run once for the very first scene (when you press Play directly in a chapter). Safe to run twice.
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    static void RunForFirstScene()
+    {
+        AddColliders();
+    }
+
+    static readonly HashSet<int> doneHouses = new HashSet<int>();
+
     static void AddColliders()
     {
         FadingInteractablesSetup setup = Object.FindFirstObjectByType<FadingInteractablesSetup>();
         Transform house = setup != null ? setup.transform : FindByName("FadingHouse");
         if (house == null) return;
+        if (!doneHouses.Add(house.gameObject.GetInstanceID())) return;       // already done for this house
 
         int added = 0, repaired = 0;
         foreach (Transform t in house.GetComponentsInChildren<Transform>(true))
@@ -54,7 +66,7 @@ public static class HouseColliders
             }
             else if (existing == null && IsInside(t, BoxGroups, house) && !IsFlat(t))
             {
-                AddBoxCollider(t.gameObject, filter.sharedMesh);
+                AddMeshCollider(t.gameObject, filter.sharedMesh);
                 added++;
             }
         }
@@ -116,13 +128,6 @@ public static class HouseColliders
     static void AddMeshCollider(GameObject g, Mesh mesh)
     {
         g.AddComponent<MeshCollider>().sharedMesh = mesh;
-    }
-
-    static void AddBoxCollider(GameObject g, Mesh mesh)
-    {
-        BoxCollider box = g.AddComponent<BoxCollider>();
-        box.center = mesh.bounds.center;
-        box.size = mesh.bounds.size;
     }
 
     // Rugs, slippers, shawls etc. are too low to block anyone; a collider on them only makes the player climb them.

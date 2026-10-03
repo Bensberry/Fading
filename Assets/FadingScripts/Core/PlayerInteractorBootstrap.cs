@@ -15,7 +15,19 @@ public static class PlayerInteractorBootstrap
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
+    // Also run once for the very first scene (when you press Play directly in a chapter). Safe to run twice.
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    static void RunForFirstScene()
+    {
+        AddInteractor();
+    }
+
     static void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        AddInteractor();
+    }
+
+    static void AddInteractor()
     {
         // Only needed in scenes that contain touchable objects.
         if (Object.FindFirstObjectByType<Interactable>(FindObjectsInactive.Include) == null) return;

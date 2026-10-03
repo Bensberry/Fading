@@ -32,9 +32,22 @@ public class ChapterRules : MonoBehaviour
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
+    // Also run once for the very first scene (when you press Play directly in a chapter). Safe to run twice.
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    static void RunForFirstScene()
+    {
+        TryCreate(SceneManager.GetActiveScene().name);
+    }
+
     static void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (scene.name != Chapter0 && scene.name != Chapter1) return;
+        TryCreate(scene.name);
+    }
+
+    static void TryCreate(string sceneName)
+    {
+        if (sceneName != Chapter0 && sceneName != Chapter1) return;
+        if (FindFirstObjectByType<ChapterRules>() != null) return;        // already running
         LightFadeIn.StartIfPending();                  // coming from the main menu: start in the blinding light and fade out of it
         new GameObject("ChapterRules").AddComponent<ChapterRules>();
     }
