@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Events;
 
 // Base class for everything the ghost can touch.
-// THE 5-SECOND RULE: every touch follows the same fixed sequence, and no subclass can change it:
+// THE 5-SECOND RULE: every touch follows the same fixed sequence (doors are the only exception):
 //   Apply()  ->  hold for exactly 5 seconds (WhileHeld runs every frame)  ->  Revert()  (drifts back)
 public abstract class Interactable : MonoBehaviour
 {
@@ -29,7 +29,8 @@ public abstract class Interactable : MonoBehaviour
     public virtual void ApplyDefaults() { }
     protected virtual void Reset() { ApplyDefaults(); }
 
-    public void TryInteract()
+    // Doors override this (they are the one exception to the 5-second rule).
+    public virtual void TryInteract()
     {
         if (IsBusy || !isActiveAndEnabled) return;
         StartCoroutine(Sequence());
