@@ -1,48 +1,34 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
-using UnityEngine.InputSystem.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 // Goes on: one empty object in the MainMenu scene (the scene already has it).
-// The menu: a pitch black screen with only PLAY and QUIT in white on the left.
-// PLAY: the text fades away, a candle is revealed on the right and lit, then the screen fades to black
-//       while the game scene loads in the background, and the game starts.
+// The menu: a pitch black screen, the title lit by a candle burning on the right, PLAY and QUIT on the left.
+// PLAY: the text fades away, the candle flares, then the screen fades to black while the game scene
+//       loads in the background, and the game starts.
 // QUIT: closes the game (in the Unity Editor it just stops Play mode).
-// Everything is built from code at start, so the scene file stays tiny. All settings are public fields.
+// Everything is built from code at start, so the scene file stays tiny. The look comes from 'style'
+// (see MenuStyle in MenuKit.cs); the candle settings are on the CandleTransition component.
 public class MainMenuController : MonoBehaviour
 {
     [Header("Scene")]
     public string sceneName = "Chapter0";
 
-    [Header("Text")]
-    [Tooltip("Optional. Drag a TextMeshPro font asset here to change the font. Empty = the project's default font.")]
-    public TMP_FontAsset font;
-    public int fontSize = 64;
-    public float letterSpacing = 16f;
-    public Color textColor = Color.white;
-    [Tooltip("Distance of the text from the left edge (0-1 of the screen width).")]
-    [Range(0f, 0.5f)] public float leftMargin = 0.08f;
-    [Tooltip("Height of PLAY and QUIT on the screen (0 = bottom, 1 = top).")]
-    [Range(0f, 1f)] public float playHeight = 0.56f;
-    [Range(0f, 1f)] public float quitHeight = 0.44f;
-
-    [Header("Text hover effect")]
-    [Tooltip("How faded the text looks when the mouse is not on it. Lower = fainter.")]
-    [Range(0f, 1f)] public float normalAlpha = 0.35f;
-    [Range(0f, 1f)] public float hoverAlpha = 1f;
-    public float hoverScale = 1.05f;
+    [Header("Look")]
+    public MenuStyle style = new MenuStyle();
 
     [Header("Timing (seconds)")]
     [Tooltip("The menu text slowly appears from the dark when the menu opens.")]
-    public float menuFadeInSeconds = 2f;
+    public float menuFadeInSeconds = 2.5f;
     public float textFadeOutSeconds = 0.8f;
-    [Tooltip("Black fade after the candle is lit, before the game scene appears.")]
+    [Tooltip("Black fade after the candle flares, before the game scene appears.")]
     public float fadeDuration = 2f;
 
     CandleTransition candle;
     Image fadeImage;
+    TextMeshProUGUI title;
     MenuButton playButton, quitButton;
     bool starting;
 
@@ -53,14 +39,17 @@ public class MainMenuController : MonoBehaviour
         Cursor.visible = true;
 
         MakeEverythingBlack();
-        EnsureEventSystem();
-        Canvas canvas = MakeCanvas();
-        playButton = MakeButton(canvas.transform, "PLAY", playHeight, StartGame);
-        quitButton = MakeButton(canvas.transform, "QUIT", quitHeight, QuitGame);
+        MenuKit.EnsureEventSystem();
+        Canvas canvas = MenuKit.MakeCanvas("MenuCanvas", 0);
+        title = MenuKit.MakeTitle(canvas.transform, style);
+        playButton = MenuKit.MakeOption(canvas.transform, "PLAY", 0, style, StartGame);
+        quitButton = MenuKit.MakeOption(canvas.transform, "QUIT", 1, style, QuitGame);
         fadeImage = MakeFadeOverlay(canvas.transform);
+        SetTextVisibility(0f);
 
         candle = gameObject.AddComponent<CandleTransition>();
         candle.Build(Camera.main != null ? Camera.main : FindFirstObjectByType<Camera>());
+        candle.ShowLit();
 
         StartCoroutine(FadeInText());
     }
@@ -72,57 +61,6 @@ public class MainMenuController : MonoBehaviour
         RenderSettings.fog = false;
         RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
         RenderSettings.ambientLight = Color.black;
-    }
-
-    // Clicks only work if the scene has an EventSystem. The project uses the new Input System.
-    static void EnsureEventSystem()
-    {
-        if (FindFirstObjectByType<UnityEngine.EventSystems.EventSystem>() != null) return;
-        GameObject g = new GameObject("EventSystem", typeof(UnityEngine.EventSystems.EventSystem));
-        g.AddComponent<InputSystemUIInputModule>().AssignDefaultActions();
-    }
-
-    // The canvas scales with the screen, so the menu looks the same on every resolution and aspect ratio.
-    static Canvas MakeCanvas()
-    {
-        GameObject g = new GameObject("MenuCanvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
-        Canvas canvas = g.GetComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-
-        CanvasScaler scaler = g.GetComponent<CanvasScaler>();
-        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920f, 1080f);
-        scaler.matchWidthOrHeight = 0.5f;
-        return canvas;
-    }
-
-    MenuButton MakeButton(Transform parent, string text, float height, UnityEngine.Events.UnityAction onClick)
-    {
-        GameObject g = new GameObject(text, typeof(RectTransform));
-        g.transform.SetParent(parent, false);
-
-        RectTransform rt = (RectTransform)g.transform;
-        rt.anchorMin = rt.anchorMax = new Vector2(leftMargin, height);
-        rt.pivot = new Vector2(0f, 0.5f);                 // grows from its left edge, so it stays lined up
-        rt.anchoredPosition = Vector2.zero;
-        rt.sizeDelta = new Vector2(520f, 120f);           // the hover/click area
-
-        TextMeshProUGUI label = g.AddComponent<TextMeshProUGUI>();
-        if (font != null) label.font = font;
-        label.text = text;
-        label.fontSize = fontSize;
-        label.characterSpacing = letterSpacing;
-        label.color = textColor;
-        label.alignment = TextAlignmentOptions.MidlineLeft;
-        label.raycastTarget = true;
-
-        MenuButton button = g.AddComponent<MenuButton>();
-        button.normalAlpha = normalAlpha;
-        button.hoverAlpha = hoverAlpha;
-        button.hoverScale = hoverScale;
-        button.Visibility = 0f;
-        button.onClick.AddListener(onClick);
-        return button;
     }
 
     static Image MakeFadeOverlay(Transform parent)
@@ -161,12 +99,12 @@ public class MainMenuController : MonoBehaviour
 
     IEnumerator PlaySequence()
     {
-        // The game scene loads in the background while the candle is lit. It waits at 90% until we say go.
+        // The game scene loads in the background while the candle flares. It waits at 90% until we say go.
         AsyncOperation load = SceneManager.LoadSceneAsync(sceneName);
         load.allowSceneActivation = false;
 
-        yield return FadeText(1f, 0f, textFadeOutSeconds);          // the text disappears, leaving the dark
-        yield return candle.Play();                                  // reveal, ignite, burn
+        yield return FadeText(1f, 0f, textFadeOutSeconds);          // the text disappears, leaving the candle
+        yield return candle.Play();                                  // the flame swells and burns
         yield return FadeScreen(0f, 1f, fadeDuration);               // fade to black
 
         while (load.progress < 0.9f) yield return null;
@@ -192,6 +130,7 @@ public class MainMenuController : MonoBehaviour
 
     void SetTextVisibility(float v)
     {
+        title.alpha = v;
         playButton.Visibility = v;
         quitButton.Visibility = v;
     }

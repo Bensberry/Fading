@@ -22,6 +22,8 @@ public class DayNightCycle : MonoBehaviour
     [Tooltip("Press N to jump to the next phase (for testing).")]
     public bool debugSkipKey = true;
     public bool showPhaseTitle = true;
+    [Tooltip("Set by the pause menu's LIGHTING slider. 1 = normal, higher = brighter sun/moon and ambient light.")]
+    public float brightness = 1f;
 
     [Header("Night")]
     public Color nightLightColor = new Color(0.55f, 0.65f, 0.95f);
@@ -112,6 +114,14 @@ public class DayNightCycle : MonoBehaviour
         onPhaseChanged.Invoke((int)phase);
     }
 
+    // Change the brightness right now (used by the pause menu's LIGHTING slider).
+    public void SetBrightness(float value)
+    {
+        brightness = value;
+        if (fade != null) StopCoroutine(fade);
+        fade = StartCoroutine(FadeLighting(IsNight, 0f));      // 0 seconds = applies instantly
+    }
+
     public static string PhaseName(Phase p)
     {
         switch (p)
@@ -153,8 +163,8 @@ public class DayNightCycle : MonoBehaviour
         float e0 = SkyExposure();
 
         Color c1 = night ? nightLightColor : dayLightColor;
-        Color a1 = night ? nightAmbient : dayAmbient;
-        float i1 = night ? nightIntensity : dayIntensity;
+        Color a1 = (night ? nightAmbient : dayAmbient) * brightness;
+        float i1 = (night ? nightIntensity : dayIntensity) * brightness;
         Quaternion r1 = Quaternion.Euler(night ? moonAngles : sunAngles);
         float e1 = night ? nightSkyExposure : daySkyExposure;
 

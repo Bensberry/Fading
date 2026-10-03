@@ -19,6 +19,9 @@ public class CandleLight : MonoBehaviour
     public float Brightness = 1f;
     public Transform FlameTransform { get { return flame; } }
 
+    // Set by the pause menu's LIGHTING slider (1 = normal).
+    public static float GlobalScale = 1f;
+
     Transform flame;
     Light glow;
     Renderer flameRenderer;
@@ -118,7 +121,7 @@ public class CandleLight : MonoBehaviour
         if (flame.gameObject.activeSelf != visible) flame.gameObject.SetActive(visible);
         if (!visible) return;
 
-        glow.intensity = baseIntensity * shown * flicker;
+        glow.intensity = baseIntensity * GlobalScale * shown * flicker;
         glow.color = Color.Lerp(dimColor, brightColor, Mathf.Clamp01(shown * flicker));
 
         float size = 0.022f * (0.7f + 0.5f * shown * flicker);

@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 // First-person walking for the player (ghost). Goes on the FPP prefab root (already attached).
-// WASD = move, Left Shift = run, HOLD the LEFT MOUSE BUTTON and move the mouse to look around.
+// WASD = move, Left Shift = run, HOLD the RIGHT MOUSE BUTTON and move the mouse to look around.
 // (The cursor is only hidden while you hold the button, so you can click normally otherwise.)
 // Gravity is on, but the player can never sink below the floor level they started on,
 // and if they ever fall out of the house they are put back at their starting point.
@@ -76,8 +76,8 @@ public class FirstPersonController : MonoBehaviour
     {
         if (Mouse.current == null) return;
 
-        // Look only while the left mouse button is held down.
-        bool holding = Mouse.current.leftButton.isPressed;
+        // Look only while the right mouse button is held down.
+        bool holding = Mouse.current.rightButton.isPressed;
         if (holding != lookActive)
         {
             lookActive = holding;

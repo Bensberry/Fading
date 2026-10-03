@@ -36,9 +36,13 @@ public class ChapterRules : MonoBehaviour
         yield return null;          // wait one frame so doors, the candle and the day/night cycle are all set up
         cycle = FindFirstObjectByType<DayNightCycle>();
 
+        GameSettings.CaptureSceneDefaults();
         AddCandle();
         if (SceneManager.GetActiveScene().name == Chapter0) SetUpChapter0();
         else SetUpChapter1();
+
+        gameObject.AddComponent<PauseMenu>();          // Esc opens the pause menu
+        GameSettings.ApplyAll();                       // the player's saved fog / lighting / sensitivity
     }
 
     void OnDestroy()

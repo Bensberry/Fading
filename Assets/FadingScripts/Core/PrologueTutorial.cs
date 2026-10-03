@@ -73,7 +73,7 @@ public class PrologueTutorial : MonoBehaviour
         {
             case 0: FadingHud.SetObjective("You are a ghost. Move around with  W A S D." + tab); break;
             case 1: FadingHud.SetObjective("Hold  Left Shift  to move faster." + tab); break;
-            case 2: FadingHud.SetObjective("Hold the LEFT MOUSE button and move the mouse to look around." + tab); break;
+            case 2: FadingHud.SetObjective("Hold the RIGHT MOUSE button and move the mouse to look around." + tab); break;
             case 3: FadingHud.SetObjective("Look at an object and press  F  to touch it. It drifts back after 5 seconds." + tab); break;
             case 4: FadingHud.SetObjective("Your candle can show you what to touch next. Press  H.  It burns low after each use." + tab); break;
         }
@@ -114,7 +114,7 @@ public class PrologueTutorial : MonoBehaviour
     static float MouseMovement()
     {
 #if ENABLE_INPUT_SYSTEM
-        return (Mouse.current != null && Mouse.current.leftButton.isPressed) ? Mouse.current.delta.ReadValue().magnitude : 0f;
+        return (Mouse.current != null && Mouse.current.rightButton.isPressed) ? Mouse.current.delta.ReadValue().magnitude : 0f;
 #else
         return 0f;
 #endif
