@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 // Goes in: nowhere. It runs by itself when a scene starts (no need to attach it).
 // The imported house (FadingHouse.glb) has no colliders, so the player could walk through walls or fall.
@@ -16,7 +17,20 @@ public static class HouseColliders
         { "Hallway_Furniture", "Guest_Furniture", "Child_Furniture", "Living_Furniture", "Kitchen_Furniture",
           "Mother_Furniture", "Grandma_Belongings", "Packing" };
 
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    // Unity runs this start-up hook only ONCE (for the first scene), so we listen for every scene load instead.
+    // That way it also works when the game is started from the main menu.
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    static void Register()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    static void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        AddColliders();
+    }
+
     static void AddColliders()
     {
         FadingInteractablesSetup setup = Object.FindFirstObjectByType<FadingInteractablesSetup>();

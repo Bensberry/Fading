@@ -23,11 +23,18 @@ public class ChapterRules : MonoBehaviour
     DayNightCycle cycle;
     bool loadingNext;
 
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-    static void Create()
+    // Unity runs this start-up hook only ONCE (for the first scene), so we listen for every scene load instead.
+    // That way it also works when the game is started from the main menu.
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    static void Register()
     {
-        string scene = SceneManager.GetActiveScene().name;
-        if (scene != Chapter0 && scene != Chapter1) return;
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    static void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.name != Chapter0 && scene.name != Chapter1) return;
         new GameObject("ChapterRules").AddComponent<ChapterRules>();
     }
 
