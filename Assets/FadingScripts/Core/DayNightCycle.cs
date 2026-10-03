@@ -39,6 +39,10 @@ public class DayNightCycle : MonoBehaviour
     public float daySkyExposure = 1.2f;
     public Vector3 sunAngles = new Vector3(40f, 120f, 0f);
 
+    [Header("Fog colour (the scene's fog is tinted by the time of day, so day and night look really different)")]
+    public Color nightFogColor = new Color(0.02f, 0.03f, 0.07f);
+    public Color dayFogColor = new Color(0.75f, 0.82f, 0.88f);
+
     [Tooltip("Fires every time the phase changes (0 = Night 0 ... 6 = Night 3).")]
     public UnityEvent<int> onPhaseChanged = new UnityEvent<int>();
 
@@ -93,6 +97,24 @@ public class DayNightCycle : MonoBehaviour
 #else
         return Input.GetKeyDown(KeyCode.N);
 #endif
+    }
+
+    // The look used by the story chapters: a clear difference between day and night, and slower, calmer changes.
+    // (The values saved in the scene are older and too timid, so ChapterRules calls this when a chapter starts.)
+    public void UseStoryLook()
+    {
+        daySeconds = 90f;                 // how long each day lasts before the night comes
+        transitionSeconds = 8f;           // how slowly the light changes between day and night
+
+        nightLightColor = new Color(0.45f, 0.55f, 0.95f);
+        nightIntensity = 0.12f;
+        nightAmbient = new Color(0.025f, 0.03f, 0.06f);
+        nightSkyExposure = 0.08f;
+
+        dayLightColor = new Color(1f, 0.92f, 0.78f);
+        dayIntensity = 1.4f;
+        dayAmbient = new Color(0.62f, 0.6f, 0.55f);
+        daySkyExposure = 1.3f;
     }
 
     // Move to the next phase. Does nothing after Night 3.
@@ -161,12 +183,14 @@ public class DayNightCycle : MonoBehaviour
         float i0 = sun.intensity;
         Quaternion r0 = sun.transform.rotation;
         float e0 = SkyExposure();
+        Color f0 = RenderSettings.fogColor;
 
         Color c1 = night ? nightLightColor : dayLightColor;
         Color a1 = (night ? nightAmbient : dayAmbient) * brightness;
         float i1 = (night ? nightIntensity : dayIntensity) * brightness;
         Quaternion r1 = Quaternion.Euler(night ? moonAngles : sunAngles);
         float e1 = night ? nightSkyExposure : daySkyExposure;
+        Color f1 = night ? nightFogColor : dayFogColor;
 
         for (float t = 0f; t < time; t += Time.deltaTime)
         {
@@ -176,11 +200,13 @@ public class DayNightCycle : MonoBehaviour
             sun.transform.rotation = Quaternion.Slerp(r0, r1, k);
             RenderSettings.ambientLight = Color.Lerp(a0, a1, k);
             SetSkyExposure(Mathf.Lerp(e0, e1, k));
+            RenderSettings.fogColor = Color.Lerp(f0, f1, k);
             yield return null;
         }
         sun.color = c1; sun.intensity = i1; sun.transform.rotation = r1;
         RenderSettings.ambientLight = a1;
         SetSkyExposure(e1);
+        RenderSettings.fogColor = f1;
         DynamicGI.UpdateEnvironment();
         fade = null;
     }

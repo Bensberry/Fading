@@ -81,6 +81,11 @@ public class ChapterRules : MonoBehaviour
         yield return null;          // wait one frame so doors, the candle and the day/night cycle are all set up
         chapter = ChapterNumber(SceneManager.GetActiveScene().name);
         cycle = FindFirstObjectByType<DayNightCycle>();
+        if (cycle != null)
+        {
+            cycle.UseStoryLook();                      // clear day/night difference, slow calm changes
+            cycle.SetPhase(cycle.Current, true);       // show the new look straight away
+        }
 
         GameSettings.CaptureSceneDefaults();
         AddCandle();
