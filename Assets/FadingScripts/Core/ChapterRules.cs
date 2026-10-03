@@ -51,7 +51,13 @@ public class ChapterRules : MonoBehaviour
     {
         GameObject candle = GameObject.Find("MemorialCandle");      // the candle the player holds (the hallway one is INT_...)
         if (candle == null) candle = MakeFallbackCandle();
-        if (candle != null && candle.GetComponent<CandleHint>() == null) candle.AddComponent<CandleHint>();
+        if (candle == null) return;
+
+        // The held candle must not collide with anything: its collider rides in front of the player
+        // and can shove the player's body around (that made the player pop up into the air).
+        foreach (Collider c in candle.GetComponentsInChildren<Collider>(true)) c.enabled = false;
+
+        if (candle.GetComponent<CandleHint>() == null) candle.AddComponent<CandleHint>();
     }
 
     static GameObject MakeFallbackCandle()

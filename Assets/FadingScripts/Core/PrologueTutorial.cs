@@ -7,7 +7,7 @@ using UnityEngine.InputSystem;
 // A short guided start (the prologue). Each step shows one line at the bottom of the screen
 // and moves on when the player does it:
 //   1 move (WASD)  ->  2 run (Shift)  ->  3 look around  ->  4 touch something (F)  ->  5 use the candle (H)
-// then the last line stays on screen as the goal for the night. Press Tab to skip the steps.
+// then the last line stays on screen as the goal for the night. Press Tab to cut the tutorial off completely.
 public class PrologueTutorial : MonoBehaviour
 {
     const string FinalGoal = "Tonight only Grandma's room is open. Get her attention: flicker her lamp, touch the clock, then the photo album.";
@@ -36,7 +36,7 @@ public class PrologueTutorial : MonoBehaviour
     void Update()
     {
         if (finished) return;
-        if (SkipPressed()) { GoToFinalGoal(); return; }
+        if (SkipPressed()) { Finish(); return; }
 
         // Wait a moment before the first step so the chapter title can show.
         if (Time.timeSinceLevelLoad < 4f) return;
@@ -68,12 +68,12 @@ public class PrologueTutorial : MonoBehaviour
     void ShowStep()
     {
         stepStartTime = Time.time;
-        string tab = "      [Tab] skip";
+        string tab = "      [Tab] skip tutorial";
         switch (step)
         {
             case 0: FadingHud.SetObjective("You are a ghost. Move around with  W A S D." + tab); break;
             case 1: FadingHud.SetObjective("Hold  Left Shift  to move faster." + tab); break;
-            case 2: FadingHud.SetObjective("Move the mouse to look around." + tab); break;
+            case 2: FadingHud.SetObjective("Hold the LEFT MOUSE button and move the mouse to look around." + tab); break;
             case 3: FadingHud.SetObjective("Look at an object and press  F  to touch it. It drifts back after 5 seconds." + tab); break;
             case 4: FadingHud.SetObjective("Your candle can show you what to touch next. Press  H.  It burns low after each use." + tab); break;
         }
@@ -114,7 +114,7 @@ public class PrologueTutorial : MonoBehaviour
     static float MouseMovement()
     {
 #if ENABLE_INPUT_SYSTEM
-        return Mouse.current != null ? Mouse.current.delta.ReadValue().magnitude : 0f;
+        return (Mouse.current != null && Mouse.current.leftButton.isPressed) ? Mouse.current.delta.ReadValue().magnitude : 0f;
 #else
         return 0f;
 #endif

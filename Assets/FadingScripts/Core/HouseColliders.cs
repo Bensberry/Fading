@@ -30,7 +30,7 @@ public static class HouseColliders
             if (filter == null || filter.sharedMesh == null || t.GetComponent<Collider>() != null) continue;
 
             if (IsInside(t, SolidGroups, house)) AddMeshCollider(t.gameObject, filter.sharedMesh);
-            else if (IsInside(t, BoxGroups, house)) AddBoxCollider(t.gameObject, filter.sharedMesh);
+            else if (IsInside(t, BoxGroups, house) && !IsFlat(t)) AddBoxCollider(t.gameObject, filter.sharedMesh);
         }
     }
 
@@ -44,6 +44,13 @@ public static class HouseColliders
         BoxCollider box = g.AddComponent<BoxCollider>();
         box.center = mesh.bounds.center;
         box.size = mesh.bounds.size;
+    }
+
+    // Rugs, slippers, shawls etc. are too low to block anyone; a collider on them only makes the player climb them.
+    static bool IsFlat(Transform t)
+    {
+        Renderer r = t.GetComponent<Renderer>();
+        return r != null && r.bounds.size.y < 0.25f;
     }
 
     // True if this object (or any parent) is one of the touchable INT_ objects.

@@ -2,8 +2,10 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 // First-person walking for the player (ghost). Goes on the FPP prefab root (already attached).
-// WASD = move, Left Shift = run, mouse = look, Escape = free / lock the cursor.
-// If the player ever falls out of the house, they are put back at their starting point.
+// WASD = move, Left Shift = run, HOLD the LEFT MOUSE BUTTON and move the mouse to look around.
+// (The cursor is only hidden while you hold the button, so you can click normally otherwise.)
+// Gravity is on, but the player can never sink below the floor level they started on,
+// and if they ever fall out of the house they are put back at their starting point.
 [RequireComponent(typeof(CharacterController))]
 public class FirstPersonController : MonoBehaviour
 {
@@ -13,8 +15,12 @@ public class FirstPersonController : MonoBehaviour
     [Tooltip("Higher = reaches full speed / stops faster.")]
     public float acceleration = 12f;
     public float gravity = -9.81f;
-    [Tooltip("Ghost: after landing on the floor once, the player stays at that height and can never fall again.")]
-    public bool ghostMode = true;
+
+    [Header("Body (set in code so the prefab values don't matter)")]
+    [Tooltip("Highest step the player can walk up (metres). Keep it small so low furniture can't be climbed.")]
+    public float stepOffset = 0.15f;
+    [Tooltip("Collision padding. The player prefab is scaled down, so this must be tiny.")]
+    public float skinWidth = 0.02f;
 
     [Header("Look Settings")]
     [Tooltip("Degrees turned per mouse count, like an FPS game. 0.1 = typical FPS default, 0.05 = slower, 0.2 = fast.")]
@@ -28,34 +34,39 @@ public class FirstPersonController : MonoBehaviour
     private CharacterController controller;
     private Vector3 horizontalVelocity;
     private float verticalVelocity;
-    private bool hasLanded;
     private float verticalRotation = 0f;
+    private bool lookActive;
+    private bool skipLookFrame;
+    private bool hasLanded;
+    private float floorY;
     private Vector3 startPosition;
     private Quaternion startRotation;
 
     void Start()
     {
         controller = GetComponent<CharacterController>();
+        controller.stepOffset = stepOffset;
+        controller.skinWidth = skinWidth;
         startPosition = transform.position;
         startRotation = transform.rotation;
-        LockCursor(true);
+        SetCursorLocked(false);
+    }
+
+    void OnDisable()
+    {
+        lookActive = false;
+        SetCursorLocked(false);       // e.g. during the cutscene
     }
 
     void Update()
     {
-        HandleCursorToggle();
-        if (Cursor.lockState == CursorLockMode.Locked) HandleMouseLook();
+        HandleMouseLook();
         HandleMovement();
+        KeepAboveFloor();
         RespawnIfFallen();
     }
 
-    void HandleCursorToggle()
-    {
-        if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
-            LockCursor(Cursor.lockState != CursorLockMode.Locked);
-    }
-
-    void LockCursor(bool locked)
+    void SetCursorLocked(bool locked)
     {
         Cursor.lockState = locked ? CursorLockMode.Locked : CursorLockMode.None;
         Cursor.visible = !locked;
@@ -65,14 +76,22 @@ public class FirstPersonController : MonoBehaviour
     {
         if (Mouse.current == null) return;
 
+        // Look only while the left mouse button is held down.
+        bool holding = Mouse.current.leftButton.isPressed;
+        if (holding != lookActive)
+        {
+            lookActive = holding;
+            skipLookFrame = holding;           // ignore the first frame: locking the cursor causes a jump
+            SetCursorLocked(holding);
+        }
+        if (!lookActive) return;
+        if (skipLookFrame) { skipLookFrame = false; return; }
+
         // The mouse delta is already "movement this frame", so it must NOT be multiplied by deltaTime.
         Vector2 mouseDelta = Mouse.current.delta.ReadValue();
-        float mouseX = mouseDelta.x * lookSensitivity;
-        float mouseY = mouseDelta.y * lookSensitivity;
+        transform.Rotate(Vector3.up * (mouseDelta.x * lookSensitivity));
 
-        transform.Rotate(Vector3.up * mouseX);
-
-        verticalRotation -= mouseY;
+        verticalRotation -= mouseDelta.y * lookSensitivity;
         verticalRotation = Mathf.Clamp(verticalRotation, -89f, 89f);
 
         if (playerCameraRoot != null)
@@ -88,23 +107,31 @@ public class FirstPersonController : MonoBehaviour
         // Smoothly speed up / slow down instead of jumping straight to full speed.
         horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, wanted, acceleration * Time.deltaTime);
 
-        UpdateVerticalVelocity();
+        // Gravity: a small constant push while grounded keeps isGrounded reliable.
+        if (controller.isGrounded && verticalVelocity < 0f) verticalVelocity = -2f;
+        verticalVelocity += gravity * Time.deltaTime;
 
         // ONE Move call per frame (two separate calls made isGrounded flicker).
         Vector3 total = horizontalVelocity + Vector3.up * verticalVelocity;
         controller.Move(total * Time.deltaTime);
     }
 
-    void UpdateVerticalVelocity()
+    // The first time we touch the floor we remember its height. After that the player can't sink below it
+    // (so a gap in the floor can't swallow them), but gravity still brings them down off anything they stepped on.
+    void KeepAboveFloor()
     {
-        if (controller.isGrounded) hasLanded = true;
-
-        // Ghost: once we have settled on the floor, stay at this height for good.
-        if (ghostMode && hasLanded) { verticalVelocity = 0f; return; }
-
-        // Gravity: a small constant push while grounded keeps isGrounded reliable.
-        if (controller.isGrounded && verticalVelocity < 0f) verticalVelocity = -2f;
-        verticalVelocity += gravity * Time.deltaTime;
+        if (!hasLanded)
+        {
+            if (!controller.isGrounded) return;
+            hasLanded = true;
+            floorY = transform.position.y;
+            return;
+        }
+        if (transform.position.y < floorY - 0.02f)
+        {
+            controller.Move(Vector3.up * (floorY - transform.position.y));
+            verticalVelocity = 0f;
+        }
     }
 
     Vector3 ReadWantedDirection()
