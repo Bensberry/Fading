@@ -150,7 +150,8 @@ public class FirstPersonController : MonoBehaviour
     float CurrentSpeed()
     {
         bool running = Keyboard.current.leftShiftKey.isPressed;
-        return running ? runSpeed : walkSpeed;
+        float speed = running ? runSpeed : walkSpeed;
+        return speed * AbilityLoss.SpeedMultiplier;           // the ghost slows down as the chapters pass
     }
 
     void RespawnIfFallen()

@@ -2,25 +2,27 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-// Goes in: nowhere by hand. It starts by itself in the scenes named "Chapter0" and "Chapter1"
+// Goes in: nowhere by hand. It starts by itself in the scenes named "Chapter0", "Chapter1", "Chapter2" and "Chapter3"
 // (other scenes are not affected), so we never have to edit the scene files.
 //
-// Both chapters: the player's candle gets its flame light and the hint system (H).
+// All chapters: the player's candle gets its flame light and the hint system (H); Esc opens the pause menu;
+//               the house packs itself away (HouseEmptying) and the ghost loses an ability (AbilityLoss).
 //
-// Chapter0 (the first night, with Grandma):
+// Chapter0 = Night 0 (the only night with Grandma):
 //   - the short tutorial runs
 //   - only Grandma's door can be opened; other doors rattle and show a message
 //   - when Grandma's cutscene ends (or N is pressed), Chapter1 is loaded
 //
-// Chapter1 (the next morning):
-//   - starts at Day 1, Grandma is gone, her room is already open
-//   - every other door is unlocked too
+// Chapter1 = Day 1 + Night 1,  Chapter2 = Day 2 + Night 2,  Chapter3 = Day 3 + the last night:
+//   - Grandma is gone, her room stands open, every other door is unlocked too
+//   - each chapter starts in its own day; when the next day begins (N key for now) the next chapter loads
+//   - Chapter3 is the end of the game: nothing loads after it (the endings come later)
 public class ChapterRules : MonoBehaviour
 {
-    const string Chapter0 = "Chapter0";
-    const string Chapter1 = "Chapter1";
+    const int LastChapter = 3;
 
     DayNightCycle cycle;
+    int chapter;
     bool loadingNext;
 
     // Unity runs this start-up hook only ONCE (for the first scene), so we listen for every scene load instead.
@@ -46,22 +48,47 @@ public class ChapterRules : MonoBehaviour
 
     static void TryCreate(string sceneName)
     {
-        if (sceneName != Chapter0 && sceneName != Chapter1) return;
+        if (ChapterNumber(sceneName) < 0) return;
         if (FindFirstObjectByType<ChapterRules>() != null) return;        // already running
         LightFadeIn.StartIfPending();                  // coming from the main menu: start in the blinding light and fade out of it
         new GameObject("ChapterRules").AddComponent<ChapterRules>();
     }
 
+    // "Chapter2" -> 2.   Anything that is not a chapter scene -> -1.
+    static int ChapterNumber(string sceneName)
+    {
+        for (int i = 0; i <= LastChapter; i++)
+            if (sceneName == ChapterName(i)) return i;
+        return -1;
+    }
+
+    static string ChapterName(int number) { return "Chapter" + number; }
+
+    // The day/night phase each chapter starts in.
+    static DayNightCycle.Phase StartPhase(int number)
+    {
+        switch (number)
+        {
+            case 0: return DayNightCycle.Phase.Night0;
+            case 1: return DayNightCycle.Phase.Day1;
+            case 2: return DayNightCycle.Phase.Day2;
+            default: return DayNightCycle.Phase.Day3;
+        }
+    }
+
     IEnumerator Start()
     {
         yield return null;          // wait one frame so doors, the candle and the day/night cycle are all set up
+        chapter = ChapterNumber(SceneManager.GetActiveScene().name);
         cycle = FindFirstObjectByType<DayNightCycle>();
 
         GameSettings.CaptureSceneDefaults();
         AddCandle();
-        if (SceneManager.GetActiveScene().name == Chapter0) SetUpChapter0();
-        else SetUpChapter1();
+        if (chapter == 0) SetUpChapter0();
+        else SetUpLaterChapter();
 
+        gameObject.AddComponent<HouseEmptying>();      // boxes appear, things on shelves and walls disappear
+        AbilityLoss.StartFor(gameObject, chapter);     // vision, then speed, then hearing
         gameObject.AddComponent<PauseMenu>();          // Esc opens the pause menu
         GameSettings.ApplyAll();                       // the player's saved fog / lighting / sensitivity
     }
@@ -71,7 +98,7 @@ public class ChapterRules : MonoBehaviour
         FinalCutsceneController.OnCutsceneFinished -= OnCutsceneFinished;
     }
 
-    // ---------- the candle (both chapters)
+    // ---------- the candle (all chapters)
     void AddCandle()
     {
         GameObject candle = GameObject.Find("MemorialCandle");      // the candle the player holds (the hallway one is INT_...)
@@ -120,33 +147,12 @@ public class ChapterRules : MonoBehaviour
         return "It won't open.";
     }
 
-    void OnCutsceneFinished() { StartCoroutine(GoToChapter1After(2.5f)); }
+    void OnCutsceneFinished() { StartCoroutine(GoToNextChapterAfter(2.5f)); }
 
-    // N (testing skip) moves the cycle on to Day 1: that also means "Chapter 0 is over".
-    void OnPhaseChanged(int phase)
+    // ---------- Chapters 1, 2, 3
+    void SetUpLaterChapter()
     {
-        if (phase == (int)DayNightCycle.Phase.Day1) StartCoroutine(GoToChapter1After(0.5f));
-    }
-
-    IEnumerator GoToChapter1After(float seconds)
-    {
-        if (loadingNext) yield break;
-        loadingNext = true;
-        FadingHud.Toast("Morning comes...", seconds + 1f);
-        yield return new WaitForSeconds(seconds);
-
-        if (Application.CanStreamedLevelBeLoaded(Chapter1)) SceneManager.LoadScene(Chapter1);
-        else
-        {
-            FadingHud.Toast("Chapter1 scene is missing from File > Build Profiles (Scene List).", 6f);
-            loadingNext = false;
-        }
-    }
-
-    // ---------- Chapter 1
-    void SetUpChapter1()
-    {
-        if (cycle != null) cycle.SetPhase(DayNightCycle.Phase.Day1, true);     // start from Day 1 (this also shuts all doors)
+        if (cycle != null) cycle.SetPhase(StartPhase(chapter), true);     // start in this chapter's day (this also shuts all doors)
         RemoveGrandma();
 
         foreach (DoorToggle d in FindObjectsByType<DoorToggle>(FindObjectsInactive.Include, FindObjectsSortMode.None))
@@ -155,6 +161,32 @@ public class ChapterRules : MonoBehaviour
             if (d is GuestRoomDoor) d.OpenInstant();                          // her room stands open
         }
         FadingHud.SetObjective("");
+
+        if (cycle != null) cycle.onPhaseChanged.AddListener(OnPhaseChanged);
+    }
+
+    // ---------- moving on to the next chapter
+    // When the NEXT chapter's starting phase begins (the N testing key for now), this chapter is over.
+    void OnPhaseChanged(int phase)
+    {
+        if (chapter >= LastChapter) return;                                    // the last chapter leads to the endings, not to a scene
+        if (phase == (int)StartPhase(chapter + 1)) StartCoroutine(GoToNextChapterAfter(0.5f));
+    }
+
+    IEnumerator GoToNextChapterAfter(float seconds)
+    {
+        if (loadingNext || chapter >= LastChapter) yield break;
+        loadingNext = true;
+        string next = ChapterName(chapter + 1);
+        FadingHud.Toast(chapter == 0 ? "Morning comes..." : "Another day begins...", seconds + 1f);
+        yield return new WaitForSeconds(seconds);
+
+        if (Application.CanStreamedLevelBeLoaded(next)) SceneManager.LoadScene(next);
+        else
+        {
+            FadingHud.Toast(next + " scene is missing from File > Build Profiles (Scene List).", 6f);
+            loadingNext = false;
+        }
     }
 
     // Grandma is gone: hide her and switch off the Chapter 0 puzzle that needed her.
