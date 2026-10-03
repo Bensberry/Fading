@@ -40,14 +40,14 @@ public static class HouseColliders
         AddColliders();
     }
 
-    static readonly HashSet<int> doneHouses = new HashSet<int>();
+    static readonly HashSet<Transform> doneHouses = new HashSet<Transform>();
 
     static void AddColliders()
     {
         FadingInteractablesSetup setup = Object.FindFirstObjectByType<FadingInteractablesSetup>();
         Transform house = setup != null ? setup.transform : FindByName("FadingHouse");
         if (house == null) return;
-        if (!doneHouses.Add(house.gameObject.GetInstanceID())) return;       // already done for this house
+        if (!doneHouses.Add(house)) return;       // already done for this house
 
         int added = 0, repaired = 0;
         foreach (Transform t in house.GetComponentsInChildren<Transform>(true))
