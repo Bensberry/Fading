@@ -1,8 +1,8 @@
 using UnityEngine;
 
 // INT_Door_Guest: the guest room (Grandma's) door.
-// Middle-click: the door swings open into the room and stays open.
-// Middle-click again: it shuts almost instantly. (Doors do not follow the 5-second rule.)
+// Press F: the door swings open into the room and stays open.
+// Press F again: it shuts almost instantly. (Doors do not follow the 5-second rule.)
 // Put this script on the INT_Door_Guest object. Tweak the numbers in the Inspector if needed.
 public class GuestRoomDoor : DoorToggle
 {

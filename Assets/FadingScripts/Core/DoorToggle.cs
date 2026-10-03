@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 
 // Doors: the one exception to the 5-second rule.
-// Middle-click opens the door; it stays open until you middle-click it again, then it shuts almost instantly.
+// Pressing F opens the door; it stays open until you press F on it again, then it shuts almost instantly.
 public class DoorToggle : Interactable
 {
     public Vector3 localAxis = Vector3.up;

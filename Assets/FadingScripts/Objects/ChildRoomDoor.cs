@@ -1,8 +1,8 @@
 using UnityEngine;
 
 // INT_Door_Child: the child's bedroom door.
-// Middle-click: the door swings open into the room and stays open.
-// Middle-click again: it shuts almost instantly. (Doors do not follow the 5-second rule.)
+// Press F: the door swings open into the room and stays open.
+// Press F again: it shuts almost instantly. (Doors do not follow the 5-second rule.)
 // Put this script on the INT_Door_Child object. Tweak the numbers in the Inspector if needed.
 public class ChildRoomDoor : DoorToggle
 {

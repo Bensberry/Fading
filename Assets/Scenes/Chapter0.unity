@@ -965,6 +965,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1188199368776920828, guid: ca239f86970b2fe4b88e1dfeae661cbd, type: 3}
+      propertyPath: m_StepOffset
+      value: 0.4
+      objectReference: {fileID: 0}
     - target: {fileID: 1770445052529152727, guid: ca239f86970b2fe4b88e1dfeae661cbd, type: 3}
       propertyPath: m_LocalScale.x
       value: 0.37808412
@@ -1016,6 +1020,10 @@ PrefabInstance:
     - target: {fileID: 1770445052529152727, guid: ca239f86970b2fe4b88e1dfeae661cbd, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2869104028479882615, guid: ca239f86970b2fe4b88e1dfeae661cbd, type: 3}
+      propertyPath: m_Radius
+      value: 0.25
       objectReference: {fileID: 0}
     - target: {fileID: 4243476104724738162, guid: ca239f86970b2fe4b88e1dfeae661cbd, type: 3}
       propertyPath: m_Layer

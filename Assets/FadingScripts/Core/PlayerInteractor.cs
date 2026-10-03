@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 #endif
 
-// Put this on the player's camera. Look at an interactable and press the Middle Mouse button.
+// Put this on the player's camera. Look at an interactable and press F.
 public class PlayerInteractor : MonoBehaviour
 {
     public float reach = 3f;
@@ -26,9 +26,9 @@ public class PlayerInteractor : MonoBehaviour
     bool PressedThisFrame()
     {
 #if ENABLE_INPUT_SYSTEM
-        return Mouse.current != null && Mouse.current.middleButton.wasPressedThisFrame;
+        return Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame;
 #else
-        return Input.GetMouseButtonDown(2);
+        return Input.GetKeyDown(KeyCode.F);
 #endif
     }
 
@@ -42,6 +42,6 @@ public class PlayerInteractor : MonoBehaviour
         float cx = Screen.width / 2f, cy = Screen.height / 2f;
         GUI.Label(new Rect(cx - 20, cy - 15, 40, 30), current != null ? "( + )" : "+", promptStyle);
         if (current != null && !current.IsBusy)
-            GUI.Label(new Rect(cx - 250, cy + 30, 500, 30), current.prompt + "  [Middle Mouse]", promptStyle);
+            GUI.Label(new Rect(cx - 250, cy + 30, 500, 30), current.prompt + "  [F]", promptStyle);
     }
 }

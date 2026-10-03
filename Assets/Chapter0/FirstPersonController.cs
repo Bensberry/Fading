@@ -17,8 +17,8 @@ public class FirstPersonController : MonoBehaviour
     public bool ghostMode = true;
 
     [Header("Look Settings")]
-    [Tooltip("Lower this value significantly (e.g., between 0.05 and 0.5)")]
-    public float mouseSensitivity = 0.5f;
+    [Tooltip("Degrees turned per mouse count, like an FPS game. 0.1 = typical FPS default, 0.05 = slower, 0.2 = fast.")]
+    public float lookSensitivity = 0.1f;
     public Transform playerCameraRoot; // Drag your 'Head' object here
 
     [Header("Safety Net")]
@@ -67,13 +67,13 @@ public class FirstPersonController : MonoBehaviour
 
         // The mouse delta is already "movement this frame", so it must NOT be multiplied by deltaTime.
         Vector2 mouseDelta = Mouse.current.delta.ReadValue();
-        float mouseX = mouseDelta.x * mouseSensitivity;
-        float mouseY = mouseDelta.y * mouseSensitivity;
+        float mouseX = mouseDelta.x * lookSensitivity;
+        float mouseY = mouseDelta.y * lookSensitivity;
 
         transform.Rotate(Vector3.up * mouseX);
 
         verticalRotation -= mouseY;
-        verticalRotation = Mathf.Clamp(verticalRotation, -90f, 90f);
+        verticalRotation = Mathf.Clamp(verticalRotation, -89f, 89f);
 
         if (playerCameraRoot != null)
             playerCameraRoot.localRotation = Quaternion.Euler(verticalRotation, 0f, 0f);
