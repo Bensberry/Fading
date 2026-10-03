@@ -759,11 +759,12 @@ MonoBehaviour:
   onReturned:
     m_PersistentCalls:
       m_Calls: []
-  partSuffix: 
   localAxis: {x: 0, y: 1, z: 0}
   angle: -90
   openTime: 1
   closeTime: 0.35
+  openPrompt: Open the door
+  closePrompt: Close the door
 --- !u!1 &802950634 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -286268298260827943, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
@@ -861,21 +862,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d10a7732c70d334d8a7cee2a43968c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MusicBoxInteraction
-  prompt: Wind the music box
-  sound: {fileID: 0}
-  soundVolume: 0.7
-  onInteract:
-    m_PersistentCalls:
-      m_Calls: []
-  onReturned:
-    m_PersistentCalls:
-      m_Calls: []
-  lullaby: {fileID: 0}
-  volume: 0.6
-  lidOpenAngle: 70
-  openTime: 0.8
-  closeTime: 1.2
-  keyTurnsPerSecond: 0.5
 --- !u!114 &1015068143
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -961,11 +947,12 @@ MonoBehaviour:
   onReturned:
     m_PersistentCalls:
       m_Calls: []
-  partSuffix: 
   localAxis: {x: 0, y: 1, z: 0}
   angle: -90
   openTime: 1
   closeTime: 0.35
+  openPrompt: Open the door
+  closePrompt: Close the door
 --- !u!1 &1303869469 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -7439297484935309250, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
@@ -1015,21 +1002,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 14b4f8ddcea0f82408d741745a5084ca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SlideAndReturn
-  prompt: Push the mug
-  sound: {fileID: 0}
-  soundVolume: 0.7
-  onInteract:
-    m_PersistentCalls:
-      m_Calls: []
-  onReturned:
-    m_PersistentCalls:
-      m_Calls: []
-  slideToward: {fileID: 0}
-  slideDirection: {x: -1, y: 0, z: 0}
-  distance: 0.18
-  hopHeight: 0
-  slideTime: 0.6
-  returnTime: 1.5
 --- !u!114 &1342888990
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1116,6 +1088,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2559461654371415120, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1619421472}
+    - targetCorrespondingSourceObject: {fileID: 2559461654371415120, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1619421473}
     - targetCorrespondingSourceObject: {fileID: 8521694949006794179, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1072484275}
@@ -1217,6 +1192,37 @@ MonoBehaviour:
   nightlightClick: {fileID: 0}
   mobileChime: {fileID: 0}
   doorCreak: {fileID: 0}
+--- !u!114 &1619421473
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1619421470}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66f0b46a0345e164eb847e2af6e35c5d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DayNightCycle
+  sun: {fileID: 0}
+  transitionSeconds: 3
+  autoAdvanceDays: 1
+  daySeconds: 20
+  debugSkipKey: 1
+  showPhaseTitle: 1
+  nightLightColor: {r: 0.55, g: 0.65, b: 0.95, a: 1}
+  nightIntensity: 0.2
+  nightAmbient: {r: 0.04, g: 0.05, b: 0.09, a: 1}
+  nightSkyExposure: 0.12
+  moonAngles: {x: 35, y: 210, z: 0}
+  dayLightColor: {r: 1, g: 0.9, b: 0.75, a: 1}
+  dayIntensity: 1.1
+  dayAmbient: {r: 0.42, g: 0.4, b: 0.36, a: 1}
+  daySkyExposure: 1.2
+  sunAngles: {x: 40, y: 120, z: 0}
+  onPhaseChanged:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1695486539 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2899536982557017773, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
@@ -1275,11 +1281,12 @@ MonoBehaviour:
   onReturned:
     m_PersistentCalls:
       m_Calls: []
-  partSuffix: 
   localAxis: {x: 0, y: 1, z: 0}
   angle: -90
   openTime: 1
   closeTime: 0.35
+  openPrompt: Open the door
+  closePrompt: Close the door
 --- !u!1 &1825837450 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8345176284820455332, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
@@ -1331,20 +1338,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 076a295d01765664795cac145357bc48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RockingChairInteraction
-  prompt: Rock the chair
-  sound: {fileID: 0}
-  soundVolume: 0.7
-  onInteract:
-    m_PersistentCalls:
-      m_Calls: []
-  onReturned:
-    m_PersistentCalls:
-      m_Calls: []
-  maxAngle: 8
-  rocksPerSecond: 0.8
-  rampTime: 0.6
-  settleTime: 2
-  runnerRadius: 1
 --- !u!114 &1856716806
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1428,11 +1421,12 @@ MonoBehaviour:
   onReturned:
     m_PersistentCalls:
       m_Calls: []
-  partSuffix: 
   localAxis: {x: 0, y: 1, z: 0}
   angle: -90
   openTime: 1
   closeTime: 0.35
+  openPrompt: Open the door
+  closePrompt: Close the door
 --- !u!1 &2110684433 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -6953235842492146601, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
