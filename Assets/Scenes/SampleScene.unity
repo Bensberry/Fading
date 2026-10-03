@@ -119,6 +119,37 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &35546795 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -7171375629071200995, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
+  m_PrefabInstance: {fileID: 1602684904}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &35546799
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 35546795}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f31642703f51bf04aaea8d065be7c846, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GrandmaPhotoAlbum
+  prompt: Open the album
+  sound: {fileID: 0}
+  soundVolume: 0.7
+  onInteract:
+    m_PersistentCalls:
+      m_Calls: []
+  onReturned:
+    m_PersistentCalls:
+      m_Calls: []
+  partSuffix: _Cover
+  localAxis: {x: 0, y: 0, z: 1}
+  angle: 170
+  openTime: 1
+  closeTime: 1.5
 --- !u!1 &67697565
 GameObject:
   m_ObjectHideFlags: 0
@@ -131,8 +162,8 @@ GameObject:
   - component: {fileID: 67697567}
   - component: {fileID: 67697566}
   - component: {fileID: 67697571}
-  - component: {fileID: 67697570}
-  - component: {fileID: 67697569}
+  - component: {fileID: 67697573}
+  - component: {fileID: 67697572}
   m_Layer: 0
   m_Name: Free Camera
   m_TagString: Untagged
@@ -250,38 +281,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &67697569
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 67697565}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e270688972c57754fb3eeace82324289, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerInteractor
-  reach: 3
-  layers:
-    serializedVersion: 2
-    m_Bits: 4294967295
---- !u!114 &67697570
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 67697565}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c98975ca5002df246bccb377ebdb9e0a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
-  walkSpeed: 2.5
-  runSpeed: 4.5
-  mouseSensitivity: 0.15
-  eyeHeight: 1.6
 --- !u!143 &67697571
 CharacterController:
   m_ObjectHideFlags: 0
@@ -307,6 +306,70 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &67697572
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 67697565}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a17b584f0556c854ea3bc05ecdbb94f3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
+  walkSpeed: 2.5
+  runSpeed: 4.5
+  mouseSensitivity: 0.15
+  eyeHeight: 1.6
+--- !u!114 &67697573
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 67697565}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 655752f4189c21048ba401550b416052, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerInteractor
+  reach: 3
+  layers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+--- !u!1 &73588955 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6500141538660331818, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
+  m_PrefabInstance: {fileID: 1602684904}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &73588959
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 73588955}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01f8ccdd01364cf438540c7e32faa316, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MomRadio
+  prompt: Turn on the radio
+  sound: {fileID: 0}
+  soundVolume: 0.7
+  onInteract:
+    m_PersistentCalls:
+      m_Calls: []
+  onReturned:
+    m_PersistentCalls:
+      m_Calls: []
+  song: {fileID: 0}
+  songStart: 0
+  volume: 0.7
+  fadeIn: 0.6
+  fadeOut: 1.5
+  tremble: 0.0015
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -571,6 +634,167 @@ MonoBehaviour:
   m_ShadowLayerMask: 1
   m_RenderingLayers: 1
   m_ShadowRenderingLayers: 1
+--- !u!1 &545966268 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 303589615650283787, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
+  m_PrefabInstance: {fileID: 1602684904}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &545966272
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 545966268}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1ace13c5d0f6cf84a824cb80bacd9036, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GrandmaLamp
+  prompt: Flicker the lamp
+  sound: {fileID: 0}
+  soundVolume: 0.7
+  onInteract:
+    m_PersistentCalls:
+      m_Calls: []
+  onReturned:
+    m_PersistentCalls:
+      m_Calls: []
+  mode: 0
+  startsOn: 1
+  bulbSuffix: _Bulb
+  color: {r: 1, g: 0.78, b: 0.5, a: 1}
+  intensity: 1.2
+  range: 4
+  flickerTime: 1.2
+  fadeTime: 1
+--- !u!1 &585721394 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -6454868636084629512, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
+  m_PrefabInstance: {fileID: 1602684904}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &585721398
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 585721394}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a33deb6d459e22489988f4126e28d04, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FamilyPhoto
+  prompt: Tip the photo
+  sound: {fileID: 0}
+  soundVolume: 0.7
+  onInteract:
+    m_PersistentCalls:
+      m_Calls: []
+  onReturned:
+    m_PersistentCalls:
+      m_Calls: []
+  partSuffix: 
+  localAxis: {x: 1, y: 0, z: 0}
+  angle: 14
+  openTime: 0.4
+  closeTime: 1.2
+--- !u!1 &659661303 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -6697523740450909201, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
+  m_PrefabInstance: {fileID: 1602684904}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &659661307
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 659661303}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c47f5a8c256e4914891bc386b3c1954d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ChildNightlight
+  prompt: Turn on the nightlight
+  sound: {fileID: 0}
+  soundVolume: 0.7
+  onInteract:
+    m_PersistentCalls:
+      m_Calls: []
+  onReturned:
+    m_PersistentCalls:
+      m_Calls: []
+  mode: 1
+  startsOn: 0
+  bulbSuffix: _Bulb
+  color: {r: 1, g: 0.85, b: 0.6, a: 1}
+  intensity: 0.6
+  range: 2.5
+  flickerTime: 1.2
+  fadeTime: 1
+--- !u!1 &791682312 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3849834079154472389, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
+  m_PrefabInstance: {fileID: 1602684904}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &791682316
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 791682312}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 318077d3569a89846b0348b64204f7b8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FrontDoor
+  prompt: Open the door
+  sound: {fileID: 0}
+  soundVolume: 0.7
+  onInteract:
+    m_PersistentCalls:
+      m_Calls: []
+  onReturned:
+    m_PersistentCalls:
+      m_Calls: []
+  partSuffix: 
+  localAxis: {x: 0, y: 1, z: 0}
+  angle: -90
+  openTime: 1
+  closeTime: 0.35
+--- !u!1 &802950634 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -286268298260827943, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
+  m_PrefabInstance: {fileID: 1602684904}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &802950638
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 802950634}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cc0485c57f39744b824d2585157251d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MomTablePhoto
+  prompt: Tip the photo
+  sound: {fileID: 0}
+  soundVolume: 0.7
+  onInteract:
+    m_PersistentCalls:
+      m_Calls: []
+  onReturned:
+    m_PersistentCalls:
+      m_Calls: []
+  partSuffix: 
+  localAxis: {x: 1, y: 0, z: 0}
+  angle: 14
+  openTime: 0.4
+  closeTime: 1.2
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -638,14 +862,142 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MusicBoxInteraction
   prompt: Wind the music box
+  sound: {fileID: 0}
+  soundVolume: 0.7
   onInteract:
     m_PersistentCalls:
       m_Calls: []
+  onReturned:
+    m_PersistentCalls:
+      m_Calls: []
+  lullaby: {fileID: 0}
+  volume: 0.6
   lidOpenAngle: 70
   openTime: 0.8
-  playTime: 6
+  closeTime: 1.2
   keyTurnsPerSecond: 0.5
-  music: {fileID: 0}
+--- !u!114 &1015068143
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1015068135}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cad8184fa18fcb94c8c91a08030f1ce3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ChildMusicBox
+  prompt: Wind the music box
+  sound: {fileID: 0}
+  soundVolume: 0.7
+  onInteract:
+    m_PersistentCalls:
+      m_Calls: []
+  onReturned:
+    m_PersistentCalls:
+      m_Calls: []
+  lullaby: {fileID: 0}
+  volume: 0.6
+  lidOpenAngle: 70
+  openTime: 0.8
+  closeTime: 1.2
+  keyTurnsPerSecond: 0.5
+--- !u!1 &1072484271 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8521694949006794179, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
+  m_PrefabInstance: {fileID: 1602684904}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1072484275
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1072484271}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4237ba9ffa5edc24a9728e5786840be1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MomFogWindow
+  prompt: Trace in the fog
+  sound: {fileID: 0}
+  soundVolume: 0.7
+  onInteract:
+    m_PersistentCalls:
+      m_Calls: []
+  onReturned:
+    m_PersistentCalls:
+      m_Calls: []
+  nickname: Sunny
+  letterColor: {r: 0.25, g: 0.3, b: 0.35, a: 1}
+  traceTime: 1.5
+  fadeTime: 2
+  fontSize: 60
+  characterSize: 0.03
+--- !u!1 &1102390534 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -5612818972513144757, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
+  m_PrefabInstance: {fileID: 1602684904}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1102390538
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1102390534}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e802ad60dc951d48b03c1314c5f626f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MotherRoomDoor
+  prompt: Open the door
+  sound: {fileID: 0}
+  soundVolume: 0.7
+  onInteract:
+    m_PersistentCalls:
+      m_Calls: []
+  onReturned:
+    m_PersistentCalls:
+      m_Calls: []
+  partSuffix: 
+  localAxis: {x: 0, y: 1, z: 0}
+  angle: -90
+  openTime: 1
+  closeTime: 0.35
+--- !u!1 &1303869469 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -7439297484935309250, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
+  m_PrefabInstance: {fileID: 1602684904}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1303869473
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1303869469}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 736182fda403c964586778c1e6d97515, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GrandmaClock
+  prompt: Make the clock chime
+  sound: {fileID: 0}
+  soundVolume: 0.7
+  onInteract:
+    m_PersistentCalls:
+      m_Calls: []
+  onReturned:
+    m_PersistentCalls:
+      m_Calls: []
+  partSuffix: _Pendulum
+  localAxis: {x: 0, y: 0, z: 1}
+  amplitude: 12
+  swingsPerSecond: 0.6
+  rampTime: 0.6
+  settleTime: 1.5
 --- !u!1 &1342888982 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -6525681972476093483, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
@@ -664,16 +1016,47 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SlideAndReturn
   prompt: Push the mug
+  sound: {fileID: 0}
+  soundVolume: 0.7
   onInteract:
+    m_PersistentCalls:
+      m_Calls: []
+  onReturned:
     m_PersistentCalls:
       m_Calls: []
   slideToward: {fileID: 0}
   slideDirection: {x: -1, y: 0, z: 0}
   distance: 0.18
+  hopHeight: 0
   slideTime: 0.6
-  holdTime: 5
   returnTime: 1.5
-  slideSound: {fileID: 0}
+--- !u!114 &1342888990
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1342888982}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: faa92739ff022db4da2476949ecaf4cc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MomCoffeeMug
+  prompt: Push the mug
+  sound: {fileID: 0}
+  soundVolume: 0.7
+  onInteract:
+    m_PersistentCalls:
+      m_Calls: []
+  onReturned:
+    m_PersistentCalls:
+      m_Calls: []
+  slideToward: {fileID: 0}
+  slideDirection: {x: -1, y: 0, z: 0}
+  distance: 0.18
+  hopHeight: 0
+  slideTime: 0.6
+  returnTime: 1.5
 --- !u!1001 &1602684904
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -730,16 +1113,207 @@ PrefabInstance:
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2559461654371415120, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1619421472}
+    - targetCorrespondingSourceObject: {fileID: 8521694949006794179, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1072484275}
+    - targetCorrespondingSourceObject: {fileID: 3849834079154472389, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 791682316}
+    - targetCorrespondingSourceObject: {fileID: -5372287660143017796, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1809327565}
+    - targetCorrespondingSourceObject: {fileID: 6183767360526211724, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1910627698}
+    - targetCorrespondingSourceObject: {fileID: -5612818972513144757, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1102390538}
+    - targetCorrespondingSourceObject: {fileID: -6454868636084629512, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 585721398}
+    - targetCorrespondingSourceObject: {fileID: 8345176284820455332, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1825837454}
+    - targetCorrespondingSourceObject: {fileID: -2338194141120372263, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1862385547}
     - targetCorrespondingSourceObject: {fileID: -5865988644177264745, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1856716802}
+    - targetCorrespondingSourceObject: {fileID: -5865988644177264745, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1856716806}
+    - targetCorrespondingSourceObject: {fileID: 303589615650283787, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 545966272}
+    - targetCorrespondingSourceObject: {fileID: -7171375629071200995, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 35546799}
+    - targetCorrespondingSourceObject: {fileID: -7439297484935309250, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1303869473}
+    - targetCorrespondingSourceObject: {fileID: -6697523740450909201, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 659661307}
     - targetCorrespondingSourceObject: {fileID: -5951246220285500362, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1015068139}
+    - targetCorrespondingSourceObject: {fileID: -5951246220285500362, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1015068143}
+    - targetCorrespondingSourceObject: {fileID: 2899536982557017773, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1695486543}
+    - targetCorrespondingSourceObject: {fileID: -6953235842492146601, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2110684437}
+    - targetCorrespondingSourceObject: {fileID: 6500141538660331818, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 73588959}
     - targetCorrespondingSourceObject: {fileID: -6525681972476093483, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1342888986}
+    - targetCorrespondingSourceObject: {fileID: -6525681972476093483, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1342888990}
+    - targetCorrespondingSourceObject: {fileID: -286268298260827943, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 802950638}
   m_SourcePrefab: {fileID: -2371494000614353004, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
+--- !u!1 &1619421470 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2559461654371415120, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
+  m_PrefabInstance: {fileID: 1602684904}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1619421472
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1619421470}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 696814ccd22a04f458fc59ab4008e2bc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FadingInteractablesSetup
+  candleWhoosh: {fileID: 0}
+  photoTap: {fileID: 0}
+  calendarRustle: {fileID: 0}
+  chairCreak: {fileID: 0}
+  lampBuzz: {fileID: 0}
+  albumPage: {fileID: 0}
+  clockChime: {fileID: 0}
+  radioSong: {fileID: 0}
+  radioSongStart: 0
+  mugSlide: {fileID: 0}
+  fogSqueak: {fileID: 0}
+  fogNickname: Sunny
+  lullaby: {fileID: 0}
+  toyThump: {fileID: 0}
+  nightlightClick: {fileID: 0}
+  mobileChime: {fileID: 0}
+  doorCreak: {fileID: 0}
+--- !u!1 &1695486539 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2899536982557017773, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
+  m_PrefabInstance: {fileID: 1602684904}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1695486543
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1695486539}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf6c09f8fd220bf43b5883df1100fed8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ChildStuffedToy
+  prompt: Nudge the teddy
+  sound: {fileID: 0}
+  soundVolume: 0.7
+  onInteract:
+    m_PersistentCalls:
+      m_Calls: []
+  onReturned:
+    m_PersistentCalls:
+      m_Calls: []
+  slideToward: {fileID: 0}
+  slideDirection: {x: 0, y: 0, z: 1}
+  distance: 0.25
+  hopHeight: 0.06
+  slideTime: 0.6
+  returnTime: 1.5
+--- !u!1 &1809327561 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -5372287660143017796, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
+  m_PrefabInstance: {fileID: 1602684904}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1809327565
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1809327561}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a8dfd329edee65048a5987f509e75a35, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GuestRoomDoor
+  prompt: Open the door
+  sound: {fileID: 0}
+  soundVolume: 0.7
+  onInteract:
+    m_PersistentCalls:
+      m_Calls: []
+  onReturned:
+    m_PersistentCalls:
+      m_Calls: []
+  partSuffix: 
+  localAxis: {x: 0, y: 1, z: 0}
+  angle: -90
+  openTime: 1
+  closeTime: 0.35
+--- !u!1 &1825837450 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8345176284820455332, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
+  m_PrefabInstance: {fileID: 1602684904}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1825837454
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1825837450}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 82f6b6d496be6c544a7721d2a102432e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MemorialCandle
+  prompt: Touch the candle
+  sound: {fileID: 0}
+  soundVolume: 0.7
+  onInteract:
+    m_PersistentCalls:
+      m_Calls: []
+  onReturned:
+    m_PersistentCalls:
+      m_Calls: []
+  startsLit: 1
+  wickHeight: 0.19
+  flameColor: {r: 1, g: 0.7, b: 0.35, a: 1}
+  normalIntensity: 0.6
+  flareIntensity: 1.8
+  range: 3
+  flareTime: 0.4
+  calmTime: 1.2
 --- !u!1 &1856716798 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -5865988644177264745, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
@@ -758,14 +1332,137 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RockingChairInteraction
   prompt: Rock the chair
+  sound: {fileID: 0}
+  soundVolume: 0.7
   onInteract:
+    m_PersistentCalls:
+      m_Calls: []
+  onReturned:
     m_PersistentCalls:
       m_Calls: []
   maxAngle: 8
   rocksPerSecond: 0.8
-  duration: 5
+  rampTime: 0.6
+  settleTime: 2
   runnerRadius: 1
-  creak: {fileID: 0}
+--- !u!114 &1856716806
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1856716798}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9fbf5829112f73448b803d8c646efde0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GrandmaRockingChair
+  prompt: Rock the chair
+  sound: {fileID: 0}
+  soundVolume: 0.7
+  onInteract:
+    m_PersistentCalls:
+      m_Calls: []
+  onReturned:
+    m_PersistentCalls:
+      m_Calls: []
+  maxAngle: 8
+  rocksPerSecond: 0.8
+  rampTime: 0.6
+  settleTime: 2
+  runnerRadius: 1
+--- !u!1 &1862385543 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -2338194141120372263, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
+  m_PrefabInstance: {fileID: 1602684904}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1862385547
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1862385543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a1e970cfeea1894c82891e749567676, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HallwayCalendar
+  prompt: Swing the calendar
+  sound: {fileID: 0}
+  soundVolume: 0.7
+  onInteract:
+    m_PersistentCalls:
+      m_Calls: []
+  onReturned:
+    m_PersistentCalls:
+      m_Calls: []
+  partSuffix: 
+  localAxis: {x: 0, y: 0, z: 1}
+  angle: 12
+  openTime: 0.5
+  closeTime: 1.5
+--- !u!1 &1910627694 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6183767360526211724, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
+  m_PrefabInstance: {fileID: 1602684904}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1910627698
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1910627694}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8ee4801c9ff37648be9aef3ccfe8392, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ChildRoomDoor
+  prompt: Open the door
+  sound: {fileID: 0}
+  soundVolume: 0.7
+  onInteract:
+    m_PersistentCalls:
+      m_Calls: []
+  onReturned:
+    m_PersistentCalls:
+      m_Calls: []
+  partSuffix: 
+  localAxis: {x: 0, y: 1, z: 0}
+  angle: -90
+  openTime: 1
+  closeTime: 0.35
+--- !u!1 &2110684433 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -6953235842492146601, guid: ea7c1e8efc1863845922f6f903ffb1fc, type: 3}
+  m_PrefabInstance: {fileID: 1602684904}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2110684437
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2110684433}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee22a6393146b9e4b81a32f8042a2ff3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ChildMobile
+  prompt: Spin the mobile
+  sound: {fileID: 0}
+  soundVolume: 0.7
+  onInteract:
+    m_PersistentCalls:
+      m_Calls: []
+  onReturned:
+    m_PersistentCalls:
+      m_Calls: []
+  partSuffix: _Spinner
+  degreesPerSecond: 70
+  spinUpTime: 0.8
+  returnTime: 2
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
