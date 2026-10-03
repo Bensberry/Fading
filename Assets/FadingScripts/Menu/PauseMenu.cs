@@ -145,11 +145,11 @@ public class PauseMenu : MonoBehaviour
         MenuKit.MakeOption(optionsGroup.transform, "QUIT", 3, style, QuitGame);
 
         settingsGroup = MakeGroup("Settings");
-        MenuKit.MakeSlider(settingsGroup.transform, "Fog", 0.58f, style, 0f, 2f, GameSettings.Fog, v => Mathf.RoundToInt(v * 100f) + "%",
+        MenuKit.MakeSlider(settingsGroup.transform, "Fog", 0.58f, style, 0f, 100f, GameSettings.Fog, v => Mathf.RoundToInt(v).ToString(),
                            v => { GameSettings.Fog = v; GameSettings.ApplyFog(); });
-        MenuKit.MakeSlider(settingsGroup.transform, "Lighting", 0.44f, style, 0.5f, 2.5f, GameSettings.Lighting, v => Mathf.RoundToInt(v * 100f) + "%",
+        MenuKit.MakeSlider(settingsGroup.transform, "Lighting", 0.44f, style, 0f, 100f, GameSettings.Lighting, v => Mathf.RoundToInt(v).ToString(),
                            v => { GameSettings.Lighting = v; GameSettings.ApplyLighting(); KeepDarkWhilePaused(); });
-        MenuKit.MakeSlider(settingsGroup.transform, "Sensitivity", 0.30f, style, 0.02f, 0.3f, GameSettings.Sensitivity, v => v.ToString("0.00"),
+        MenuKit.MakeSlider(settingsGroup.transform, "Sensitivity", 0.30f, style, 0f, 100f, GameSettings.Sensitivity, v => Mathf.RoundToInt(v).ToString(),
                            v => { GameSettings.Sensitivity = v; GameSettings.ApplySensitivity(); });
         MenuKit.MakeOption(settingsGroup.transform, "BACK", 4, style, ShowOptions);
     }
