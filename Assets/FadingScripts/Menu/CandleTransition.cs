@@ -123,6 +123,12 @@ public class CandleTransition : MonoBehaviour
         revealLight.shadows = LightShadows.None;
     }
 
+    // The tip of the wick in the world (the white-out grows out from here).
+    public Vector3 WickPosition
+    {
+        get { return root.transform.TransformPoint(new Vector3(0f, 0.7f / 2f + 0.04f, 0f)); }
+    }
+
     // ---------- states
     // The candle is already burning (what the menu looks like).
     public void ShowLit()

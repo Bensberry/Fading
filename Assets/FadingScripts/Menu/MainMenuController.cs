@@ -35,9 +35,14 @@ public class MainMenuController : MonoBehaviour
     public float whiteOutDelay = 0.8f;
     [Tooltip("The blinding colour the screen fades to. The game scene starts in the same colour.")]
     public Color blindingColor = new Color(1f, 0.95f, 0.85f);
+    [Tooltip("The light starts as a tiny glow at the wick of the candle (size in pixels at 1080p)...")]
+    public float glowStartSize = 60f;
+    [Tooltip("...and grows to this size, which is big enough to cover the whole screen.")]
+    public float glowEndSize = 9000f;
 
     CandleTransition candle;
-    Image fadeImage;
+    Image fadeImage, glowImage;
+    RectTransform glowRect;
     TextMeshProUGUI title;
     MenuButton playButton, quitButton;
     bool starting;
@@ -54,6 +59,7 @@ public class MainMenuController : MonoBehaviour
         title = MenuKit.MakeTitle(canvas.transform, style);
         playButton = MenuKit.MakeOption(canvas.transform, "PLAY", 0, style, StartGame);
         quitButton = MenuKit.MakeOption(canvas.transform, "QUIT", 1, style, QuitGame);
+        MakeGlow(canvas.transform);                       // under the full-screen overlay
         fadeImage = MakeFadeOverlay(canvas.transform);
         SetTextVisibility(0f);
 
@@ -86,6 +92,37 @@ public class MainMenuController : MonoBehaviour
         RenderSettings.fog = false;
         RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
         RenderSettings.ambientLight = Color.black;
+    }
+
+    // The blinding light: a soft round glow image. It starts at the candle's wick and grows until it fills the screen.
+    void MakeGlow(Transform parent)
+    {
+        GameObject g = new GameObject("CandleGlow", typeof(RectTransform), typeof(Image));
+        g.transform.SetParent(parent, false);
+        glowRect = (RectTransform)g.transform;
+        glowImage = g.GetComponent<Image>();
+        glowImage.sprite = MakeGlowSprite();
+        glowImage.color = new Color(blindingColor.r, blindingColor.g, blindingColor.b, 0f);
+        glowImage.raycastTarget = false;
+    }
+
+    // A white circle that is solid in the middle and fades softly to nothing at the edge.
+    static Sprite MakeGlowSprite()
+    {
+        const int size = 256;
+        Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        tex.wrapMode = TextureWrapMode.Clamp;
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                float d = Vector2.Distance(new Vector2(x, y), new Vector2(size / 2f, size / 2f)) / (size / 2f);
+                float a = Mathf.Pow(Mathf.Clamp01(1f - d), 1.6f);
+                tex.SetPixel(x, y, new Color(1f, 1f, 1f, a));
+            }
+        }
+        tex.Apply();
+        return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f));
     }
 
     static Image MakeFadeOverlay(Transform parent)
@@ -145,11 +182,34 @@ public class MainMenuController : MonoBehaviour
 
     bool whiteOutDone;
 
+    // The light is born at the wick and spreads outward until the whole screen is white.
     IEnumerator WhiteOut()
     {
         yield return new WaitForSeconds(whiteOutDelay);
-        yield return FadeScreen(0f, 1f, fadeDuration);
+
+        Camera cam = Camera.main != null ? Camera.main : FindFirstObjectByType<Camera>();
+        Vector3 wick = cam.WorldToViewportPoint(candle.WickPosition);
+        glowRect.anchorMin = glowRect.anchorMax = new Vector2(wick.x, wick.y);     // sit exactly on the wick
+        glowRect.anchoredPosition = Vector2.zero;
+
+        for (float t = 0f; t < fadeDuration; t += Time.deltaTime)
+        {
+            float k = t / fadeDuration;
+            float size = Mathf.Lerp(glowStartSize, glowEndSize, k * k);            // slow at first, then it rushes outward
+            glowRect.sizeDelta = new Vector2(size, size);
+            SetOverlay(glowImage, Mathf.Clamp01(k * 4f));
+            SetOverlay(fadeImage, Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.75f, 1f, k)));   // makes sure it ends fully white
+            yield return null;
+        }
+        glowRect.sizeDelta = new Vector2(glowEndSize, glowEndSize);
+        SetOverlay(glowImage, 1f);
+        SetOverlay(fadeImage, 1f);
         whiteOutDone = true;
+    }
+
+    void SetOverlay(Image image, float alpha)
+    {
+        image.color = new Color(blindingColor.r, blindingColor.g, blindingColor.b, alpha);
     }
 
     // ---------- fades
@@ -168,15 +228,5 @@ public class MainMenuController : MonoBehaviour
         title.alpha = v;
         playButton.Visibility = v;
         quitButton.Visibility = v;
-    }
-
-    IEnumerator FadeScreen(float from, float to, float seconds)
-    {
-        for (float t = 0f; t < seconds; t += Time.deltaTime)
-        {
-            fadeImage.color = new Color(blindingColor.r, blindingColor.g, blindingColor.b, Mathf.SmoothStep(from, to, t / seconds));
-            yield return null;
-        }
-        fadeImage.color = new Color(blindingColor.r, blindingColor.g, blindingColor.b, to);
     }
 }
