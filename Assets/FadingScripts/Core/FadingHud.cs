@@ -103,8 +103,7 @@ public class FadingHud : MonoBehaviour
         float w = Screen.width * 0.7f, h = Screen.height * 0.14f;
         Rect box = new Rect((Screen.width - w) / 2f, Screen.height * 0.72f, w, h);
         toastStyle.richText = true;
-        string speaker = subtitleSpeaker.Length > 0 ? "<color=#ffcc88><size=70%>" + subtitleSpeaker.ToUpper() + "</size></color>
-" : "";
+        string speaker = subtitleSpeaker.Length > 0 ? "<color=#ffcc88><size=70%>" + subtitleSpeaker.ToUpper() + "</size></color>\n" : "";
         toastStyle.normal.textColor = new Color(1f, 0.97f, 0.9f, alpha);
         Color old = GUI.color;
         GUI.color = new Color(1f, 1f, 1f, alpha);
