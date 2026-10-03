@@ -12,13 +12,29 @@ public class DoorToggle : Interactable
     public string openPrompt = "Open the door";
     public string closePrompt = "Close the door";
 
+    [Header("Locking")]
+    [Tooltip("A locked door will not open: it rattles and shows a message instead.")]
+    public bool locked;
+    public string lockedMessage = "It won't open.";
+    public string lockedPrompt = "Locked door";
+
     public bool IsOpen { get; private set; }
 
     Quaternion closedRot;
     bool captured;
-    Coroutine moving;
+    Coroutine moving, rattling;
 
-    void Start() { Capture(); prompt = openPrompt; }
+    void Start() { Capture(); prompt = ClosedPrompt(); }
+
+    string ClosedPrompt() { return locked ? lockedPrompt : openPrompt; }
+
+    // Lock or unlock from code (ChapterRules does this per chapter).
+    public void SetLocked(bool value, string message = null)
+    {
+        locked = value;
+        if (message != null) lockedMessage = message;
+        prompt = IsOpen ? closePrompt : ClosedPrompt();
+    }
 
     void Capture()
     {
@@ -31,6 +47,7 @@ public class DoorToggle : Interactable
     {
         if (!isActiveAndEnabled) return;
         Capture();
+        if (locked && !IsOpen) { Rattle(); return; }
         IsOpen = !IsOpen;
         prompt = IsOpen ? closePrompt : openPrompt;
         onInteract.Invoke();
@@ -38,6 +55,27 @@ public class DoorToggle : Interactable
         if (moving != null) StopCoroutine(moving);
         Quaternion target = IsOpen ? closedRot * Quaternion.AngleAxis(angle, localAxis) : closedRot;
         moving = StartCoroutine(Turn(target, IsOpen ? openTime : closeTime));
+    }
+
+    // Locked door: the handle rattles (small quick shake that fades out) and a message pops up.
+    void Rattle()
+    {
+        FadingHud.Toast(lockedMessage);
+        if (rattling == null) rattling = StartCoroutine(RattleRoutine());
+    }
+
+    IEnumerator RattleRoutine()
+    {
+        const float length = 0.5f;
+        for (float t = 0f; t < length; t += Time.deltaTime)
+        {
+            float fade = 1f - t / length;
+            float shake = Mathf.Sin(t * 70f) * 3.5f * fade;
+            transform.localRotation = closedRot * Quaternion.AngleAxis(shake, localAxis);
+            yield return null;
+        }
+        transform.localRotation = closedRot;
+        rattling = null;
     }
 
     IEnumerator Turn(Quaternion to, float time)
@@ -60,7 +98,18 @@ public class DoorToggle : Interactable
         moving = null;
         if (captured) transform.localRotation = closedRot;
         IsOpen = false;
-        prompt = openPrompt;
+        prompt = ClosedPrompt();
+    }
+
+    // Swing the door open instantly from code (e.g. Grandma's door is already open in Chapter 1).
+    public void OpenInstant()
+    {
+        Capture();
+        if (moving != null) StopCoroutine(moving);
+        moving = null;
+        IsOpen = true;
+        prompt = closePrompt;
+        transform.localRotation = closedRot * Quaternion.AngleAxis(angle, localAxis);
     }
 
     // Not used by doors, but required by Interactable.

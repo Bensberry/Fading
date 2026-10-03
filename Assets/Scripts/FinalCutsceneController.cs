@@ -7,6 +7,10 @@ public class FinalCutsceneController : MonoBehaviour
 {
     public static FinalCutsceneController Instance { get; private set; }
 
+    // Other scripts (tutorial, chapter logic) listen to these.
+    public static event System.Action OnCutsceneStarted;
+    public static event System.Action OnCutsceneFinished;
+
     [Header("Cinemachine & Input References")]
     public CinemachineCamera cutsceneVcam; 
     public FirstPersonController playerController; 
@@ -39,6 +43,7 @@ public class FinalCutsceneController : MonoBehaviour
 
     private IEnumerator CutsceneRoutine()
     {
+        if (OnCutsceneStarted != null) OnCutsceneStarted();
         // 1. Freeze Player Movement & Mouse Look
         if (playerController != null)
         {
@@ -95,5 +100,6 @@ public class FinalCutsceneController : MonoBehaviour
         }
 
         Debug.Log("Cutscene complete.");
+        if (OnCutsceneFinished != null) OnCutsceneFinished();
     }
 }
