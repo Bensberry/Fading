@@ -21,6 +21,8 @@ public class FadingHud : MonoBehaviour
     string toast = "";
     float toastStart = -100f, toastLength;
     string objective = "";
+    string subtitleSpeaker = "", subtitleText = "";
+    float subtitleStart = -100f, subtitleLength;
 
     bool candleShown;
     int hintsLeft, hintsMax;
@@ -40,6 +42,18 @@ public class FadingHud : MonoBehaviour
 
     public static void SetObjective(string text) { Instance.objective = text ?? ""; }
 
+    // A line of dialogue near the bottom of the screen: "MOM   Did you hear that?"  (used by cutscenes)
+    public static void Subtitle(string speaker, string text, float seconds)
+    {
+        FadingHud h = Instance;
+        h.subtitleSpeaker = speaker ?? "";
+        h.subtitleText = text ?? "";
+        h.subtitleStart = Time.unscaledTime;
+        h.subtitleLength = seconds;
+    }
+
+    public static void ClearSubtitle() { Instance.subtitleLength = 0f; }
+
     public static void SetCandle(int hintsLeft, int hintsMax, float cooldown01, bool burnedOut)
     {
         FadingHud h = Instance;
@@ -55,6 +69,7 @@ public class FadingHud : MonoBehaviour
     {
         MakeStyles();
         DrawToast();
+        DrawSubtitle();
         DrawObjective();
         if (candleShown) DrawCandle();
     }
@@ -78,6 +93,23 @@ public class FadingHud : MonoBehaviour
         DrawBox(box, new Color(0.05f, 0.04f, 0.03f, 0.75f * alpha));
         toastStyle.normal.textColor = new Color(1f, 0.93f, 0.8f, alpha);
         GUI.Label(box, toast, toastStyle);
+    }
+
+    void DrawSubtitle()
+    {
+        float age = Time.unscaledTime - subtitleStart;
+        if (age > subtitleLength || subtitleText.Length == 0) return;
+        float alpha = Mathf.Clamp01(Mathf.Min(age / 0.3f, (subtitleLength - age) / 0.4f));
+        float w = Screen.width * 0.7f, h = Screen.height * 0.14f;
+        Rect box = new Rect((Screen.width - w) / 2f, Screen.height * 0.72f, w, h);
+        toastStyle.richText = true;
+        string speaker = subtitleSpeaker.Length > 0 ? "<color=#ffcc88><size=70%>" + subtitleSpeaker.ToUpper() + "</size></color>
+" : "";
+        toastStyle.normal.textColor = new Color(1f, 0.97f, 0.9f, alpha);
+        Color old = GUI.color;
+        GUI.color = new Color(1f, 1f, 1f, alpha);
+        GUI.Label(box, speaker + subtitleText, toastStyle);
+        GUI.color = old;
     }
 
     void DrawObjective()

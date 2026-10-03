@@ -144,17 +144,39 @@ public class ChapterRules : MonoBehaviour
     }
 
     // ---------- Chapter 1
+    // Set this to true when MorningCutscene (Cutscenes/Cutscene_Morning.cs) is ready, to play it when Chapter 1 starts.
+    const bool PlayMorningCutscene = false;
+
     void SetUpChapter1()
     {
         if (cycle != null) cycle.SetPhase(DayNightCycle.Phase.Day1, true);     // start from Day 1 (this also shuts all doors)
         RemoveGrandma();
+        ArrangeChapter1Doors();
+        FadingHud.SetObjective("");
 
+        if (PlayMorningCutscene)
+        {
+            if (cycle != null) cycle.autoAdvanceDays = false;                   // the day must not run out during the cutscene
+            CutsceneRunner.Play(new MorningCutscene(), AfterMorningCutscene);
+        }
+    }
+
+    void AfterMorningCutscene()
+    {
+        if (cycle == null) return;
+        cycle.autoAdvanceDays = true;
+        cycle.SetPhase(DayNightCycle.Phase.Day1, true);                        // restarts the day timer
+        ArrangeChapter1Doors();
+    }
+
+    // Every door is unlocked in Chapter 1 and Grandma's room stands open.
+    static void ArrangeChapter1Doors()
+    {
         foreach (DoorToggle d in FindObjectsByType<DoorToggle>(FindObjectsInactive.Include, FindObjectsSortMode.None))
         {
             d.SetLocked(false);
-            if (d is GuestRoomDoor) d.OpenInstant();                          // her room stands open
+            if (d is GuestRoomDoor) d.OpenInstant();
         }
-        FadingHud.SetObjective("");
     }
 
     // Grandma is gone: hide her and switch off the Chapter 0 puzzle that needed her.
