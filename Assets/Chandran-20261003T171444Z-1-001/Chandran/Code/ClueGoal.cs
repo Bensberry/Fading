@@ -14,6 +14,7 @@ public class ClueGoal : MonoBehaviour
 
     public void ActivateClue()
     {
+        if (!goalAchieved) reactionStarted = false;        // a NEW activation can be reacted to again (points are still only given once)
         goalAchieved = true;
         Debug.Log($"[CLUE] {name}: goalAchieved = TRUE");
     }

@@ -102,6 +102,7 @@ public class ChapterRules : MonoBehaviour
         gameObject.AddComponent<AmbientAudio>();       // quiet room sound, footsteps, a chime when touching things
         SetUpMusic();
         TrackSigns();
+        FamilyReactions.Run();                         // Mom and the baby react to what the ghost touches
         gameObject.AddComponent<HouseEmptying>();      // boxes appear, things on shelves and walls disappear
         AbilityLoss.StartFor(gameObject, chapter);     // vision, then speed, then hearing
         gameObject.AddComponent<PauseMenu>();          // Esc opens the pause menu

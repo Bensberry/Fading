@@ -19,6 +19,9 @@ public class GrandmaAI : MonoBehaviour
     [Range(0f, 180f)] public float visionAngle = 100f;
     public LayerMask lineOfSightLayers = ~0;
 
+    [Header("Hearing (any active clue this close is noticed, even if she cannot see it)")]
+    public float hearingRange = 9f;
+
     [Header("Radio Hearing")]
     [Tooltip("Maximum distance at which Grandma can hear an active radio clue.")]
     public float radioDetectionRange = 30f;
@@ -236,6 +239,10 @@ public class GrandmaAI : MonoBehaviour
 
             if (CanSeeClue(clue))
                 return clue;
+
+            // Hearing: she notices actions close by even when furniture or her own back is in the way.
+            if (Vector3.Distance(transform.position, clue.transform.position) <= hearingRange)
+                return clue;
         }
 
         return null;
@@ -304,6 +311,13 @@ public class GrandmaAI : MonoBehaviour
         }
 
         isReacting = true;
+
+        // First she turns and LOOKS at what happened (about half a second), then she walks over.
+        for (float look = 0f; look < 0.6f; look += Time.deltaTime)
+        {
+            FaceTowards(clue.transform.position);
+            yield return null;
+        }
 
         Debug.Log(
             $"[GRANDMA] Interrupting work and approaching {clue.name}."
@@ -470,7 +484,7 @@ public class GrandmaAI : MonoBehaviour
                 clue.goalAchieved
             )
             {
-                // Keep Idle while standing at clue.
+                // Keep Idle while standing at clue, and keep looking at it.
                 if (animator != null)
                 {
                     animator.SetFloat(
@@ -478,6 +492,7 @@ public class GrandmaAI : MonoBehaviour
                         0f
                     );
                 }
+                FaceTowards(clue.transform.position);
 
                 yield return null;
             }
@@ -533,6 +548,19 @@ public class GrandmaAI : MonoBehaviour
         }
 
         FinishClueReaction();
+    }
+
+    // Turn (smoothly, flat) toward a point in the world.
+    private void FaceTowards(Vector3 worldPoint)
+    {
+        Vector3 direction = worldPoint - transform.position;
+        direction.y = 0f;
+        if (direction.sqrMagnitude < 0.01f) return;
+        transform.rotation = Quaternion.Slerp(
+            transform.rotation,
+            Quaternion.LookRotation(direction),
+            6f * Time.deltaTime
+        );
     }
 
     private void UpdateProgressSlider()

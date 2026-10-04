@@ -81,7 +81,7 @@ public class NightOneCutscene : Cutscene
         yield return c.CameraLight(true, 0.9f);                                    // the night is nearly black: a soft light on the camera
 
         yield return c.Spawn("Mom", new Vector3(-4.3f, 0f, 12.6f), new Vector3(-2.9f, 0.5f, 13.6f), CastStance.Sitting);
-        yield return c.Spawn("Baby", new Vector3(-2.9f, 0.5f, 13.7f), new Vector3(-2.9f, 1f, 8f), CastStance.Sitting);
+        yield return c.Spawn("Baby", new Vector3(-2.86f, 0.40f, 13.85f), new Vector3(-2.86f, 0.4f, 8f), CastStance.Sitting);     // the mattress top is 0.40 m high
 
         // The child's room: Mom on the floor beside the bed.
         yield return c.CutCamera(c.House(-3.0f, 1.60f, 8.4f), c.House(-2.9f, 0.50f, 13.6f), 60f);

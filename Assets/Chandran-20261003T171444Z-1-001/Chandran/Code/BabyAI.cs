@@ -50,6 +50,9 @@ public class BabyAI : MonoBehaviour
     [Header("Baby Animation")]
     public Animator babyAnimator;
 
+    [Tooltip("Animation speed while she is standing still (0 = frozen pose, a small value = she gently sways instead of freezing).")]
+    public float idleAnimationSpeed = 0.12f;
+
 
     // ============================================================
     // TEDDY
@@ -252,6 +255,8 @@ public class BabyAI : MonoBehaviour
 
     private void Update()
     {
+        WatchForStall();
+
         // ========================================================
         // RESET TEDDY LOCK WHEN TEDDY CLUE ENDS
         // ========================================================
@@ -355,6 +360,38 @@ public class BabyAI : MonoBehaviour
     // ============================================================
     // START CLUE REACTION
     // ============================================================
+
+    // Safety net: if the baby has not moved for 15 seconds while NOT reacting to anything, her crawling restarts.
+    private Vector3 watchdogPosition;
+    private float watchdogTime;
+
+    private void WatchForStall()
+    {
+        if (reactingToClue || crawlPositions == null || crawlPositions.Length != 3)
+        {
+            watchdogTime = Time.time;
+            watchdogPosition = transform.position;
+            return;
+        }
+
+        if ((transform.position - watchdogPosition).sqrMagnitude > 0.0004f)
+        {
+            watchdogPosition = transform.position;
+            watchdogTime = Time.time;
+            return;
+        }
+
+        if (Time.time - watchdogTime < 15f) return;
+
+        Debug.LogWarning("[BABY] Standing still for too long: restarting her crawling.");
+        watchdogTime = Time.time;
+        if (movementCoroutine != null) StopCoroutine(movementCoroutine);
+        currentTarget = null;
+        currentTargetIndex = -1;
+        waitingAtTarget = false;
+        waitTimer = 0f;
+        movementCoroutine = StartCoroutine(MovementRoutine());
+    }
 
     private void StartClueReaction(
         IEnumerator reaction
@@ -660,7 +697,7 @@ public class BabyAI : MonoBehaviour
         }
         else
         {
-            babyAnimator.speed = 0f;
+            babyAnimator.speed = idleAnimationSpeed;
         }
     }
 

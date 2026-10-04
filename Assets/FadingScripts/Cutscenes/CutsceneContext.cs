@@ -290,7 +290,21 @@ public class CutsceneContext
         actors[who] = go;
         go.transform.position = world;
         if (toward.sqrMagnitude > 0.0001f) go.transform.rotation = Quaternion.LookRotation(toward);
-        yield break;
+
+        // A real model: wait a moment for its animation to take its pose, then put its lowest point exactly on the surface
+        // (so a baby on the bed rests on the mattress and does not float).
+        if (prefab != null)
+        {
+            yield return null;
+            yield return null;
+            Renderer[] renderers = go.GetComponentsInChildren<Renderer>();
+            if (renderers.Length > 0)
+            {
+                Bounds b = renderers[0].bounds;
+                foreach (Renderer r in renderers) b.Encapsulate(r.bounds);
+                go.transform.position += Vector3.up * (world.y - b.min.y);
+            }
+        }
     }
 
     // Walk a character to a house position. Real models slide (and get their "Walking" value set); stand-ins also bob a little.
