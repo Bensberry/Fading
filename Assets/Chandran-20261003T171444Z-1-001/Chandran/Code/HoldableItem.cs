@@ -109,7 +109,7 @@ public class HoldableItem : MonoBehaviour
                 promptUI.SetActive(isPlayerNearby);
 
             // Press F to pick up.
-            if (isPlayerNearby && FKeyPressedThisFrame())
+            if (isPlayerNearby && IsAimedAt() && FKeyPressedThisFrame())
             {
                 PickUpItem();
             }
@@ -130,6 +130,13 @@ public class HoldableItem : MonoBehaviour
                 ThrowItem();
             }
         }
+    }
+
+    // The player must be LOOKING at the item to pick it up (before, F anywhere near it always grabbed it).
+    private bool IsAimedAt()
+    {
+        Vector3 toItem = transform.position - playerCameraTransform.position;
+        return Vector3.Angle(playerCameraTransform.forward, toItem) < 12f;
     }
 
     // Helper method to check for F key press across both Input Systems

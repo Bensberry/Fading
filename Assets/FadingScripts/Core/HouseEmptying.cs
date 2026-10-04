@@ -9,7 +9,8 @@ using UnityEngine;
 //   stage 1  Day 1 + Night 1      a few small things (a vase, a frame, a plant)
 //   stage 2  Day 2 + Night 2      more: photo frames, the gramophone, kitchen things, plants
 //   stage 3  Day 3 + Night 3      barren: every frame, rugs, bookshelves, coat rack, extra chairs and lamps
-// Beds, tables, counters, the fridge, the memorial and everything touchable (INT_...) always stay.
+// Beds, tables, counters, the fridge and the memorial always stay. Some touchable things (INT_...) are packed too:
+// a packed object is switched off completely, so it can no longer be touched.
 // To pack something else, add its object name to the right list below (names are in the house model).
 public class HouseEmptying : MonoBehaviour
 {
@@ -18,11 +19,13 @@ public class HouseEmptying : MonoBehaviour
         new string[0],                                                                  // stage 0
         new[] { "Vase_Living", "Frame_Living_2", "Frame_Mother_1", "Plant_Hallway" },   // stage 1
         new[] { "Gramophone", "Frame_Dresser_1", "Frame_Dresser_2", "Kettle", "Plant_Kitchen",
-                "Frame_Hallway_1", "Frame_Hallway_2", "Frame_Living_1", "Plant_Living" },   // stage 2 (adds to stage 1)
+                "Frame_Hallway_1", "Frame_Hallway_2", "Frame_Living_1", "Plant_Living",
+                "INT_Hallway_Calendar", "INT_Mom_TablePhoto" },   // stage 2 (adds to stage 1)
         new[] { "Frame_Hallway_3", "Frame_Guest_1", "Frame_Guest_2", "Frame_Child_1", "Plant_Guest",
                 "Rug_Runner", "Rug_Guest", "Rug_Child", "Rug_Living", "Coat_Rack",
                 "Bookshelf_Guest", "Bookshelf_Child", "CoffeeTable", "ToyChest",
-                "Armchair_Mother", "Armchair", "FloorLamp_Living", "Mom_PhotoBox" },    // stage 3 (adds to stages 1 and 2)
+                "Armchair_Mother", "Armchair", "FloorLamp_Living", "Mom_PhotoBox",
+                "INT_Hallway_FamilyPhoto", "INT_Child_Mobile" },    // stage 3 (adds to stages 1 and 2)
     };
 
     readonly Dictionary<string, GameObject> byName = new Dictionary<string, GameObject>();
