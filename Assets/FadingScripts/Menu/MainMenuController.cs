@@ -33,6 +33,10 @@ public class MainMenuController : MonoBehaviour
     public float fadeDuration = 2f;
     [Tooltip("Seconds after PLAY (and after the text is gone) before the white-out starts, while the flame is swelling.")]
     public float whiteOutDelay = 0.8f;
+    [Tooltip("The black text shown while the screen is white after PLAY.")]
+    public string flashQuote = LightFadeIn.Quote;
+    [Tooltip("How long the quote stays readable on the white screen before the game scene appears.")]
+    public float quoteHoldSeconds = 2.5f;
     [Tooltip("The blinding colour the screen fades to. The game scene starts in the same colour.")]
     public Color blindingColor = new Color(1f, 0.95f, 0.85f);
     [Tooltip("The light starts as a tiny glow at the wick of the candle (size in pixels at 1080p)...")]
@@ -43,6 +47,7 @@ public class MainMenuController : MonoBehaviour
     CandleTransition candle;
     Image fadeImage, glowImage;
     RectTransform glowRect;
+    TextMeshProUGUI quoteLabel;
     TextMeshProUGUI title;
     MenuButton playButton, quitButton;
     bool starting;
@@ -61,6 +66,10 @@ public class MainMenuController : MonoBehaviour
         quitButton = MenuKit.MakeOption(canvas.transform, "QUIT", 1, style, QuitGame);
         MakeGlow(canvas.transform);                       // under the full-screen overlay
         fadeImage = MakeFadeOverlay(canvas.transform);
+        quoteLabel = MenuKit.MakeLabel(canvas.transform, "FlashQuote", flashQuote, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                                       new Vector2(1500f, 300f), 54, 4f, style, TextAlignmentOptions.Center);
+        quoteLabel.color = Color.black;                    // on top of the white
+        quoteLabel.alpha = 0f;
         SetTextVisibility(0f);
 
         // The CandleTransition component sits on this same object in the scene, so its settings can be tuned in the Inspector.
@@ -172,6 +181,7 @@ public class MainMenuController : MonoBehaviour
         StartCoroutine(WhiteOut());
         yield return candle.Play();
         while (!whiteOutDone) yield return null;
+        yield return new WaitForSeconds(quoteHoldSeconds);        // the quote stays readable on the white screen
 
         // The game scene starts in the same blinding light and slowly clears (see LightFadeIn).
         LightFadeIn.lightColor = blindingColor;
@@ -199,11 +209,13 @@ public class MainMenuController : MonoBehaviour
             glowRect.sizeDelta = new Vector2(size, size);
             SetOverlay(glowImage, Mathf.Clamp01(k * 4f));
             SetOverlay(fadeImage, Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.75f, 1f, k)));   // makes sure it ends fully white
+            quoteLabel.alpha = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.55f, 0.9f, k));      // the quote appears as the white takes over
             yield return null;
         }
         glowRect.sizeDelta = new Vector2(glowEndSize, glowEndSize);
         SetOverlay(glowImage, 1f);
         SetOverlay(fadeImage, 1f);
+        quoteLabel.alpha = 1f;
         whiteOutDone = true;
     }
 

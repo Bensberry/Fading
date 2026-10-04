@@ -141,7 +141,7 @@ public class CandleHint : MonoBehaviour
         beam.color = new Color(1f, 0.8f, 0.5f);
         beam.spotAngle = 32f;
         beam.range = 14f;
-        beam.shadows = LightShadows.Soft;
+        beam.shadows = LightShadows.Hard;
         beam.enabled = false;
     }
 

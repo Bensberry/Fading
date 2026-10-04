@@ -77,7 +77,7 @@ public class LightSign : Interactable
             lamp.type = LightType.Point;
             lamp.color = color;
             lamp.range = range;
-            lamp.shadows = LightShadows.Soft;
+            lamp.shadows = LightShadows.None;                // no shadows: much cheaper
         }
 
         // Apply light settings.

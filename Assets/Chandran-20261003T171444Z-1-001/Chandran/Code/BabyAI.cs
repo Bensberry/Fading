@@ -66,6 +66,8 @@ public class BabyAI : MonoBehaviour
     // ClueGoal remains active.
     private bool teddyHandledUntilReset = false;
 
+    private bool warnedNoCollider = false;
+
 
     // ============================================================
     // WINDBOX
@@ -695,11 +697,16 @@ public class BabyAI : MonoBehaviour
 
         if (targetCollider == null)
         {
-            Debug.LogWarning(
-                "Baby cannot see " +
-                target.name +
-                " because it has no Collider."
-            );
+            // Say this only once: this method runs every frame, and logging every frame makes the game lag.
+            if (!warnedNoCollider)
+            {
+                warnedNoCollider = true;
+                Debug.LogWarning(
+                    "Baby cannot see " +
+                    target.name +
+                    " because it has no Collider."
+                );
+            }
 
             return false;
         }

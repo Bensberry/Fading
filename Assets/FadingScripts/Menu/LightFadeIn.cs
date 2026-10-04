@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,6 +8,8 @@ using UnityEngine.UI;
 // It only runs when the scene was started from the main menu (the menu sets 'pending').
 public class LightFadeIn : MonoBehaviour
 {
+    public const string Quote = "Grief is a ghost that refuses to admit it is dead.";   // shown in black on the white flash
+
     public static bool pending;                     // set by MainMenuController when PLAY is pressed
     public static Color lightColor = new Color(1f, 0.95f, 0.85f);
 
@@ -14,6 +17,7 @@ public class LightFadeIn : MonoBehaviour
     public float fadeSeconds = 3f;
 
     Image overlay;
+    TextMeshProUGUI quote;
     float age;
 
     public static void StartIfPending()
@@ -38,6 +42,11 @@ public class LightFadeIn : MonoBehaviour
         overlay = g.GetComponent<Image>();
         overlay.color = lightColor;
         overlay.raycastTarget = false;
+
+        // The quote from the menu's flash carries on, in black, and fades away together with the white.
+        quote = MenuKit.MakeLabel(canvas.transform, "FlashQuote", Quote, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                                  new Vector2(1500f, 300f), 54, 4f, new MenuStyle(), TextAlignmentOptions.Center);
+        quote.color = Color.black;
     }
 
     void Update()
@@ -47,6 +56,7 @@ public class LightFadeIn : MonoBehaviour
         Color c = lightColor;
         c.a = 1f - Mathf.SmoothStep(0f, 1f, t);
         overlay.color = c;
+        quote.alpha = c.a;
         if (t >= 1f) Destroy(gameObject);
     }
 }

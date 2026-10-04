@@ -39,7 +39,7 @@ public class CandleFlare : Interactable
         glow.type = LightType.Point;
         glow.color = flameColor;
         glow.range = range;
-        glow.shadows = LightShadows.Soft;
+        glow.shadows = LightShadows.None;           // shadows from every light are expensive; only the held candle casts them
 
         normal = startsLit ? normalIntensity : 0f;
         Set(normal, 1f);

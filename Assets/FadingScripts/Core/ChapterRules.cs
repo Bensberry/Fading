@@ -24,6 +24,7 @@ public class ChapterRules : MonoBehaviour
 {
     const int LastChapter = 3;
     const float LastNightSeconds = 120f;                 // how long the last night lasts before the ending (N skips the wait)
+    const float NightSeconds = 150f;                     // how long Night 1 and Night 2 last before the next day begins by itself
     const string MainMenuScene = "MainMenu";
 
     DayNightCycle cycle;
@@ -98,6 +99,7 @@ public class ChapterRules : MonoBehaviour
         if (chapter == 0) SetUpChapter0();
         else SetUpLaterChapter();
 
+        gameObject.AddComponent<AmbientAudio>();       // quiet room sound, footsteps, a chime when touching things
         gameObject.AddComponent<HouseEmptying>();      // boxes appear, things on shelves and walls disappear
         AbilityLoss.StartFor(gameObject, chapter);     // vision, then speed, then hearing
         gameObject.AddComponent<PauseMenu>();          // Esc opens the pause menu
@@ -228,6 +230,24 @@ public class ChapterRules : MonoBehaviour
 
         if (cycle != null) cycle.onPhaseChanged.AddListener(OnPhaseChanged);
         if (chapter == 2) StartCoroutine(PlayAfter(3f, new DayTwoCutscene()));
+        StartCoroutine(ShowChapterGoal());
+    }
+
+    // A short line telling the player what this chapter asks of them (it appears after the chapter title, then goes away).
+    IEnumerator ShowChapterGoal()
+    {
+        string goal;
+        switch (chapter)
+        {
+            case 1: goal = "Touch things around the house (F) so Mom and Luna feel you.   [H] your candle shows you where."; break;
+            case 2: goal = "There are more boxes now, and less time. Keep reaching them."; break;
+            default: goal = "The last night. Make them feel you one more time."; break;
+        }
+        yield return new WaitForSeconds(5f);
+        while (CutsceneRunner.IsPlaying) yield return null;
+        FadingHud.SetObjective(goal);
+        yield return new WaitForSeconds(14f);
+        FadingHud.SetObjective("");
     }
 
     IEnumerator PlayAfter(float seconds, Cutscene cutscene)
@@ -252,8 +272,19 @@ public class ChapterRules : MonoBehaviour
             StartCoroutine(EndingAfterTheLastNight());
         }
 
+        // Night 1 and Night 2 end by themselves, which moves the story on to the next chapter.
+        if ((chapter == 1 && phase == (int)DayNightCycle.Phase.Night1) || (chapter == 2 && phase == (int)DayNightCycle.Phase.Night2))
+            StartCoroutine(EndTheNightAfter(NightSeconds));
+
         if (chapter >= LastChapter) return;                                    // the last chapter leads to the ending, not to a scene
         if (phase == (int)StartPhase(chapter + 1)) StartCoroutine(GoToNextChapterAfter(0.5f));
+    }
+
+    IEnumerator EndTheNightAfter(float seconds)
+    {
+        yield return new WaitForSeconds(seconds);
+        while (CutsceneRunner.IsPlaying) yield return null;
+        if (cycle != null) cycle.AdvancePhase();                               // Night -> the next Day: OnPhaseChanged loads the next chapter
     }
 
     // The last night lasts LastNightSeconds (press N to skip the wait), then the ending plays and the main menu loads.

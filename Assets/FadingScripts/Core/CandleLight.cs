@@ -61,7 +61,7 @@ public class CandleLight : MonoBehaviour
         glow = f.AddComponent<Light>();
         glow.type = LightType.Point;
         glow.range = range;
-        glow.shadows = LightShadows.Soft;
+        glow.shadows = LightShadows.Hard;               // the held candle is the one light that keeps shadows (hard = cheaper), so walls still block its light
     }
 
     void OnEnable() { if (flame != null) flame.gameObject.SetActive(true); }
