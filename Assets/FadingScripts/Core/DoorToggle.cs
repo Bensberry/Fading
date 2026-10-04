@@ -61,6 +61,7 @@ public class DoorToggle : Interactable
     void Rattle()
     {
         FadingHud.Toast(lockedMessage);
+        GameAudio.Play("door_locked", 0.9f);
         if (rattling == null) rattling = StartCoroutine(RattleRoutine());
     }
 

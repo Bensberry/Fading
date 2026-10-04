@@ -60,6 +60,7 @@ public class MainMenuController : MonoBehaviour
 
         MakeEverythingBlack();
         MenuKit.EnsureEventSystem();
+        MusicPlayer.Create().Play("music_menu", 3f);
         Canvas canvas = MenuKit.MakeCanvas("MenuCanvas", 0);
         title = MenuKit.MakeTitle(canvas.transform, style);
         playButton = MenuKit.MakeOption(canvas.transform, "PLAY", 0, style, StartGame);
@@ -163,6 +164,7 @@ public class MainMenuController : MonoBehaviour
     {
         if (starting) return;
         starting = true;
+        GameAudio.Play("flash_swell", 1f);                 // the sound of the candle's light swelling
         playButton.Interactable = false;
         quitButton.Interactable = false;
         StartCoroutine(PlaySequence());

@@ -48,7 +48,11 @@ public class AbilityLoss : MonoBehaviour
         if (chapter > 0 && Messages[chapter].Length > 0) Invoke("ShowMessage", 6f);
     }
 
-    void ShowMessage() { FadingHud.Toast(Messages[chapter], 5f); }
+    void ShowMessage()
+    {
+        FadingHud.Toast(Messages[chapter], 5f);
+        GameAudio.Play("ability_lost", 0.9f);
+    }
 
     void Update()
     {

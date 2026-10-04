@@ -31,6 +31,7 @@ public class FadingInteractablesSetup : MonoBehaviour
 
     void Awake()
     {
+        GameAudio.FillEmptySlots(this);          // sound files named like the slots (candleWhoosh, doorCreak, lullaby ...) in Resources/Audio fill empty slots
         foreach (Transform t in GetComponentsInChildren<Transform>(true))
         {
             if (!t.name.StartsWith("INT_") || t.GetComponent<Interactable>() != null) continue;

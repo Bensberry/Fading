@@ -5,6 +5,8 @@ using UnityEngine;
 //   - a low, quiet room ambience that loops all the time (a soft hum and a breath of air)
 //   - footsteps while the player walks (one soft step for every 0.8 m)
 //   - a gentle chime when the ghost touches something that has no sound of its own
+// Your own files (Assets/Resources/Audio) replace the generated ones automatically:
+//   room_ambience, footstep_1 ... footstep_6, touch_chime
 // All volumes are fields at the top. Hearing loss (AbilityLoss) automatically makes all of it quieter and duller.
 // When you have real sound files, give them to the objects (Interactable.sound etc.) and these simply stay in the background.
 public class AmbientAudio : MonoBehaviour
@@ -18,6 +20,7 @@ public class AmbientAudio : MonoBehaviour
 
     AudioSource ambience, effects;
     AudioClip footstep, chime;
+    readonly System.Collections.Generic.List<AudioClip> customSteps = new System.Collections.Generic.List<AudioClip>();
     Transform player;
     Vector3 lastPosition;
     float travelled;
@@ -25,14 +28,21 @@ public class AmbientAudio : MonoBehaviour
     void Start()
     {
         ambience = MakeSource();
-        ambience.clip = MakeAmbience();
+        AudioClip customAmbience = GameAudio.Get("room_ambience");
+        ambience.clip = customAmbience != null ? customAmbience : MakeAmbience();
         ambience.loop = true;
         ambience.volume = ambienceVolume;
         ambience.Play();
 
         effects = MakeSource();
+        for (int n = 1; n <= 6; n++)
+        {
+            AudioClip custom = GameAudio.Get("footstep_" + n);
+            if (custom != null) customSteps.Add(custom);
+        }
         footstep = MakeFootstep();
-        chime = MakeChime();
+        AudioClip customChime = GameAudio.Get("touch_chime");
+        chime = customChime != null ? customChime : MakeChime();
 
         FirstPersonController p = FindFirstObjectByType<FirstPersonController>();
         if (p != null) { player = p.transform; lastPosition = player.position; }
@@ -66,8 +76,9 @@ public class AmbientAudio : MonoBehaviour
         if (travelled < metresPerStep) return;
         travelled = 0f;
 
-        effects.pitch = Random.Range(0.85f, 1.1f);
-        effects.PlayOneShot(footstep, footstepVolume);
+        effects.pitch = Random.Range(0.92f, 1.08f);
+        AudioClip step = customSteps.Count > 0 ? customSteps[Random.Range(0, customSteps.Count)] : footstep;
+        effects.PlayOneShot(step, footstepVolume);
     }
 
     void PlayChime(Interactable touched)

@@ -189,10 +189,19 @@ public class CutsceneContext
 
     // ---------------------------------------------------------------- words
     // A subtitle: speaker name (can be "") and the line. Waits until the line is done.
-    public IEnumerator Say(string speaker, string line, float seconds)
+    // 'voice' is optional: the name of a voice file in Assets/Resources/Audio/ (e.g. "voice_mom_eyes"). Played if it exists.
+    public IEnumerator Say(string speaker, string line, float seconds, string voice = null)
     {
         FadingHud.Subtitle(speaker, line, seconds);
+        if (voice != null) GameAudio.Play(voice, 1f);
         yield return new WaitForSeconds(seconds);
+    }
+
+    // A sound effect by file name (Assets/Resources/Audio/<name>). Does nothing if the file does not exist. Does not wait.
+    public IEnumerator Sfx(string name, float volume = 1f)
+    {
+        GameAudio.Play(name, volume);
+        yield break;
     }
 
     // Big centred text (e.g. an ending's name). Waits until it is gone.
@@ -267,6 +276,9 @@ public class CutsceneContext
         {
             go = Object.Instantiate(prefab);
             spawned.Add(go);
+            // The baby's only animation is crawling: when she should sit still, freeze it.
+            Animator animator = go.GetComponentInChildren<Animator>();
+            if (animator != null && stance == CastStance.Sitting && who == "Baby") animator.speed = 0f;
         }
         else
         {
@@ -295,6 +307,7 @@ public class CutsceneContext
 
         bool standIn = standIns.ContainsKey(name);
         SetBoolIfExists(a, "Walking", true);
+        SetFloatIfExists(a, "Speed", 1f);                 // Mom's animator uses a "Speed" value
         for (float t = 0f; t < seconds; t += Time.deltaTime)
         {
             Vector3 p = Vector3.Lerp(from, to, t / seconds);
@@ -304,6 +317,7 @@ public class CutsceneContext
         }
         a.transform.position = to;
         SetBoolIfExists(a, "Walking", false);
+        SetFloatIfExists(a, "Speed", 0f);
     }
 
     // Turn a character to look at a house position.
@@ -441,6 +455,12 @@ public class CutsceneContext
     {
         Animator animator = a.GetComponentInChildren<Animator>();
         if (animator != null && HasParameter(animator, parameter)) animator.SetBool(parameter, value);
+    }
+
+    static void SetFloatIfExists(GameObject a, string parameter, float value)
+    {
+        Animator animator = a.GetComponentInChildren<Animator>();
+        if (animator != null && HasParameter(animator, parameter)) animator.SetFloat(parameter, value);
     }
 
     static bool HasParameter(Animator animator, string parameter)

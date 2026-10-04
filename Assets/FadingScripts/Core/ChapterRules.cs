@@ -100,6 +100,8 @@ public class ChapterRules : MonoBehaviour
         else SetUpLaterChapter();
 
         gameObject.AddComponent<AmbientAudio>();       // quiet room sound, footsteps, a chime when touching things
+        SetUpMusic();
+        TrackSigns();
         gameObject.AddComponent<HouseEmptying>();      // boxes appear, things on shelves and walls disappear
         AbilityLoss.StartFor(gameObject, chapter);     // vision, then speed, then hearing
         gameObject.AddComponent<PauseMenu>();          // Esc opens the pause menu
@@ -171,8 +173,29 @@ public class ChapterRules : MonoBehaviour
         }
     }
 
+    // Night music at night, day music by day (files music_night and music_day; missing files = no music).
+    void SetUpMusic()
+    {
+        MusicPlayer music = MusicPlayer.Create();
+        if (cycle == null) return;
+        music.Play(cycle.IsNight ? "music_night" : "music_day");
+        cycle.onPhaseChanged.AddListener(delegate { music.Play(cycle.IsNight ? "music_night" : "music_day"); });
+    }
+
+    // Counts the different things the ghost touches (doors do not count): this decides the ending.
+    void TrackSigns()
+    {
+        foreach (Interactable i in FindObjectsByType<Interactable>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+        {
+            if (i is DoorToggle) continue;
+            string objectName = i.gameObject.name;
+            i.onInteract.AddListener(() => StoryProgress.Touched(objectName));
+        }
+    }
+
     void SetUpChapter0()
     {
+        StoryProgress.Reset();                           // a new game starts here
         MakeGrandmaPuzzleEasier();
         LockOtherDoors();
         StartCoroutine(OpeningCutscene());
@@ -297,7 +320,7 @@ public class ChapterRules : MonoBehaviour
             yield return null;
         }
         while (CutsceneRunner.IsPlaying) yield return null;
-        CutsceneRunner.Play(new EndingCutscene(), () => SceneManager.LoadScene(MainMenuScene));
+        CutsceneRunner.Play(new EndingCutscene(StoryProgress.PickEnding()), () => SceneManager.LoadScene(MainMenuScene));
     }
 
     IEnumerator GoToNextChapterAfter(float seconds)

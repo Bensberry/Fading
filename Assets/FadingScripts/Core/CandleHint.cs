@@ -78,6 +78,7 @@ public class CandleHint : MonoBehaviour
         hintsLeft = maxHints;
         cooldownLeft = 0f;
         FadingHud.Toast("The candle flickers back to life.", 2.5f);
+        GameAudio.Play("candle_relight", 0.9f);
     }
 
     void UpdateHud()
@@ -97,6 +98,7 @@ public class CandleHint : MonoBehaviour
 
         hintsLeft--;
         cooldownLeft = cooldownSeconds;
+        GameAudio.Play("hint_whoosh", 0.9f);
         if (HintUsed != null) HintUsed();
         StartCoroutine(Shine(target, text));
     }
@@ -129,6 +131,7 @@ public class CandleHint : MonoBehaviour
             burnedOut = true;
             burnLeft = burnOutSeconds;
             FadingHud.Toast("The candle burns out...", 3f);
+            GameAudio.Play("candle_out", 0.9f);
         }
     }
 
