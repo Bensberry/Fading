@@ -22,7 +22,7 @@ public class CandleFlare : Interactable
 
     void Start()
     {
-        GameObject f = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        GameObject f = FadingMaterials.Primitive(PrimitiveType.Sphere);
         f.name = "Flame";
         Destroy(f.GetComponent<Collider>());
         flame = f.transform;

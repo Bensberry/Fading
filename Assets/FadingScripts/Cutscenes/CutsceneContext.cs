@@ -592,7 +592,7 @@ public class CutsceneContext
 
     static Transform Part(Transform parent, PrimitiveType type, Color color)
     {
-        GameObject g = GameObject.CreatePrimitive(type);
+        GameObject g = FadingMaterials.Primitive(type);
         Object.Destroy(g.GetComponent<Collider>());
         g.transform.SetParent(parent, false);
         g.GetComponent<Renderer>().material.color = color;

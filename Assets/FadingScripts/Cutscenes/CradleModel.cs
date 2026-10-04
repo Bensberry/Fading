@@ -63,7 +63,7 @@ public static class CradleModel
 
     static void Box(Transform parent, Vector3 position, Vector3 size, Color color, float tiltZ = 0f)
     {
-        GameObject g = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        GameObject g = FadingMaterials.Primitive(PrimitiveType.Cube);
         Object.Destroy(g.GetComponent<Collider>());
         g.transform.SetParent(parent, false);
         g.transform.localPosition = position;

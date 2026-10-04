@@ -81,7 +81,7 @@ public class CandleTransition : MonoBehaviour
 
     GameObject MakePart(string name, PrimitiveType type, Vector3 localPos, Vector3 localScale, Color color, float smoothness)
     {
-        GameObject g = GameObject.CreatePrimitive(type);
+        GameObject g = FadingMaterials.Primitive(type);
         g.name = name;
         Destroy(g.GetComponent<Collider>());
         g.transform.SetParent(root.transform, false);

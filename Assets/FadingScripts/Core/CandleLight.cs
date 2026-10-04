@@ -50,7 +50,7 @@ public class CandleLight : MonoBehaviour
 
     void CreateFlame()
     {
-        GameObject f = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        GameObject f = FadingMaterials.Primitive(PrimitiveType.Sphere);
         f.name = "CandleFlame";
         Destroy(f.GetComponent<Collider>());
         flame = f.transform;                                  // not a child, so we can move it freely

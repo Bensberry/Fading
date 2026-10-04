@@ -5,7 +5,7 @@ using UnityEngine;
 // Goes in: nowhere (a static helper used by many scripts).
 // Finds your sound files BY NAME, so nothing has to be dragged into slots:
 //   put a file in  Assets/Resources/Audio/  and name it exactly what the audio list says, e.g. door_locked.wav
-// If a file does not exist the game simply plays no sound there (no error). Names are not case-sensitive for the extension.
+// If a file does not exist the game simply plays no sound there (no error), or a stand-in from GeneratedSounds. Names are not case-sensitive for the extension.
 public static class GameAudio
 {
     static readonly Dictionary<string, AudioClip> cache = new Dictionary<string, AudioClip>();
@@ -20,6 +20,7 @@ public static class GameAudio
         AudioClip clip;
         if (cache.TryGetValue(name, out clip)) return clip;
         clip = Resources.Load<AudioClip>("Audio/" + name);
+        if (clip == null) clip = GeneratedSounds.Make(name);          // a few sounds have a stand-in made in code
         cache[name] = clip;
         return clip;
     }
