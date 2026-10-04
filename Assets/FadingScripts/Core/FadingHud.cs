@@ -27,6 +27,7 @@ public class FadingHud : MonoBehaviour
 
     bool progressShown;
     float progress01;
+    float progressScareTime = -100f;
 
     bool candleShown;
     int hintsLeft, hintsMax;
@@ -69,6 +70,9 @@ public class FadingHud : MonoBehaviour
         h.progress01 = Mathf.Clamp01(value01);
     }
 
+    // The bar flashes red for a moment (the ghost frightened the family).
+    public static void ProgressScare() { Instance.progressScareTime = Time.unscaledTime; }
+
     public static void HideProgress() { if (instance != null) instance.progressShown = false; }
 
     public static void SetCandle(int hintsLeft, int hintsMax, float cooldown01, bool burnedOut)
@@ -109,11 +113,14 @@ public class FadingHud : MonoBehaviour
         float x = (Screen.width - w) / 2f, y = Screen.height * 0.035f;
         smallStyle.alignment = TextAnchor.MiddleCenter;
         smallStyle.normal.textColor = new Color(1f, 0.93f, 0.8f, 0.9f);
-        GUI.Label(new Rect(x, y - h * 1.7f, w, h * 1.6f), "They are starting to feel you", smallStyle);
+        float scare = Mathf.Clamp01(1f - (Time.unscaledTime - progressScareTime) / 2.5f);
+        if (scare > 0f) smallStyle.normal.textColor = Color.Lerp(smallStyle.normal.textColor, new Color(1f, 0.35f, 0.3f, 1f), scare);
+        GUI.Label(new Rect(x, y - h * 1.7f, w, h * 1.6f), scare > 0f ? "You frightened them" : "They are starting to feel you", smallStyle);
         smallStyle.alignment = TextAnchor.MiddleLeft;
         DrawBox(new Rect(x - 3f, y - 3f, w + 6f, h + 6f), new Color(0f, 0f, 0f, 0.55f));
         DrawBox(new Rect(x, y, w, h), new Color(0.2f, 0.16f, 0.1f, 0.9f));
-        DrawBox(new Rect(x, y, w * progress01, h), Color.Lerp(new Color(1f, 0.6f, 0.2f), new Color(1f, 0.95f, 0.7f), progress01));
+        Color fill = Color.Lerp(new Color(1f, 0.6f, 0.2f), new Color(1f, 0.95f, 0.7f), progress01);
+        DrawBox(new Rect(x, y, w * progress01, h), Color.Lerp(fill, new Color(0.85f, 0.15f, 0.12f), scare));
     }
 
     void DrawToast()

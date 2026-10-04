@@ -9,7 +9,8 @@ using UnityEngine;
 // pointing at the existing model files (no 47 MB copy):
 //     Assets/Resources/Cast/Mom.prefab    = femeie_1 model + WifeAnimator controller, about 1.7 m tall
 //     Assets/Resources/Cast/Baby.prefab   = Baby 1+motions model + KidAnimator controller, about 0.75 m long
-// They are created automatically when Unity recompiles and the files do not exist yet.
+// Each prefab also gets a ClipLibrary: the list of animation clips inside its model (the baby's sleeping pose etc.).
+// They are created automatically when Unity recompiles and the files do not exist yet (or have no ClipLibrary yet).
 // To make them again (e.g. after changing a model): Tools > Fading > Rebuild cast prefabs.
 [InitializeOnLoad]
 public static class CastPrefabBuilder
@@ -40,7 +41,7 @@ public static class CastPrefabBuilder
     static bool Make(string name, string modelPath, string controllerPath, float size, bool sizeIsHeight, bool force)
     {
         string prefabPath = "Assets/Resources/Cast/" + name + ".prefab";
-        if (!force && File.Exists(prefabPath)) return false;
+        if (!force && File.Exists(prefabPath) && HasClipLibrary(prefabPath)) return false;
 
         GameObject model = AssetDatabase.LoadAssetAtPath<GameObject>(modelPath);
         if (model == null) { Debug.LogWarning("CastPrefabBuilder: model not found: " + modelPath); return false; }
@@ -65,10 +66,22 @@ public static class CastPrefabBuilder
         animator.runtimeAnimatorController = AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(controllerPath);
         animator.applyRootMotion = false;
 
+        // The list of clips in the model file, so the game can play them while it runs.
+        System.Collections.Generic.List<AnimationClip> clips = new System.Collections.Generic.List<AnimationClip>();
+        foreach (Object o in AssetDatabase.LoadAllAssetsAtPath(modelPath))
+            if (o is AnimationClip && !o.name.StartsWith("__preview__")) clips.Add((AnimationClip)o);
+        root.AddComponent<ClipLibrary>().clips = clips.ToArray();
+
         PrefabUtility.SaveAsPrefabAsset(root, prefabPath);
         Object.DestroyImmediate(root);
         Debug.Log("CastPrefabBuilder: created " + prefabPath);
         return true;
+    }
+
+    static bool HasClipLibrary(string prefabPath)
+    {
+        GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+        return prefab != null && prefab.GetComponent<ClipLibrary>() != null;
     }
 
     static Bounds BoundsOf(GameObject g)

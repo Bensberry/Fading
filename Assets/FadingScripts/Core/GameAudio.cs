@@ -35,6 +35,13 @@ public static class GameAudio
         AudioSource.PlayClipAtPoint(clip, at, volume);
     }
 
+    // Play a sound once at a place in the house (3D: louder when the player is close). Does nothing if the file is missing.
+    public static void PlayAt(string name, Vector3 position, float volume = 1f)
+    {
+        AudioClip clip = Get(name);
+        if (clip != null) AudioSource.PlayClipAtPoint(clip, position, volume);
+    }
+
     // For a component with public AudioClip slots that were left empty in the scene: every empty slot is filled from
     // Assets/Resources/Audio/<slot name>. (FadingInteractablesSetup uses this for candleWhoosh, doorCreak, lullaby ...)
     public static void FillEmptySlots(object target)

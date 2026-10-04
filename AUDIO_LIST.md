@@ -71,6 +71,17 @@ Record them yourselves or use text-to-speech. Each file is one line.
 | `voice_mom_letsgo` | Mom (ending 3) | "This house is so cold now. Come on, Luna. Let's go." |
 | `voice_ghost_nobody` | the ghost (ending 4) | "Nobody noticed. Nobody turned around." |
 
+## 5. Family life and scares (new)
+| File name | What | Length |
+|---|---|---|
+| `baby_cry` | the baby starting to cry (when the ghost frightens her) | 3-6 s |
+| `mom_cry` | a woman crying softly (Mom on her bed at night) | 6-12 s |
+| `mom_sigh` | a tired, sad sigh | 1-2 s |
+| `mom_gasp` | a frightened gasp (the ghost scared Mom) | 1 s |
+| `scare_sting` | a short uneasy sting when the family is frightened (the bar turns red) | 1-2 s |
+| `voice_ghost_smile` | the ghost (ending 1): "She smiles at me. She always knew I was here." | 4 s |
+| `voice_ghost_seesme` | the ghost (ending 2): "For a moment, she sees me." | 3 s |
+
 ## The four endings (picked by how many different things the ghost touched)
 1. **THE LIGHT** - they feel him and let him go in peace
 2. **THE ECHO** - they half feel him

@@ -7,7 +7,8 @@ using UnityEngine;
 //   2. ChapterZeroEndCutscene end of Chapter 0: Grandma speaks to him, sends him to his family, leaves
 //   3. NightOneCutscene       Chapter 1, when Night 1 begins: Mom by the bed, the baby sees him
 //   4. DayTwoCutscene         Chapter 2, start of Day 2: the baby laughs at nothing, Mom wonders
-//   5. EndingCutscene(1-4)    Chapter 3, after the last night: one of four endings (see StoryProgress.cs)
+//   5. EndingCutscene(1-4)    Chapter 3 after the last night, or any chapter when the progress bar is full (ending 1):
+//                             Mom by Luna's cradle, and in the good endings Luna looks up at the ghost and smiles
 // The dialogue lines are placeholders: change the text inside Say("WHO", "text", seconds, "voice_file") freely.
 // The last word of every Say is the name of an OPTIONAL voice file in Assets/Resources/Audio/ (see the audio list).
 // Positions are points of the house MODEL (x, height above floor, z): c.House(x, y, z). Nudge them if a shot looks off.
@@ -145,12 +146,14 @@ public class EndingCutscene : Cutscene
         yield return c.Fade(1f, 1.5f, Color.black);
         yield return c.Dawn();                                                     // the world switches to morning light
 
-        // The bare living room at dawn. In the worst ending nobody is there.
+        // The bare living room at dawn: Mom beside Luna's cradle. In the worst ending nobody is there, only the empty cradle.
+        Vector3 cradleSpot = new Vector3(-11.7f, 0f, 2.3f);
         if (ending != 4)
         {
             yield return c.Spawn("Mom", new Vector3(-12.6f, 0f, 1.8f), new Vector3(-12.6f, 1.6f, 4.4f), CastStance.Standing);
-            yield return c.Spawn("Baby", new Vector3(-12.35f, 0.95f, 1.95f), new Vector3(-12.6f, 1.6f, 4.4f), CastStance.Sitting);
+            yield return c.Cradle(cradleSpot, new Vector3(-12.6f, 1.6f, 4.4f), true);
         }
+        else yield return c.Cradle(cradleSpot, new Vector3(-12.6f, 1.6f, 4.4f), false);
         yield return c.CutCamera(c.House(-12.6f, 1.50f, 4.4f), c.House(-12.6f, 1.60f, 0.0f), 55f);
         yield return c.Fade(0f, 2.5f);
 
@@ -171,6 +174,17 @@ public class EndingCutscene : Cutscene
             default:                                                               // THE FADING: nobody noticed
                 yield return c.Say("", "Nobody noticed. Nobody turned around.", 5f, "voice_ghost_nobody");
                 break;
+        }
+
+        // The good endings: Luna looks up from her cradle, straight at him, and smiles.
+        if (ending <= 2)
+        {
+            yield return c.Fade(1f, 1f);
+            yield return c.CameraLight(true, 0.5f);
+            yield return c.BabyLooksUpAndSmiles(6f);
+            if (ending == 1) yield return c.Say("", "She smiles at me. She always knew I was here.", 4.5f, "voice_ghost_smile");
+            else yield return c.Say("", "For a moment, she sees me.", 3.5f, "voice_ghost_seesme");
+            yield return c.CameraLight(false);
         }
         yield return c.Fade(1f, 1.5f);
 

@@ -13,6 +13,7 @@ public enum CastStance { Standing, Sitting }
 //   Words:      Say (a subtitle), Title (big centred text)
 //   Camera:     CutCamera (instant), MoveCamera (smooth), CameraLight (soft light so dark nights can be seen)
 //   Characters: Spawn, MoveActor, TurnActor, Stance, Anim, AnimBool, Show
+//   The cradle: Cradle (a cradle, with Luna lying in it or empty), BabyLooksUpAndSmiles (close-up: she looks at us and smiles)
 //   World:      Touch (play an object's own sign), Extinguish (a candle goes out), Dawn (morning light)
 //   Sound:      Sound
 //   Positions:  House(x, y, z) turns house-model coordinates into world coordinates
@@ -433,6 +434,76 @@ public class CutsceneContext
 
     // ---------------------------------------------------------------- positions
     // Turn a point of the house MODEL (x, height above the floor, z) into a world position.
+    // ---------------------------------------------------------------- the cradle (ending)
+    GameObject cradle;
+    BabyFace cradleFace;
+
+    // A cradle at a house position; its long side faces 'lookAt'. withBaby = Luna lies in it (the baby model, sleeping pose).
+    public IEnumerator Cradle(Vector3 position, Vector3 lookAt, bool withBaby)
+    {
+        Vector3 world = House(position.x, position.y, position.z);
+        Vector3 toward = House(lookAt.x, lookAt.y, lookAt.z) - world;
+        toward.y = 0f;
+
+        float mattress;
+        cradle = CradleModel.Make(out mattress);
+        spawned.Add(cradle);
+        cradle.transform.position = world;
+        if (withBaby) yield return LayBabyIn(world + Vector3.up * mattress);
+        if (toward.sqrMagnitude > 0.0001f) cradle.transform.rotation = Quaternion.LookRotation(toward);
+    }
+
+    IEnumerator LayBabyIn(Vector3 mattressTop)
+    {
+        GameObject prefab = Resources.Load<GameObject>("Cast/Baby");
+        if (prefab == null) yield break;                                     // no baby model yet: the cradle stays empty
+
+        GameObject baby = Object.Instantiate(prefab, mattressTop, Quaternion.identity);
+        spawned.Add(baby);
+        actors["Baby"] = baby;
+        AnimationClip lying = GameClips.First(baby, "baby_lie", "sleeping");
+        Animator animator = baby.GetComponentInChildren<Animator>();
+        if (!PosePlayer.On(baby).Play(lying, 0.05f) && animator != null) animator.speed = 0f;
+        for (int i = 0; i < 3; i++) yield return null;                     // let the pose settle before measuring
+
+        // Lie along the cradle, small enough to fit, centred, resting on the mattress.
+        Bounds b = BoundsOf(baby);
+        if (b.size.z > b.size.x) { baby.transform.Rotate(0f, 90f, 0f, Space.World); b = BoundsOf(baby); }
+        float fit = Mathf.Min(1f, 0.78f / Mathf.Max(0.01f, b.size.x), 0.40f / Mathf.Max(0.01f, b.size.z));
+        baby.transform.localScale *= fit;
+        b = BoundsOf(baby);
+        baby.transform.position += new Vector3(mattressTop.x - b.center.x, mattressTop.y - b.min.y, mattressTop.z - b.center.z);
+        baby.transform.SetParent(cradle.transform, true);
+        cradleFace = BabyFace.On(baby);
+    }
+
+    // Close-up from above the cradle: Luna turns her head, looks up at the camera (at us) and smiles.
+    // Fade to black before this step; it fades in by itself.
+    public IEnumerator BabyLooksUpAndSmiles(float seconds = 6f)
+    {
+        if (cradleFace == null) yield break;
+        Vector3 head = cradleFace.HeadPosition;
+        Vector3 side = cradle != null ? cradle.transform.forward : Vector3.forward;
+        Vector3 from = head + Vector3.up * 0.55f + side * 0.22f;
+        yield return CutCamera(from, head, 42f);
+        yield return Fade(0f, 1.2f);
+        yield return Wait(0.5f);
+        cradleFace.LookAt(cam.transform);
+        yield return Wait(1.1f);
+        cradleFace.Smile(true);
+        GameAudio.Play("baby_giggle", 0.9f);
+        yield return MoveCamera(from + (head - from) * 0.18f, head, Mathf.Max(1f, seconds - 1.6f), 38f);     // a slow push in
+    }
+
+    static Bounds BoundsOf(GameObject g)
+    {
+        Renderer[] renderers = g.GetComponentsInChildren<Renderer>();
+        if (renderers.Length == 0) return new Bounds(g.transform.position, Vector3.zero);
+        Bounds b = renderers[0].bounds;
+        foreach (Renderer r in renderers) b.Encapsulate(r.bounds);
+        return b;
+    }
+
     public Vector3 House(float x, float y, float z)
     {
         Vector3 local = new Vector3(-x, y, z);            // the model is mirrored in x when it is imported

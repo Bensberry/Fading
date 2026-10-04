@@ -103,7 +103,10 @@ public class ChapterRules : MonoBehaviour
         SetUpMusic();
         TrackSigns();
         FamilyReactions.Run();                         // Mom and the baby react to what the ghost touches
-        gameObject.AddComponent<FamilyLife>();         // Mom visits her room, small sounds, floating dust
+        gameObject.AddComponent<FamilyLife>();         // doors for the family, Mom's words, floating dust
+        gameObject.AddComponent<MomLife>();            // Mom's day and night (her room, sitting, crying) and her eyes
+        gameObject.AddComponent<BabyLife>();           // Luna crawls around by day, smiles at the ghost, cries when frightened
+        gameObject.AddComponent<FamilyFear>();         // scaring them pushes the progress bar back
         gameObject.AddComponent<FamilyProgress>();     // the "they feel you" bar; when it is full the good ending plays
         FamilyProgress.Filled += OnProgressFull;
         gameObject.AddComponent<HouseEmptying>();      // boxes appear, things on shelves and walls disappear
@@ -287,7 +290,7 @@ public class ChapterRules : MonoBehaviour
         string goal;
         switch (chapter)
         {
-            case 1: goal = "Touch things around the house (F) so Mom and Luna feel you.   [H] your candle shows you where."; break;
+            case 1: goal = "Touch things (F) where Mom can SEE them, so she and Luna feel you. Be gentle: too much at once, slammed doors or startling Luna will frighten them."; break;
             case 2: goal = "There are more boxes now, and less time. Keep reaching them."; break;
             default: goal = "The last night. Make them feel you one more time."; break;
         }

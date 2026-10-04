@@ -19,8 +19,14 @@ public class GrandmaAI : MonoBehaviour
     [Range(0f, 180f)] public float visionAngle = 100f;
     public LayerMask lineOfSightLayers = ~0;
 
-    [Header("Hearing (any active clue this close is noticed, even if she cannot see it)")]
-    public float hearingRange = 9f;
+    [Header("Hearing (an active clue this close is noticed even if she cannot see it; keep it small, she should SEE signs)")]
+    public float hearingRange = 1.5f;
+
+    // Hooks for other scripts (MomLife): what she just noticed, where she just arrived, and how long to stay there.
+    public System.Action<ClueGoal> onClueNoticed;
+    public System.Action<Transform> onArrived;
+    [HideInInspector] public float holdUntil;           // she stays at her current stop at least until this time
+    public bool IsReacting { get { return isReacting; } }
 
     [Header("Radio Hearing")]
     [Tooltip("Maximum distance at which Grandma can hear an active radio clue.")]
@@ -164,6 +170,7 @@ public class GrandmaAI : MonoBehaviour
 
         detectedClue.reactionStarted = true;
         activeClue = detectedClue;
+        if (onClueNoticed != null) onClueNoticed(detectedClue);
 
         Debug.Log(
             $"[GRANDMA] DETECTED CLUE: {detectedClue.name}. " +
@@ -190,6 +197,10 @@ public class GrandmaAI : MonoBehaviour
 
             if (clue.reactionStarted)
                 continue;
+
+            // A loud clue (the baby crying) is heard anywhere in the house.
+            if (clue.heardAnywhere)
+                return clue;
 
             // ========================================================
             // RADIO CLUE
@@ -732,6 +743,7 @@ public class GrandmaAI : MonoBehaviour
             Debug.Log(
                 $"[GRANDMA] Arrived at work waypoint: {workTarget.name}"
             );
+            if (onArrived != null) onArrived(workTarget);
 
             // ========================================================
             // STAND / IDLE AT WORK
@@ -740,7 +752,8 @@ public class GrandmaAI : MonoBehaviour
             float elapsed = 0f;
 
             while (
-                elapsed < waitTimeAtLocation
+                elapsed < waitTimeAtLocation ||
+                Time.time < holdUntil
             )
             {
                 if (isReacting)
@@ -749,8 +762,8 @@ public class GrandmaAI : MonoBehaviour
                     continue;
                 }
 
-                // Make absolutely sure she stays Idle.
-                if (animator != null)
+                // Make absolutely sure she stays Idle (unless MomLife is walking her a step, e.g. to sit on the bed).
+                if (animator != null && agent.velocity.sqrMagnitude < 0.01f)
                 {
                     animator.SetFloat(
                         "Speed",

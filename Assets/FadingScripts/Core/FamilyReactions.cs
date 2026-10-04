@@ -7,7 +7,7 @@ using UnityEngine;
 //     (this was missing for Mom's mug and radio, and the teddy's clue never switched off, so the baby kept waiting there)
 //   - touchable objects that had no clue get one, and Mom's list of things to watch gets all of them
 // Objects whose own script already runs the clue (the nightlight and the music box) are left alone.
-// Mom and the baby also turn to LOOK at whatever was touched (FamilyGaze). Doors do not count as signs.
+// The baby also turns to LOOK at whatever was touched nearby (FamilyGaze); Mom only reacts to what she SEES (MomLife). Doors do not count as signs.
 public static class FamilyReactions
 {
     public static void Run()

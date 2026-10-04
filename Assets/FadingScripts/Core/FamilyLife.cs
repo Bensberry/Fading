@@ -1,126 +1,85 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AI;
 
 // Goes in: nowhere (ChapterRules adds it in the chapters where Mom and the baby live).
-// Makes the house feel alive:
-//   - Mom spends a lot of her time in HER ROOM (a spot in "MotherRoom" is added to her walking list), starts the chapter
-//     there, and opens her bedroom door when she walks up to it.
-//   - Mom and the baby make small sounds and comments now and then ("Did you hear that?", a baby giggle).
-//   - Soft dust floats in the air around the player.
+// Small things that make the house feel alive (Mom's and Luna's own routines are in MomLife and BabyLife):
+//   - doors open by themselves when Mom or the baby comes up to them, and close again behind them
+//   - FamilyLife.Say(...) shows what Mom says as a subtitle, but only when the player is close enough to hear it,
+//     and never too often
+//   - when the ghost touches something, Luna turns to look at it (she can feel him)
+//   - soft dust floats in the air around the player
 public class FamilyLife : MonoBehaviour
 {
-    public int roomVisitsInList = 3;              // how many times her room is in Mom's list of places (more = more time there)
+    const float HearingDistance = 11f;          // the player hears Mom's words within this distance
+    const float SecondsBetweenLines = 9f;
+
+    static float nextLine;
 
     GrandmaAI mom;
     BabyAI baby;
-    Transform roomSpot;
-    DoorToggle momDoor;
-    bool weOpenedTheDoor;
-    float nextTalk;
-
-    static readonly string[] MomLinesNoticing =
-    {
-        "Did you hear that?", "Hm? Who is there?", "That's strange...", "I felt something just now.", "Luna, did you do that?",
-    };
-    static readonly string[] MomLinesQuiet =
-    {
-        "Almost done with this room.", "So many memories in these boxes.", "We'll be all right.", "Your father loved this house.",
-    };
+    readonly HashSet<DoorToggle> openedForFamily = new HashSet<DoorToggle>();
 
     IEnumerator Start()
     {
+        nextLine = 0f;
         yield return new WaitForSeconds(0.5f);                   // the AI scripts have started by now
         mom = FindFirstObjectByType<GrandmaAI>();
         baby = FindFirstObjectByType<BabyAI>();
-        nextTalk = Time.time + 25f;
-
-        if (mom != null) SetUpMomRoom();
         MakeDust();
-        StartCoroutine(BabyGiggles());
-        if (mom != null) StartCoroutine(MomTalks());
+        StartCoroutine(DoorsForTheFamily());
     }
 
-    // ---------- Mom's room
-    void SetUpMomRoom()
+    // ---------- talking
+    // A line from Mom (or the ghost's thought when speaker is ""), only if the player is near 'where'.
+    public static void Say(string speaker, string line, Vector3 where, float maxDistance = HearingDistance)
     {
-        GameObject room = GameObject.Find("MotherRoom");
-        momDoor = FindFirstObjectByType<MotherRoomDoor>();
-        if (room == null) { Debug.LogWarning("[LIFE] No object called MotherRoom found, Mom stays in her usual places."); return; }
-
-        Bounds bounds = new Bounds(room.transform.position, Vector3.zero);
-        foreach (Renderer r in room.GetComponentsInChildren<Renderer>()) bounds.Encapsulate(r.bounds);
-
-        if (!NavMesh.SamplePosition(bounds.center, out NavMeshHit hit, 4f, NavMesh.AllAreas))
-        {
-            Debug.LogWarning("[LIFE] Mom's room has no walkable floor (NavMesh) near " + bounds.center);
-            return;
-        }
-
-        roomSpot = new GameObject("Mom_RoomSpot").transform;
-        roomSpot.position = hit.position;
-        for (int i = 0; i < roomVisitsInList; i++) mom.destinationWaypoints.Add(roomSpot);
-
-        NavMeshAgent agent = mom.GetComponent<NavMeshAgent>();
-        if (agent != null && agent.isOnNavMesh) agent.Warp(hit.position);       // she starts the chapter in her room
-        StartCoroutine(OpenHerDoorWhenNear());
+        if (CutsceneRunner.IsPlaying || Time.time < nextLine || Camera.main == null) return;
+        if (Vector3.Distance(Camera.main.transform.position, where) > maxDistance) return;
+        nextLine = Time.time + SecondsBetweenLines;
+        FadingHud.Subtitle(speaker, line, 3.5f);
     }
 
-    IEnumerator OpenHerDoorWhenNear()
+    // ---------- doors
+    IEnumerator DoorsForTheFamily()
     {
-        while (momDoor != null && mom != null)
+        DoorToggle[] doors = FindObjectsByType<DoorToggle>(FindObjectsSortMode.None);
+        while (true)
         {
-            Vector3 flat = mom.transform.position - momDoor.transform.position;
-            flat.y = 0f;
-            float distance = flat.magnitude;
-            if (distance < 1.8f && !momDoor.IsOpen) { momDoor.TryInteract(); weOpenedTheDoor = true; }
-            else if (distance > 3.5f && momDoor.IsOpen && weOpenedTheDoor) { momDoor.TryInteract(); weOpenedTheDoor = false; }
+            foreach (DoorToggle door in doors)
+            {
+                if (door == null || door.locked) continue;
+                float nearest = Mathf.Min(FlatDistance(mom, door), FlatDistance(baby, door));
+                if (nearest < 1.8f && !door.IsOpen) Use(door, true);
+                else if (nearest > 3.5f && door.IsOpen && openedForFamily.Contains(door)) Use(door, false);
+            }
             yield return new WaitForSeconds(0.3f);
         }
     }
 
-    // ---------- small sounds and comments
-    IEnumerator BabyGiggles()
+    void Use(DoorToggle door, bool opening)
     {
-        while (true)
-        {
-            yield return new WaitForSeconds(Random.Range(18f, 40f));
-            if (baby != null && baby.isActiveAndEnabled && !CutsceneRunner.IsPlaying) GameAudio.Play("baby_giggle", 0.6f);
-        }
+        FamilyFear.FamilyUsingDoor = true;
+        door.TryInteract();
+        FamilyFear.FamilyUsingDoor = false;
+        if (opening) openedForFamily.Add(door);
+        else openedForFamily.Remove(door);
     }
 
-    IEnumerator MomTalks()
+    static float FlatDistance(Component who, Component door)
     {
-        while (true)
-        {
-            yield return new WaitForSeconds(Random.Range(30f, 55f));
-            if (CutsceneRunner.IsPlaying || mom == null || !mom.isActiveAndEnabled) continue;
-            Say(MomLinesQuiet);
-        }
+        if (who == null || !who.gameObject.activeInHierarchy) return float.MaxValue;
+        Vector3 d = who.transform.position - door.transform.position;
+        d.y = 0f;
+        return d.magnitude;
     }
 
-    // Called by FamilyReactions a moment after the ghost touches something.
+    // Called by FamilyReactions when the ghost touches something: Luna turns to look at it (if she is near).
     public void ReactTo(Vector3 where)
     {
-        if (mom != null && mom.TryGetComponent(out FamilyGaze momGaze)) momGaze.LookAt(where);
-        if (baby != null && baby.TryGetComponent(out FamilyGaze babyGaze)) babyGaze.LookAt(where);
-
-        if (Time.time < nextTalk - 10f) return;                                   // not too chatty
-        if (mom == null || Vector3.Distance(mom.transform.position, where) > 12f) return;
-        StartCoroutine(SayLater(MomLinesNoticing, 0.9f));
-        if (baby != null) GameAudio.Play("baby_giggle", 0.7f);
-    }
-
-    IEnumerator SayLater(string[] lines, float seconds)
-    {
-        yield return new WaitForSeconds(seconds);
-        if (!CutsceneRunner.IsPlaying) Say(lines);
-    }
-
-    void Say(string[] lines)
-    {
-        FadingHud.Subtitle("Mom", lines[Random.Range(0, lines.Length)], 3.5f);
-        nextTalk = Time.time + 20f;
+        if (baby == null || Vector3.Distance(baby.transform.position, where) > 8f) return;
+        FamilyGaze gaze = baby.GetComponent<FamilyGaze>();
+        if (gaze != null) gaze.LookAt(where);
     }
 
     // ---------- floating dust

@@ -128,6 +128,13 @@ public class BabyAI : MonoBehaviour
     // The normal crawl position the baby is currently travelling toward.
     // This survives clue interruptions.
 
+    // Optional (set by BabyLife): picks where she crawls next and returns the path (corner points) to get there.
+    // When it is empty or returns null she uses her crawl positions as before.
+    public System.Func<Vector3, Vector3[]> pickRoamPath;
+    public float roamWaitMin = 2f;
+    public float roamWaitMax = 7f;
+    [HideInInspector] public float pauseUntil;          // she stays where she is until this time (e.g. while crying)
+
     private Transform currentTarget;
 
     private int currentTargetIndex = -1;
@@ -457,6 +464,23 @@ public class BabyAI : MonoBehaviour
             // after a clue interruption.
             // ----------------------------------------------------
 
+            if (Time.time < pauseUntil)
+            {
+                SetCrawlingAnimation(false);
+                yield return null;
+                continue;
+            }
+
+            if (currentTarget == null && pickRoamPath != null)
+            {
+                Vector3[] path = pickRoamPath(transform.position);
+                if (path != null && path.Length > 0)
+                {
+                    yield return Roam(path);
+                    continue;
+                }
+            }
+
             if (currentTarget == null)
             {
                 currentTargetIndex =
@@ -583,6 +607,36 @@ public class BabyAI : MonoBehaviour
     // ============================================================
     // MOVE TO CRAWL POSITION
     // ============================================================
+
+    // Crawl along a path of points (from BabyLife), then sit for a random moment.
+    private IEnumerator Roam(Vector3[] path)
+    {
+        foreach (Vector3 corner in path)
+        {
+            while (true)
+            {
+                if (Time.time < pauseUntil)
+                {
+                    SetCrawlingAnimation(false);
+                    yield return null;
+                    continue;
+                }
+
+                Vector3 target = new Vector3(corner.x, transform.position.y, corner.z);
+                Vector3 direction = target - transform.position;
+                if (direction.magnitude <= 0.08f) break;
+
+                SetCrawlingAnimation(true);
+                transform.position += direction.normalized * Mathf.Min(moveSpeed * Time.deltaTime, direction.magnitude);
+                RotateTowards(direction);
+                yield return null;
+            }
+        }
+
+        SetCrawlingAnimation(false);
+        float wait = Random.Range(roamWaitMin, roamWaitMax);
+        for (float t = 0f; t < wait; t += Time.deltaTime) yield return null;
+    }
 
     private IEnumerator MoveToPosition(
         Transform target,

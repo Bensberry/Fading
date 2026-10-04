@@ -5,6 +5,9 @@ public class ClueGoal : MonoBehaviour
     [Header("Clue State")]
     public bool goalAchieved = false;
 
+    [Header("Loud (Mom hears it anywhere, e.g. the baby crying)")]
+    public bool heardAnywhere = false;
+
     [Header("Scoring")]
     public int points = 10;
 
