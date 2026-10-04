@@ -14,8 +14,8 @@ OcclusionCullingSettings:
 RenderSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 10
-  m_Fog: 0
-  m_FogColor: {r: 0.29803917, g: 0.5644655, b: 0.8117647, a: 1}
+  m_Fog: 1
+  m_FogColor: {r: 0.6086935, g: 0.63943934, b: 0.6679245, a: 1}
   m_FogMode: 3
   m_FogDensity: 0.36
   m_LinearFogStart: 0
@@ -95,6 +95,30 @@ LightmapSettings:
     m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 20201, guid: 0000000000000000f000000000000000, type: 0}
   m_LightingSettings: {fileID: 0}
+--- !u!196 &4
+NavMeshSettings:
+  serializedVersion: 2
+  m_ObjectHideFlags: 0
+  m_BuildSettings:
+    serializedVersion: 3
+    agentTypeID: 0
+    agentRadius: 0.5
+    agentHeight: 2
+    agentSlope: 45
+    agentClimb: 0.4
+    ledgeDropHeight: 0
+    maxJumpAcrossDistance: 0
+    minRegionArea: 2
+    manualCellSize: 0
+    cellSize: 0.16666667
+    manualTileSize: 0
+    tileSize: 256
+    buildHeightMesh: 0
+    maxJobWorkers: 0
+    preserveTilesOutsideBounds: 0
+    debug:
+      m_Flags: 0
+  m_NavMeshData: {fileID: 0}
 --- !u!1 &10
 GameObject:
   m_ObjectHideFlags: 0
@@ -232,6 +256,33 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 79b380ceab3b45ea8a0a4a26ee2c31b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MainMenuController
+  sceneName: Chapter0
+  lightCandleOnOpen: 1
+  matchSound: {fileID: 0}
+  style:
+    font: {fileID: 0}
+    title: FADED
+    titleFontSize: 150
+    titleSpacing: 45
+    titlePosition: {x: 0.5, y: 0.565}
+    titleLeftColor: {r: 0.42, g: 0.4, b: 0.38, a: 1}
+    titleRightColor: {r: 1, g: 0.8, b: 0.55, a: 1}
+    optionFontSize: 42
+    optionSpacing: 24
+    textColor: {r: 1, g: 1, b: 1, a: 1}
+    leftMargin: 0.05
+    firstOptionHeight: 0.594
+    optionGap: 0.104
+    normalAlpha: 0.75
+    hoverAlpha: 1
+    hoverScale: 1.05
+  menuFadeInSeconds: 2.5
+  textFadeOutSeconds: 0.8
+  fadeDuration: 2
+  whiteOutDelay: 0.8
+  blindingColor: {r: 1, g: 0.95, b: 0.85, a: 1}
+  glowStartSize: 60
+  glowEndSize: 9000
 --- !u!114 &23
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -244,3 +295,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1f1de13bc794ffabc943ee57414a6c2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CandleTransition
+  viewportPosition: {x: 0.76, y: 0.46}
+  distanceFromCamera: 4
+  candleScale: 1
+  waxColor: {r: 0.17, g: 0.15, b: 0.14, a: 1}
+  revealSeconds: 4
+  igniteSeconds: 1.5
+  flareSeconds: 2.5
+  flareMultiplier: 25
+  burnSeconds: 0.5
+  matchSound: {fileID: 0}
+  matchVolume: 1
+  openDarkSeconds: 1
+  soundLeadSeconds: 0.4
+  lightColor: {r: 1, g: 0.62, b: 0.28, a: 1}
+  lightIntensity: 4
+  lightRange: 7
+  revealColor: {r: 0.55, g: 0.65, b: 0.85, a: 1}
+  revealIntensity: 0.5
+--- !u!1660057539 &9223372036854775807
+SceneRoots:
+  m_ObjectHideFlags: 0
+  m_Roots:
+  - {fileID: 11}
+  - {fileID: 21}
