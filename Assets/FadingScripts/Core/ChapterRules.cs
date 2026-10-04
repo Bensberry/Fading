@@ -89,6 +89,7 @@ public class ChapterRules : MonoBehaviour
         yield return null;          // wait one frame so doors, the candle and the day/night cycle are all set up
         chapter = ChapterNumber(SceneManager.GetActiveScene().name);
         cycle = FindFirstObjectByType<DayNightCycle>();
+        DoorwayLinks.Connect();                        // Mom can walk through every doorway (the NavMesh was baked with doors shut)
         if (cycle != null)
         {
             cycle.UseStoryLook();                      // clear day/night difference, slow calm changes

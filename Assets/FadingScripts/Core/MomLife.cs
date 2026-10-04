@@ -36,6 +36,8 @@ public class MomLife : MonoBehaviour
     float baseSpeed = 1f;
     float standHeight;                     // how high her AI object stands above the floor (to stand her up again after sleeping)
     Coroutine action;
+    Vector3 lastSpot;
+    float stillSince;
 
     IEnumerator Start()
     {
@@ -225,6 +227,13 @@ public class MomLife : MonoBehaviour
     // ---------- what she does when she gets there
     void OnArrived(Transform where)
     {
+        // Her AI says she arrived, but she is still far away: the path was cut off (she could not get there). Put her there.
+        if (where != null && agent != null && agent.isOnNavMesh && FlatDistance(mom.transform.position, where.position) > 3f)
+        {
+            Debug.LogWarning("[MOM] Could not walk to " + where.name + ", moving her there.");
+            agent.Warp(where.position);
+        }
+
         if (wanderSpots.Contains(where)) MoveWanderSpots(where);          // next time she goes somewhere new
         mom.waitTimeAtLocation = Random.Range(2.5f, 8f);
         if (agent != null) agent.speed = baseSpeed * Random.Range(0.85f, 1.15f);
@@ -347,6 +356,34 @@ public class MomLife : MonoBehaviour
         StopAction();
         FamilyLife.Say("Mom", Random.value < 0.5f ? "Who's there?! Stop it!" : "Stop... please, stop.", mom.transform.position, 25f);
         GameAudio.PlayAt("mom_gasp", mom.transform.position, 0.9f);
+    }
+
+    // ---------- safety net: if she stands still for 10 s while she should be walking somewhere, move her there
+    void Update()
+    {
+        if (mom == null || agent == null || mom.IsAsleep || !agent.enabled || !agent.isOnNavMesh || mom.IsReacting ||
+            Time.time < mom.holdUntil || !agent.hasPath || agent.isStopped)
+        {
+            stillSince = Time.time;
+            return;
+        }
+        bool far = FlatDistance(mom.transform.position, agent.destination) > 1.6f;
+        if (!far || (mom.transform.position - lastSpot).sqrMagnitude > 0.09f)
+        {
+            lastSpot = mom.transform.position;
+            stillSince = Time.time;
+            return;
+        }
+        if (Time.time - stillSince < 10f) return;
+        Debug.LogWarning("[MOM] Stuck for 10 seconds, moving her to where she was going.");
+        agent.Warp(agent.destination);
+        stillSince = Time.time;
+    }
+
+    static float FlatDistance(Vector3 a, Vector3 b)
+    {
+        a.y = b.y = 0f;
+        return Vector3.Distance(a, b);
     }
 
     // ---------- small movement helpers
