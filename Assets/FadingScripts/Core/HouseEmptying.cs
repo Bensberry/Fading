@@ -10,7 +10,7 @@ using UnityEngine;
 //   stage 2  Day 2 + Night 2      more: photo frames, the gramophone, kitchen things, plants
 //   stage 3  Day 3 + Night 3      barren: every frame, rugs, bookshelves, coat rack, extra chairs and lamps
 // Beds, tables, counters, the fridge and the memorial always stay. Some touchable things (INT_...) are packed too:
-// a packed object is switched off completely, so it can no longer be touched.
+// a packed object is switched off completely, so it can no longer be touched. On the last day the pick-up photos go too.
 // To pack something else, add its object name to the right list below (names are in the house model).
 public class HouseEmptying : MonoBehaviour
 {
@@ -60,5 +60,10 @@ public class HouseEmptying : MonoBehaviour
                 if (byName.TryGetValue(name, out g) && g != null && g.activeSelf == packed) g.SetActive(!packed);
             }
         }
+
+        // On the last day every frame is packed: so are the photos you can pick up (your friend's HoldableItem), unless one is in your hand.
+        if (stage >= 3)
+            foreach (HoldableItem photo in FindObjectsByType<HoldableItem>(FindObjectsSortMode.None))
+                if (!photo.IsHeld) photo.gameObject.SetActive(false);
     }
 }

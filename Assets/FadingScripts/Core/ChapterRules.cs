@@ -229,6 +229,7 @@ public class ChapterRules : MonoBehaviour
     void SetUpChapter0()
     {
         StoryProgress.Reset();                           // a new game starts here
+        FamilyProgress.ResetAll();                       // the progress bar starts empty
         MakeGrandmaPuzzleEasier();
         LockOtherDoors();
         StartCoroutine(OpeningCutscene());
