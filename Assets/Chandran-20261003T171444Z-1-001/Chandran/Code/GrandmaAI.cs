@@ -39,6 +39,9 @@ public class GrandmaAI : MonoBehaviour
     [Header("Progress Slider")]
     public Slider progressSlider;
 
+    [Header("Animation")]
+    public Animator animator;
+
     private NavMeshAgent agent;
     private int currentIndex = -1;
 
@@ -49,8 +52,29 @@ public class GrandmaAI : MonoBehaviour
     {
         agent = GetComponent<NavMeshAgent>();
 
+        // Automatically find Animator on GrandmaNPC or its children.
+        if (animator == null)
+        {
+            animator = GetComponentInChildren<Animator>();
+        }
+
+        if (animator == null)
+        {
+            Debug.LogWarning(
+                "[GRANDMA] Animator not found in GrandmaNPC or its children."
+            );
+        }
+
+        // Make sure root motion does not move Grandma.
+        if (animator != null)
+        {
+            animator.applyRootMotion = false;
+        }
+
         if (eyePoint == null)
+        {
             eyePoint = transform;
+        }
 
         // Initialize progress slider.
         if (progressSlider != null)
@@ -59,16 +83,28 @@ public class GrandmaAI : MonoBehaviour
             progressSlider.maxValue = maxPoints;
 
             // Display capped progress without changing totalPoints.
-            progressSlider.value = Mathf.Clamp(totalPoints, 0, maxPoints);
+            progressSlider.value = Mathf.Clamp(
+                totalPoints,
+                0,
+                maxPoints
+            );
         }
         else
         {
-            Debug.LogWarning("[GRANDMA] Progress Slider is not assigned.");
+            Debug.LogWarning(
+                "[GRANDMA] Progress Slider is not assigned."
+            );
         }
 
-        if (destinationWaypoints == null || destinationWaypoints.Count < 2)
+        if (
+            destinationWaypoints == null ||
+            destinationWaypoints.Count < 2
+        )
         {
-            Debug.LogWarning("[GRANDMA] Assign at least 2 work waypoints.");
+            Debug.LogWarning(
+                "[GRANDMA] Assign at least 2 work waypoints."
+            );
+
             return;
         }
 
@@ -77,6 +113,43 @@ public class GrandmaAI : MonoBehaviour
 
     private void Update()
     {
+        // ============================================================
+        // ANIMATION
+        // ============================================================
+
+        if (animator != null && agent != null)
+        {
+            float speed = agent.velocity.magnitude;
+
+            /*
+             * Grandma should WALK only when the NavMeshAgent
+             * is actually moving.
+             *
+             * If the cylinder/NPC stops:
+             * Speed = 0
+             *
+             * If the cylinder/NPC moves:
+             * Speed = 1
+             */
+
+            if (
+                speed > 0.05f &&
+                !agent.isStopped &&
+                agent.hasPath
+            )
+            {
+                animator.SetFloat("Speed", 1f);
+            }
+            else
+            {
+                animator.SetFloat("Speed", 0f);
+            }
+        }
+
+        // ============================================================
+        // CLUE DETECTION
+        // ============================================================
+
         if (isReacting)
             return;
 
@@ -93,7 +166,9 @@ public class GrandmaAI : MonoBehaviour
             $"goalAchieved = {detectedClue.goalAchieved}"
         );
 
-        StartCoroutine(ReactToClue(detectedClue));
+        StartCoroutine(
+            ReactToClue(detectedClue)
+        );
     }
 
     private ClueGoal FindDetectedClue()
@@ -112,15 +187,20 @@ public class GrandmaAI : MonoBehaviour
             if (clue.reactionStarted)
                 continue;
 
-            // Radio clues use hearing range, not vision or raycasting.
-            RadioClue radio = clue.GetComponent<RadioClue>();
+            // ========================================================
+            // RADIO CLUE
+            // ========================================================
+
+            RadioClue radio =
+                clue.GetComponent<RadioClue>();
 
             if (radio != null)
             {
-                float radioDistance = Vector3.Distance(
-                    transform.position,
-                    clue.transform.position
-                );
+                float radioDistance =
+                    Vector3.Distance(
+                        transform.position,
+                        clue.transform.position
+                    );
 
                 Debug.Log(
                     $"[GRANDMA RADIO CHECK] {clue.name}: " +
@@ -129,16 +209,25 @@ public class GrandmaAI : MonoBehaviour
                     $"hearing range = {radioDetectionRange}"
                 );
 
-                if (radioDistance <= radioDetectionRange)
+                if (
+                    radioDistance <=
+                    radioDetectionRange
+                )
                 {
-                    Debug.Log($"[GRANDMA] HEARD RADIO CLUE: {clue.name}");
+                    Debug.Log(
+                        $"[GRANDMA] HEARD RADIO CLUE: {clue.name}"
+                    );
+
                     return clue;
                 }
 
                 continue;
             }
 
-            // Non-radio clues use vision detection.
+            // ========================================================
+            // NORMAL VISION CLUE
+            // ========================================================
+
             if (CanSeeClue(clue))
                 return clue;
         }
@@ -148,33 +237,55 @@ public class GrandmaAI : MonoBehaviour
 
     private bool CanSeeClue(ClueGoal clue)
     {
-        Vector3 direction = clue.transform.position - eyePoint.position;
-        float distance = direction.magnitude;
+        Vector3 direction =
+            clue.transform.position -
+            eyePoint.position;
+
+        float distance =
+            direction.magnitude;
 
         if (distance > visionDistance)
             return false;
 
-        if (Vector3.Angle(eyePoint.forward, direction) > visionAngle * 0.5f)
+        if (
+            Vector3.Angle(
+                eyePoint.forward,
+                direction
+            ) >
+            visionAngle * 0.5f
+        )
+        {
             return false;
+        }
 
-        if (Physics.Raycast(
-            eyePoint.position,
-            direction.normalized,
-            out RaycastHit hit,
-            visionDistance,
-            lineOfSightLayers,
-            QueryTriggerInteraction.Ignore))
+        if (
+            Physics.Raycast(
+                eyePoint.position,
+                direction.normalized,
+                out RaycastHit hit,
+                visionDistance,
+                lineOfSightLayers,
+                QueryTriggerInteraction.Ignore
+            )
+        )
         {
             return hit.transform == clue.transform ||
-                   hit.transform.IsChildOf(clue.transform);
+                   hit.transform.IsChildOf(
+                       clue.transform
+                   );
         }
 
         return false;
     }
 
-    private IEnumerator ReactToClue(ClueGoal clue)
+    private IEnumerator ReactToClue(
+        ClueGoal clue
+    )
     {
-        if (clue == null || !agent.isOnNavMesh)
+        if (
+            clue == null ||
+            !agent.isOnNavMesh
+        )
         {
             Debug.LogWarning(
                 "[GRANDMA] Cannot react: clue is missing or Grandma is off the NavMesh."
@@ -182,29 +293,40 @@ public class GrandmaAI : MonoBehaviour
 
             activeClue = null;
             isReacting = false;
+
             yield break;
         }
 
         isReacting = true;
 
-        Debug.Log($"[GRANDMA] Interrupting work and approaching {clue.name}.");
+        Debug.Log(
+            $"[GRANDMA] Interrupting work and approaching {clue.name}."
+        );
 
         agent.isStopped = false;
         agent.ResetPath();
-        agent.stoppingDistance = clueStoppingDistance;
+        agent.stoppingDistance =
+            clueStoppingDistance;
 
-        // Find a nearby walkable position around the clue.
-        if (!NavMesh.SamplePosition(
-            clue.transform.position,
-            out NavMeshHit navHit,
-            5f,
-            agent.areaMask))
+        // ============================================================
+        // FIND WALKABLE POSITION NEAR CLUE
+        // ============================================================
+
+        if (
+            !NavMesh.SamplePosition(
+                clue.transform.position,
+                out NavMeshHit navHit,
+                5f,
+                agent.areaMask
+            )
+        )
         {
             Debug.LogWarning(
                 $"[GRANDMA] No NavMesh position found near {clue.name}."
             );
 
             FinishClueReaction();
+
             yield break;
         }
 
@@ -212,12 +334,24 @@ public class GrandmaAI : MonoBehaviour
             $"[GRANDMA] Navigation target for {clue.name}: {navHit.position}"
         );
 
-        // Check whether a complete path exists.
-        NavMeshPath path = new NavMeshPath();
+        // ============================================================
+        // CHECK PATH
+        // ============================================================
 
-        bool pathCalculated = agent.CalculatePath(navHit.position, path);
+        NavMeshPath path =
+            new NavMeshPath();
 
-        if (!pathCalculated || path.status != NavMeshPathStatus.PathComplete)
+        bool pathCalculated =
+            agent.CalculatePath(
+                navHit.position,
+                path
+            );
+
+        if (
+            !pathCalculated ||
+            path.status !=
+            NavMeshPathStatus.PathComplete
+        )
         {
             Debug.LogWarning(
                 $"[GRANDMA] No complete NavMesh path to {clue.name}. " +
@@ -225,10 +359,14 @@ public class GrandmaAI : MonoBehaviour
             );
 
             FinishClueReaction();
+
             yield break;
         }
 
-        bool destinationSet = agent.SetDestination(navHit.position);
+        bool destinationSet =
+            agent.SetDestination(
+                navHit.position
+            );
 
         if (!destinationSet)
         {
@@ -237,10 +375,15 @@ public class GrandmaAI : MonoBehaviour
             );
 
             FinishClueReaction();
+
             yield break;
         }
 
         bool reachedClue = false;
+
+        // ============================================================
+        // WALK TO CLUE
+        // ============================================================
 
         while (agent.isOnNavMesh)
         {
@@ -250,14 +393,17 @@ public class GrandmaAI : MonoBehaviour
                 continue;
             }
 
-            float arrivalThreshold = Mathf.Max(
-                clueArrivalDistance,
-                agent.stoppingDistance
-            );
+            float arrivalThreshold =
+                Mathf.Max(
+                    clueArrivalDistance,
+                    agent.stoppingDistance
+                );
 
             // Check arrival before checking hasPath.
-            // Unity may clear hasPath after the agent reaches its destination.
-            if (agent.remainingDistance <= arrivalThreshold)
+            if (
+                agent.remainingDistance <=
+                arrivalThreshold
+            )
             {
                 reachedClue = true;
                 break;
@@ -269,49 +415,89 @@ public class GrandmaAI : MonoBehaviour
                     $"[GRANDMA] No active path to {clue.name}. " +
                     $"Remaining distance: {agent.remainingDistance}"
                 );
+
                 break;
             }
 
-            if (agent.pathStatus != NavMeshPathStatus.PathComplete)
+            if (
+                agent.pathStatus !=
+                NavMeshPathStatus.PathComplete
+            )
             {
                 Debug.LogWarning(
                     $"[GRANDMA] Path to {clue.name} is not complete: " +
                     $"{agent.pathStatus}"
                 );
+
                 break;
             }
 
             yield return null;
         }
 
+        // ============================================================
+        // ARRIVED AT CLUE
+        // ============================================================
+
         if (reachedClue)
         {
+            // Stop NavMeshAgent.
             agent.isStopped = true;
+
+            // Immediately force Idle.
+            if (animator != null)
+            {
+                animator.SetFloat(
+                    "Speed",
+                    0f
+                );
+            }
 
             Debug.Log(
                 $"[GRANDMA] Reached {clue.name}. " +
                 "Waiting while the clue remains active."
             );
 
-            // Stay at the clue for as long as it remains active.
-            while (clue != null && clue.goalAchieved)
+            // Stay at clue while active.
+            while (
+                clue != null &&
+                clue.goalAchieved
+            )
             {
+                // Keep Idle while standing at clue.
+                if (animator != null)
+                {
+                    animator.SetFloat(
+                        "Speed",
+                        0f
+                    );
+                }
+
                 yield return null;
             }
 
-            // The clue has now become inactive.
-            // Start the additional wait only after it becomes false.
+            // ========================================================
+            // CLUE BECAME INACTIVE
+            // ========================================================
+
             Debug.Log(
                 $"[GRANDMA] Clue {clue.name} is now inactive. " +
                 $"Waiting another {stayAtClueSeconds} seconds before leaving."
             );
 
-            yield return new WaitForSeconds(stayAtClueSeconds);
+            yield return new WaitForSeconds(
+                stayAtClueSeconds
+            );
 
-            // Award the clue's full points only once.
-            if (clue != null && !clue.pointsAwarded)
+            // ========================================================
+            // AWARD POINTS
+            // ========================================================
+
+            if (
+                clue != null &&
+                !clue.pointsAwarded
+            )
             {
-                // Keep the full score. Do not clamp it to the slider maximum.
                 totalPoints += clue.points;
 
                 clue.pointsAwarded = true;
@@ -351,48 +537,72 @@ public class GrandmaAI : MonoBehaviour
         progressSlider.minValue = 0;
         progressSlider.maxValue = maxPoints;
 
-        // Slider progress is capped at 60.
-        // totalPoints continues accumulating independently.
-        progressSlider.value = Mathf.Clamp(totalPoints, 0, maxPoints);
+        // Slider progress is capped at maxPoints.
+        // totalPoints continues accumulating.
+        progressSlider.value =
+            Mathf.Clamp(
+                totalPoints,
+                0,
+                maxPoints
+            );
     }
 
     private void FinishClueReaction()
     {
-        if (agent != null && agent.isOnNavMesh)
+        if (
+            agent != null &&
+            agent.isOnNavMesh
+        )
         {
             agent.isStopped = false;
             agent.ResetPath();
-            agent.stoppingDistance = workArrivalDistance;
+            agent.stoppingDistance =
+                workArrivalDistance;
         }
 
         activeClue = null;
         isReacting = false;
 
-        Debug.Log("[GRANDMA] Resuming work routine.");
+        Debug.Log(
+            "[GRANDMA] Resuming work routine."
+        );
     }
 
     private IEnumerator RoutineLoop()
     {
         yield return new WaitUntil(
-            () => agent != null && agent.isOnNavMesh
+            () =>
+                agent != null &&
+                agent.isOnNavMesh
         );
 
         while (true)
         {
-            if (destinationWaypoints == null ||
-                destinationWaypoints.Count == 0)
+            if (
+                destinationWaypoints == null ||
+                destinationWaypoints.Count == 0
+            )
             {
                 yield return null;
                 continue;
             }
 
-            currentIndex = GetRandomDifferentIndex(currentIndex);
+            currentIndex =
+                GetRandomDifferentIndex(
+                    currentIndex
+                );
 
-            Transform workTarget = destinationWaypoints[currentIndex];
+            Transform workTarget =
+                destinationWaypoints[
+                    currentIndex
+                ];
 
             if (workTarget == null)
             {
-                Debug.LogWarning("[GRANDMA] A work waypoint is missing.");
+                Debug.LogWarning(
+                    "[GRANDMA] A work waypoint is missing."
+                );
+
                 yield return null;
                 continue;
             }
@@ -402,8 +612,16 @@ public class GrandmaAI : MonoBehaviour
             );
 
             agent.isStopped = false;
-            agent.stoppingDistance = workArrivalDistance;
-            agent.SetDestination(workTarget.position);
+            agent.stoppingDistance =
+                workArrivalDistance;
+
+            agent.SetDestination(
+                workTarget.position
+            );
+
+            // ========================================================
+            // WALK TO WORK WAYPOINT
+            // ========================================================
 
             while (true)
             {
@@ -413,15 +631,21 @@ public class GrandmaAI : MonoBehaviour
                     continue;
                 }
 
-                // The clue reaction clears Grandma's path.
-                // Reassign her current work destination after the reaction.
-                if (!agent.pathPending && !agent.hasPath)
+                // If path was cleared, restore destination.
+                if (
+                    !agent.pathPending &&
+                    !agent.hasPath
+                )
                 {
                     agent.isStopped = false;
-                    agent.stoppingDistance = workArrivalDistance;
+
+                    agent.stoppingDistance =
+                        workArrivalDistance;
 
                     bool destinationSet =
-                        agent.SetDestination(workTarget.position);
+                        agent.SetDestination(
+                            workTarget.position
+                        );
 
                     if (destinationSet)
                     {
@@ -442,10 +666,29 @@ public class GrandmaAI : MonoBehaviour
                     continue;
                 }
 
-                if (!agent.pathPending &&
+                // ====================================================
+                // ARRIVED AT WORK
+                // ====================================================
+
+                if (
+                    !agent.pathPending &&
                     agent.hasPath &&
-                    agent.remainingDistance <= workArrivalDistance)
+                    agent.remainingDistance <=
+                    workArrivalDistance
+                )
                 {
+                    // Explicitly stop the agent.
+                    agent.isStopped = true;
+
+                    // Explicitly stop walking animation.
+                    if (animator != null)
+                    {
+                        animator.SetFloat(
+                            "Speed",
+                            0f
+                        );
+                    }
+
                     break;
                 }
 
@@ -456,9 +699,15 @@ public class GrandmaAI : MonoBehaviour
                 $"[GRANDMA] Arrived at work waypoint: {workTarget.name}"
             );
 
+            // ========================================================
+            // STAND / IDLE AT WORK
+            // ========================================================
+
             float elapsed = 0f;
 
-            while (elapsed < waitTimeAtLocation)
+            while (
+                elapsed < waitTimeAtLocation
+            )
             {
                 if (isReacting)
                 {
@@ -466,24 +715,50 @@ public class GrandmaAI : MonoBehaviour
                     continue;
                 }
 
+                // Make absolutely sure she stays Idle.
+                if (animator != null)
+                {
+                    animator.SetFloat(
+                        "Speed",
+                        0f
+                    );
+                }
+
                 elapsed += Time.deltaTime;
+
                 yield return null;
             }
+
+            // Loop will select another waypoint.
+            // Re-enable movement before going there.
+            agent.isStopped = false;
         }
     }
 
-    private int GetRandomDifferentIndex(int current)
+    private int GetRandomDifferentIndex(
+        int current
+    )
     {
-        if (destinationWaypoints.Count <= 1)
+        if (
+            destinationWaypoints.Count <= 1
+        )
+        {
             return 0;
+        }
 
         int newIndex;
 
         do
         {
-            newIndex = Random.Range(0, destinationWaypoints.Count);
+            newIndex =
+                Random.Range(
+                    0,
+                    destinationWaypoints.Count
+                );
         }
-        while (newIndex == current);
+        while (
+            newIndex == current
+        );
 
         return newIndex;
     }

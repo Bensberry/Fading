@@ -1004,22 +1004,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d10a7732c70d334d8a7cee2a43968c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MusicBoxInteraction
-  prompt: Touch
-  sound: {fileID: 0}
-  soundVolume: 0.7
-  onInteract:
-    m_PersistentCalls:
-      m_Calls: []
-  onReturned:
-    m_PersistentCalls:
-      m_Calls: []
-  lullaby: {fileID: 0}
-  volume: 0.6
-  lidOpenAngle: 70
-  openTime: 0.8
-  closeTime: 1.2
-  keyTurnsPerSecond: 0.5
-  clueGoal: {fileID: 0}
 --- !u!1 &342600277
 GameObject:
   m_ObjectHideFlags: 0
@@ -1634,21 +1618,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 14b4f8ddcea0f82408d741745a5084ca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SlideAndReturn
-  prompt: Touch
-  sound: {fileID: 0}
-  soundVolume: 0.7
-  onInteract:
-    m_PersistentCalls:
-      m_Calls: []
-  onReturned:
-    m_PersistentCalls:
-      m_Calls: []
-  slideToward: {fileID: 0}
-  slideDirection: {x: -1, y: 0, z: 0}
-  distance: 0.18
-  hopHeight: 0
-  slideTime: 0.6
-  returnTime: 1.5
 --- !u!1 &621867938 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 257ac5975db8fbb47ac0e22106a53c4f, type: 3}
@@ -2749,7 +2718,7 @@ PrefabInstance:
     - target: {fileID: 5866666021909216657, guid: 9b40b7e2e06dfe248bb2f58e2f54e383, type: 3}
       propertyPath: m_Controller
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 9100000, guid: 8dbc54703f125d64a84ebcfbb648fae0, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
