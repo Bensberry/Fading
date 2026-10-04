@@ -133,8 +133,45 @@ public class ChapterRules : MonoBehaviour
     }
 
     // ---------- Chapter 0
+    // Grandma's puzzle is easier: the zones where F works around the lamp, clock and album are bigger,
+    // and the "look away" windows are a bit longer. (These are the numbers saved in the scene, changed here when the chapter starts.)
+    const float PuzzleZoneScale = 1.8f;
+    const float LampWindowSeconds = 8f;       // was 5.8
+    const float ClockWindowSeconds = 4.5f;    // was 2.5
+
+    void MakeGrandmaPuzzleEasier()
+    {
+        foreach (LampInteraction x in FindObjectsByType<LampInteraction>(FindObjectsSortMode.None))
+        {
+            x.lampLookAnimDuration = LampWindowSeconds;
+            GrowTriggerZones(x.gameObject);
+        }
+        foreach (ClockInteraction x in FindObjectsByType<ClockInteraction>(FindObjectsSortMode.None))
+        {
+            x.clockLookAnimDuration = ClockWindowSeconds;
+            GrowTriggerZones(x.gameObject);
+        }
+        foreach (PhotoAlbumInteraction x in FindObjectsByType<PhotoAlbumInteraction>(FindObjectsSortMode.None))
+            GrowTriggerZones(x.gameObject);
+    }
+
+    static void GrowTriggerZones(GameObject g)
+    {
+        foreach (Collider c in g.GetComponents<Collider>())
+        {
+            if (!c.isTrigger) continue;
+            BoxCollider box = c as BoxCollider;
+            SphereCollider sphere = c as SphereCollider;
+            CapsuleCollider capsule = c as CapsuleCollider;
+            if (box != null) box.size *= PuzzleZoneScale;
+            else if (sphere != null) sphere.radius *= PuzzleZoneScale;
+            else if (capsule != null) capsule.radius *= PuzzleZoneScale;
+        }
+    }
+
     void SetUpChapter0()
     {
+        MakeGrandmaPuzzleEasier();
         LockOtherDoors();
         StartCoroutine(OpeningCutscene());
         FinalCutsceneController.OnCutsceneFinished += OnCutsceneFinished;

@@ -37,7 +37,7 @@ public class PhotoAlbumInteraction : MonoBehaviour
 
         if (hasLookedAtClock)
         {
-            StartCoroutine(FlipPageThenLookRoutine());
+            StartCoroutine(StartWhenGrannyIsReady(FlipPageThenLookRoutine()));
         }
         else
         {
@@ -46,6 +46,26 @@ public class PhotoAlbumInteraction : MonoBehaviour
                 UINotifier.Instance.ShowNotification("granny is not distracted enough");
             }
         }
+    }
+
+    // Pressing F early must not desync Granny's animation: wait (at most 1.5 s) until she is really in her looking pose,
+    // then start. The player still succeeds, just a moment later, and the timing windows start when the animation does.
+    private IEnumerator StartWhenGrannyIsReady(IEnumerator routine)
+    {
+        isInteracting = true;
+        float waited = 0f;
+        while (waited < 1.5f && !GrannyIsInLookingPose())
+        {
+            waited += Time.deltaTime;
+            yield return null;
+        }
+        yield return StartCoroutine(routine);
+    }
+
+    private bool GrannyIsInLookingPose()
+    {
+        AnimatorStateInfo state = characterAnimator.GetCurrentAnimatorStateInfo(0);
+        return !characterAnimator.IsInTransition(0) && !state.IsName("New State");        // "New State" is her idle pose
     }
 
     private IEnumerator FlipPageThenLookRoutine()

@@ -21,6 +21,7 @@ public class FadingHud : MonoBehaviour
     string toast = "";
     float toastStart = -100f, toastLength;
     string objective = "";
+    bool skipHint;
     string subtitleSpeaker = "", subtitleText = "";
     float subtitleStart = -100f, subtitleLength;
 
@@ -41,6 +42,9 @@ public class FadingHud : MonoBehaviour
     }
 
     public static void SetObjective(string text) { Instance.objective = text ?? ""; }
+
+    // "SPACE  skip" in the bottom-right corner (shown during cutscenes).
+    public static void ShowSkipHint(bool on) { Instance.skipHint = on; }
 
     // A line of dialogue near the bottom of the screen: "MOM   Did you hear that?"  (used by cutscenes)
     public static void Subtitle(string speaker, string text, float seconds)
@@ -69,6 +73,7 @@ public class FadingHud : MonoBehaviour
     {
         MakeStyles();
         DrawToast();
+        DrawSkipHint();
         DrawSubtitle();
         DrawObjective();
         if (candleShown) DrawCandle();
@@ -109,6 +114,15 @@ public class FadingHud : MonoBehaviour
         toastStyle.normal.textColor = new Color(1f, 0.97f, 0.9f, 1f);
         GUI.Label(box, speaker + subtitleText, toastStyle);
         GUI.color = old;
+    }
+
+    void DrawSkipHint()
+    {
+        if (!skipHint) return;
+        smallStyle.alignment = TextAnchor.MiddleRight;
+        smallStyle.normal.textColor = new Color(1f, 1f, 1f, 0.55f);
+        GUI.Label(new Rect(Screen.width - 340f, Screen.height * 0.9f, 320f, 40f), "SPACE / ENTER   skip", smallStyle);
+        smallStyle.alignment = TextAnchor.MiddleLeft;
     }
 
     void DrawObjective()

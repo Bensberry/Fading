@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 // First-person walking for the player (ghost).
 // WASD = move
 // Left Shift = run
-// Mouse = look around (no mouse button required)
+// Mouse = look around: HOLD THE RIGHT MOUSE BUTTON and move the mouse (tick 'Hold Right Mouse To Look' off for free mouse look)
 
 [RequireComponent(typeof(CharacterController))]
 public class FirstPersonController : MonoBehaviour
@@ -29,6 +29,9 @@ public class FirstPersonController : MonoBehaviour
     [Tooltip("Degrees turned per mouse count.")]
     public float lookSensitivity = 0.1f;
 
+    [Tooltip("ON: you only look around while the right mouse button is held (the cursor is free otherwise). OFF: the mouse always looks.")]
+    public bool holdRightMouseToLook = true;
+
     public Transform playerCameraRoot; // Drag your 'Head' object here
 
     [Header("Safety Net")]
@@ -42,6 +45,8 @@ public class FirstPersonController : MonoBehaviour
 
     private bool hasLanded;
     private float floorY;
+    private bool lookActive;
+    private bool skipLookFrame;
 
     private Vector3 startPosition;
     private Quaternion startRotation;
@@ -58,11 +63,12 @@ public class FirstPersonController : MonoBehaviour
         startPosition = transform.position;
         startRotation = transform.rotation;
 
-        SetCursorLocked(true);
+        SetCursorLocked(!holdRightMouseToLook);        // free mouse look hides the cursor; right-mouse look keeps it visible
     }
 
     void OnDisable()
     {
+        lookActive = false;
         SetCursorLocked(false);
     }
 
@@ -85,6 +91,19 @@ public class FirstPersonController : MonoBehaviour
     void HandleMouseLook()
     {
         if (Mouse.current == null) return;
+
+        if (holdRightMouseToLook)
+        {
+            bool holding = Mouse.current.rightButton.isPressed;
+            if (holding != lookActive)
+            {
+                lookActive = holding;
+                skipLookFrame = holding;               // locking the cursor makes the first frame jump, so ignore it
+                SetCursorLocked(holding);
+            }
+            if (!lookActive) return;
+            if (skipLookFrame) { skipLookFrame = false; return; }
+        }
 
         Vector2 mouseDelta = Mouse.current.delta.ReadValue();
 

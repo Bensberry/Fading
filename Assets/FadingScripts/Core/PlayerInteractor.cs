@@ -6,7 +6,9 @@ using UnityEngine.InputSystem;
 // Put this on the player's camera. Look at an interactable and press F.
 public class PlayerInteractor : MonoBehaviour
 {
-    public float reach = 3f;
+    public float reach = 3.5f;
+    [Tooltip("Aim assist: the interaction ray is this thick (metres), so small or thin objects are easy to hit.")]
+    public float aimRadius = 0.3f;
     public LayerMask layers = 1 << 8;
 
     Interactable current;
@@ -16,7 +18,7 @@ public class PlayerInteractor : MonoBehaviour
     {
         current = null;
         Ray ray = new Ray(transform.position, transform.forward);
-        if (Physics.Raycast(ray, out RaycastHit hit, reach, layers, QueryTriggerInteraction.Ignore))
+        if (Physics.SphereCast(ray, aimRadius, out RaycastHit hit, reach, layers, QueryTriggerInteraction.Ignore))
             current = hit.collider.GetComponentInParent<Interactable>();
 
         if (current != null && PressedThisFrame())

@@ -90,6 +90,7 @@ public abstract class Interactable : MonoBehaviour
         foreach (Renderer r in renderers) b.Encapsulate(r.bounds);
         box.center = transform.InverseTransformPoint(b.center);
         Vector3 s = transform.InverseTransformVector(b.size);
-        box.size = new Vector3(Mathf.Max(Mathf.Abs(s.x), 0.05f), Mathf.Max(Mathf.Abs(s.y), 0.05f), Mathf.Max(Mathf.Abs(s.z), 0.05f));
+        const float padding = 0.15f;                       // bigger hit area: small objects are easier to point at
+        box.size = new Vector3(Mathf.Max(Mathf.Abs(s.x), 0.05f) + padding, Mathf.Max(Mathf.Abs(s.y), 0.05f) + padding, Mathf.Max(Mathf.Abs(s.z), 0.05f) + padding);
     }
 }

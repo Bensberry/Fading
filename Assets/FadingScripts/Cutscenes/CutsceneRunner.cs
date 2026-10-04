@@ -27,6 +27,7 @@ public class CutsceneRunner : MonoBehaviour
     {
         IsPlaying = true;
         finished = false;
+        FadingHud.ShowSkipHint(true);
         FreezePlayer();
         CutsceneContext context = new CutsceneContext();
         yield return context.Begin();                     // hides the player and the placeholder NPCs, sets up the camera
@@ -40,6 +41,7 @@ public class CutsceneRunner : MonoBehaviour
             yield return null;
         }
 
+        FadingHud.ShowSkipHint(false);
         yield return context.Finish(skipped);
         UnfreezePlayer();
         IsPlaying = false;
@@ -54,7 +56,8 @@ public class CutsceneRunner : MonoBehaviour
 
     static bool SkipPressed()
     {
-        return Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame;
+        return Keyboard.current != null &&
+               (Keyboard.current.spaceKey.wasPressedThisFrame || Keyboard.current.enterKey.wasPressedThisFrame);
     }
 
     // ---------- the player must not move or touch things during a cutscene
