@@ -1,6 +1,9 @@
 using UnityEngine;
 using System;
 using System.Collections;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 
 public class HoldableItem : MonoBehaviour
 {
@@ -105,8 +108,8 @@ public class HoldableItem : MonoBehaviour
             if (promptUI != null)
                 promptUI.SetActive(isPlayerNearby);
 
-            // Press E to pick up.
-            if (isPlayerNearby && Input.GetKeyDown(KeyCode.E))
+            // Press F to pick up.
+            if (isPlayerNearby && FKeyPressedThisFrame())
             {
                 PickUpItem();
             }
@@ -121,12 +124,22 @@ public class HoldableItem : MonoBehaviour
             if (promptUI != null)
                 promptUI.SetActive(false);
 
-            // Press E to throw.
-            if (Input.GetKeyDown(KeyCode.E))
+            // Press F to throw.
+            if (FKeyPressedThisFrame())
             {
                 ThrowItem();
             }
         }
+    }
+
+    // Helper method to check for F key press across both Input Systems
+    private bool FKeyPressedThisFrame()
+    {
+#if ENABLE_INPUT_SYSTEM
+        if (Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame)
+            return true;
+#endif
+        return Input.GetKeyDown(KeyCode.F);
     }
 
     // ======================================================
@@ -140,8 +153,7 @@ public class HoldableItem : MonoBehaviour
 
         isHeld = true;
 
-        // If a return coroutine is currently running,
-        // stop it.
+        // If a return coroutine is currently running, stop it.
         if (returnCoroutine != null)
         {
             StopCoroutine(returnCoroutine);
@@ -309,9 +321,6 @@ public class HoldableItem : MonoBehaviour
         // NOTIFY LISTENERS
         // --------------------------------------------------
 
-        // PhotoInteractable listens to this event.
-        // This is what makes the photo clue become false
-        // ONLY after the photo has completely returned.
         OnReturnedToOriginalPosition?.Invoke();
     }
 

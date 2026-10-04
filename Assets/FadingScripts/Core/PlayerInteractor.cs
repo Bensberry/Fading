@@ -7,7 +7,7 @@ using UnityEngine.InputSystem;
 public class PlayerInteractor : MonoBehaviour
 {
     public float reach = 3f;
-    public LayerMask layers = ~0;
+    public LayerMask layers = 1 << 8;
 
     Interactable current;
     GUIStyle promptStyle;

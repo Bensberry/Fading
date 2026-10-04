@@ -1,5 +1,8 @@
 using UnityEngine;
 using System.Collections;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 
 [RequireComponent(typeof(AudioSource))]
 public class RadioClue : MonoBehaviour
@@ -100,20 +103,10 @@ public class RadioClue : MonoBehaviour
 
 
         // ========================================================
-        // E INTERACTION
+        // F INTERACTION
         // ========================================================
 
-        // VERY IMPORTANT:
-        //
-        // E is checked ONLY inside this condition.
-        //
-        // If the camera is NOT looking at this radio,
-        // pressing E does absolutely nothing.
-
-        if (
-            lookingAtRadio &&
-            Input.GetKeyDown(KeyCode.E)
-        )
+        if (lookingAtRadio && FKeyPressedThisFrame())
         {
             if (isRadioOn)
             {
@@ -141,6 +134,16 @@ public class RadioClue : MonoBehaviour
         {
             PlayNextTrack();
         }
+    }
+
+    // Check F key across both Input Systems
+    private bool FKeyPressedThisFrame()
+    {
+#if ENABLE_INPUT_SYSTEM
+        if (Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame)
+            return true;
+#endif
+        return Input.GetKeyDown(KeyCode.F);
     }
 
 
