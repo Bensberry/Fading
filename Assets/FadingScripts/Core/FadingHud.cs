@@ -25,6 +25,9 @@ public class FadingHud : MonoBehaviour
     string subtitleSpeaker = "", subtitleText = "";
     float subtitleStart = -100f, subtitleLength;
 
+    bool progressShown;
+    float progress01;
+
     bool candleShown;
     int hintsLeft, hintsMax;
     float cooldown01;
@@ -58,6 +61,16 @@ public class FadingHud : MonoBehaviour
 
     public static void ClearSubtitle() { Instance.subtitleLength = 0f; }
 
+    // The "they feel you" bar at the top of the screen (0 to 1).
+    public static void SetProgress(float value01)
+    {
+        FadingHud h = Instance;
+        h.progressShown = true;
+        h.progress01 = Mathf.Clamp01(value01);
+    }
+
+    public static void HideProgress() { if (instance != null) instance.progressShown = false; }
+
     public static void SetCandle(int hintsLeft, int hintsMax, float cooldown01, bool burnedOut)
     {
         FadingHud h = Instance;
@@ -72,6 +85,7 @@ public class FadingHud : MonoBehaviour
     void OnGUI()
     {
         MakeStyles();
+        DrawProgress();
         DrawToast();
         DrawSkipHint();
         DrawSubtitle();
@@ -86,6 +100,20 @@ public class FadingHud : MonoBehaviour
         toastStyle = new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, fontSize = big, wordWrap = true };
         objectiveStyle = new GUIStyle(toastStyle) { fontSize = Mathf.RoundToInt(big * 0.8f) };
         smallStyle = new GUIStyle(toastStyle) { fontSize = Mathf.RoundToInt(big * 0.65f), alignment = TextAnchor.MiddleLeft };
+    }
+
+    void DrawProgress()
+    {
+        if (!progressShown) return;
+        float w = Screen.width * 0.34f, h = Screen.height * 0.022f;
+        float x = (Screen.width - w) / 2f, y = Screen.height * 0.035f;
+        smallStyle.alignment = TextAnchor.MiddleCenter;
+        smallStyle.normal.textColor = new Color(1f, 0.93f, 0.8f, 0.9f);
+        GUI.Label(new Rect(x, y - h * 1.7f, w, h * 1.6f), "They are starting to feel you", smallStyle);
+        smallStyle.alignment = TextAnchor.MiddleLeft;
+        DrawBox(new Rect(x - 3f, y - 3f, w + 6f, h + 6f), new Color(0f, 0f, 0f, 0.55f));
+        DrawBox(new Rect(x, y, w, h), new Color(0.2f, 0.16f, 0.1f, 0.9f));
+        DrawBox(new Rect(x, y, w * progress01, h), Color.Lerp(new Color(1f, 0.6f, 0.2f), new Color(1f, 0.95f, 0.7f), progress01));
     }
 
     void DrawToast()

@@ -7,7 +7,7 @@ using UnityEngine;
 //     (this was missing for Mom's mug and radio, and the teddy's clue never switched off, so the baby kept waiting there)
 //   - touchable objects that had no clue get one, and Mom's list of things to watch gets all of them
 // Objects whose own script already runs the clue (the nightlight and the music box) are left alone.
-// Doors do not count as signs.
+// Mom and the baby also turn to LOOK at whatever was touched (FamilyGaze). Doors do not count as signs.
 public static class FamilyReactions
 {
     public static void Run()
@@ -16,9 +16,16 @@ public static class FamilyReactions
         BabyAI[] babies = Object.FindObjectsByType<BabyAI>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         if (moms.Length == 0 && babies.Length == 0) return;                 // nobody to react in this scene
 
+        foreach (GrandmaAI mom in moms) if (mom.GetComponent<FamilyGaze>() == null) mom.gameObject.AddComponent<FamilyGaze>();
+        foreach (BabyAI baby in babies) if (baby.GetComponent<FamilyGaze>() == null) baby.gameObject.AddComponent<FamilyGaze>();
+
         foreach (Interactable sign in Object.FindObjectsByType<Interactable>(FindObjectsInactive.Include, FindObjectsSortMode.None))
         {
             if (sign is DoorToggle) continue;
+
+            Transform touched = sign.transform;                                     // everybody looks at what was touched
+            sign.onInteract.AddListener(() => LookAt(touched.position));
+
             if (sign is LightSign || sign is MusicBoxInteraction) continue;      // these run their own clue
 
             ClueGoal clue = sign.GetComponent<ClueGoal>();
@@ -34,5 +41,11 @@ public static class FamilyReactions
             sign.onInteract.AddListener(() => linked.ActivateClue());
             sign.onReturned.AddListener(() => linked.DeactivateClue());
         }
+    }
+
+    static void LookAt(Vector3 where)
+    {
+        FamilyLife life = Object.FindFirstObjectByType<FamilyLife>();
+        if (life != null) life.ReactTo(where);
     }
 }

@@ -29,7 +29,7 @@ public class ChapterRules : MonoBehaviour
 
     DayNightCycle cycle;
     int chapter;
-    bool loadingNext, nightOnePlayed, endingStarted;
+    bool loadingNext, nightOnePlayed, endingStarted, gameOver;
 
     // Unity runs this start-up hook only ONCE (for the first scene), so we listen for every scene load instead.
     // That way it also works when the game is started from the main menu.
@@ -103,6 +103,9 @@ public class ChapterRules : MonoBehaviour
         SetUpMusic();
         TrackSigns();
         FamilyReactions.Run();                         // Mom and the baby react to what the ghost touches
+        gameObject.AddComponent<FamilyLife>();         // Mom visits her room, small sounds, floating dust
+        gameObject.AddComponent<FamilyProgress>();     // the "they feel you" bar; when it is full the good ending plays
+        FamilyProgress.Filled += OnProgressFull;
         gameObject.AddComponent<HouseEmptying>();      // boxes appear, things on shelves and walls disappear
         AbilityLoss.StartFor(gameObject, chapter);     // vision, then speed, then hearing
         gameObject.AddComponent<PauseMenu>();          // Esc opens the pause menu
@@ -112,6 +115,27 @@ public class ChapterRules : MonoBehaviour
     void OnDestroy()
     {
         FinalCutsceneController.OnCutsceneFinished -= OnCutsceneFinished;
+        FamilyProgress.Filled -= OnProgressFull;
+    }
+
+    // The progress bar is full: the family felt him. The good ending plays right away and the game is over (main menu).
+    void OnProgressFull()
+    {
+        if (gameOver) return;
+        gameOver = true;
+        endingStarted = true;
+        StopAllCoroutines();                       // cancels the night timers and any chapter change that was about to happen
+        StartCoroutine(PlayGoodEnding());
+    }
+
+    IEnumerator PlayGoodEnding()
+    {
+        FadingHud.Toast("They felt you.", 3f);
+        yield return new WaitForSeconds(1.5f);
+        while (CutsceneRunner.IsPlaying) yield return null;
+        foreach (GrandmaAI mom in FindObjectsByType<GrandmaAI>(FindObjectsInactive.Include, FindObjectsSortMode.None)) mom.gameObject.SetActive(false);
+        foreach (BabyAI baby in FindObjectsByType<BabyAI>(FindObjectsInactive.Include, FindObjectsSortMode.None)) baby.gameObject.SetActive(false);
+        CutsceneRunner.Play(new EndingCutscene(1), () => SceneManager.LoadScene(MainMenuScene));
     }
 
     // ---------- the candle (all chapters)
@@ -284,6 +308,7 @@ public class ChapterRules : MonoBehaviour
     // When the NEXT chapter's starting phase begins (the N testing key for now), this chapter is over.
     void OnPhaseChanged(int phase)
     {
+        if (gameOver) return;
         // Story cutscenes that start with a phase.
         if (chapter == 1 && phase == (int)DayNightCycle.Phase.Night1 && !nightOnePlayed)
         {
