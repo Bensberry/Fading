@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
 // Goes in: nowhere by hand. It starts by itself in the scenes named "Chapter0", "Chapter1", "Chapter2" and "Chapter3"
@@ -11,19 +12,23 @@ using UnityEngine.SceneManagement;
 // Chapter0 = Night 0 (the only night with Grandma):
 //   - the short tutorial runs
 //   - only Grandma's door can be opened; other doors rattle and show a message
-//   - when Grandma's cutscene ends (or N is pressed), Chapter1 is loaded
+//   - the intro cutscene plays first, then the tutorial runs
+//   - when Grandma's cutscene ends, the Chapter 0 ending cutscene plays and then Chapter1 is loaded (N skips straight to Chapter1)
 //
 // Chapter1 = Day 1 + Night 1,  Chapter2 = Day 2 + Night 2,  Chapter3 = Day 3 + the last night:
 //   - Grandma is gone, her room stands open, every other door is unlocked too
 //   - each chapter starts in its own day; when the next day begins (N key for now) the next chapter loads
-//   - Chapter3 is the end of the game: nothing loads after it (the endings come later)
+//   - Chapter1: when Night 1 begins, the bedroom cutscene plays.   Chapter2: the living room cutscene plays at the start of Day 2.
+//   - Chapter3 is the end of the game: after the last night (2 minutes, or N) the ending cutscene plays and the main menu loads
 public class ChapterRules : MonoBehaviour
 {
     const int LastChapter = 3;
+    const float LastNightSeconds = 120f;                 // how long the last night lasts before the ending (N skips the wait)
+    const string MainMenuScene = "MainMenu";
 
     DayNightCycle cycle;
     int chapter;
-    bool loadingNext;
+    bool loadingNext, nightOnePlayed, endingStarted;
 
     // Unity runs this start-up hook only ONCE (for the first scene), so we listen for every scene load instead.
     // That way it also works when the game is started from the main menu.
@@ -130,7 +135,7 @@ public class ChapterRules : MonoBehaviour
     void SetUpChapter0()
     {
         LockOtherDoors();
-        gameObject.AddComponent<PrologueTutorial>();
+        StartCoroutine(OpeningCutscene());
         FinalCutsceneController.OnCutsceneFinished += OnCutsceneFinished;
         if (cycle != null) cycle.onPhaseChanged.AddListener(OnPhaseChanged);
     }
@@ -152,7 +157,23 @@ public class ChapterRules : MonoBehaviour
         return "It won't open.";
     }
 
-    void OnCutsceneFinished() { StartCoroutine(GoToNextChapterAfter(2.5f)); }
+    // The intro cutscene plays a moment after the scene starts (after the white fade from the main menu), then the tutorial begins.
+    IEnumerator OpeningCutscene()
+    {
+        yield return new WaitForSeconds(3.5f);
+        CutsceneRunner.Play(new IntroCutscene(), AddTutorial);
+    }
+
+    void AddTutorial()
+    {
+        if (this != null && GetComponent<PrologueTutorial>() == null) gameObject.AddComponent<PrologueTutorial>();
+    }
+
+    // Grandma's puzzle cutscene (your friend's) is over: the Chapter 0 ending plays, then the next chapter loads.
+    void OnCutsceneFinished()
+    {
+        CutsceneRunner.Play(new ChapterZeroEndCutscene(), () => StartCoroutine(GoToNextChapterAfter(0.5f)));
+    }
 
     // ---------- Chapters 1, 2, 3
     void SetUpLaterChapter()
@@ -168,14 +189,46 @@ public class ChapterRules : MonoBehaviour
         FadingHud.SetObjective("");
 
         if (cycle != null) cycle.onPhaseChanged.AddListener(OnPhaseChanged);
+        if (chapter == 2) StartCoroutine(PlayAfter(3f, new DayTwoCutscene()));
+    }
+
+    IEnumerator PlayAfter(float seconds, Cutscene cutscene)
+    {
+        yield return new WaitForSeconds(seconds);
+        CutsceneRunner.Play(cutscene);
     }
 
     // ---------- moving on to the next chapter
     // When the NEXT chapter's starting phase begins (the N testing key for now), this chapter is over.
     void OnPhaseChanged(int phase)
     {
-        if (chapter >= LastChapter) return;                                    // the last chapter leads to the endings, not to a scene
+        // Story cutscenes that start with a phase.
+        if (chapter == 1 && phase == (int)DayNightCycle.Phase.Night1 && !nightOnePlayed)
+        {
+            nightOnePlayed = true;
+            CutsceneRunner.Play(new NightOneCutscene());
+        }
+        if (chapter == LastChapter && phase == (int)DayNightCycle.Phase.Night3 && !endingStarted)
+        {
+            endingStarted = true;
+            StartCoroutine(EndingAfterTheLastNight());
+        }
+
+        if (chapter >= LastChapter) return;                                    // the last chapter leads to the ending, not to a scene
         if (phase == (int)StartPhase(chapter + 1)) StartCoroutine(GoToNextChapterAfter(0.5f));
+    }
+
+    // The last night lasts LastNightSeconds (press N to skip the wait), then the ending plays and the main menu loads.
+    IEnumerator EndingAfterTheLastNight()
+    {
+        float waited = 0f;
+        while (waited < LastNightSeconds && !(Keyboard.current != null && Keyboard.current.nKey.wasPressedThisFrame))
+        {
+            waited += Time.deltaTime;
+            yield return null;
+        }
+        while (CutsceneRunner.IsPlaying) yield return null;
+        CutsceneRunner.Play(new EndingCutscene(), () => SceneManager.LoadScene(MainMenuScene));
     }
 
     IEnumerator GoToNextChapterAfter(float seconds)
