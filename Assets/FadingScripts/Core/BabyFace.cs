@@ -10,6 +10,7 @@ using UnityEngine;
 public class BabyFace : MonoBehaviour
 {
     public float maxLookAngle = 70f;
+    public bool eyesClosed;                    // asleep
 
     struct Shape { public SkinnedMeshRenderer renderer; public int index; }
 
@@ -87,7 +88,7 @@ public class BabyFace : MonoBehaviour
         Want("Mouth_Frown", 100f * cry);
         Want("Mouth_Open", 45f * cry);
         Want("Brow_Raise_Inner_L", 100f * cry); Want("Brow_Raise_Inner_R", 100f * cry);
-        Want("Eye_Blink", 100f * blink);
+        Want("Eye_Blink", eyesClosed ? 100f : 100f * blink);
         foreach (KeyValuePair<string, float> w in wanted) SetShape(w.Key, w.Value);
 
         TurnHead();

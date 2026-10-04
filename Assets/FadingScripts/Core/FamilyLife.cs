@@ -77,7 +77,7 @@ public class FamilyLife : MonoBehaviour
     // Called by FamilyReactions when the ghost touches something: Luna turns to look at it (if she is near).
     public void ReactTo(Vector3 where)
     {
-        if (baby == null || Vector3.Distance(baby.transform.position, where) > 8f) return;
+        if (baby == null || baby.asleep || Vector3.Distance(baby.transform.position, where) > 8f) return;
         FamilyGaze gaze = baby.GetComponent<FamilyGaze>();
         if (gaze != null) gaze.LookAt(where);
     }

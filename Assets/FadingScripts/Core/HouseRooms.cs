@@ -71,6 +71,22 @@ public static class HouseRooms
         return false;
     }
 
+    // The top of a bed's mattress (height) and the bed's outline, for lying or crawling on it.
+    public static bool TryGetBedTop(string bedName, out float top, out Bounds bounds)
+    {
+        top = 0f;
+        if (!TryGetObjectBounds(bedName, out bounds)) return false;
+        GameObject bed = GameObject.Find(bedName);
+        top = bounds.min.y + bounds.size.y * 0.45f;                    // a guess, used if the ray below finds nothing
+
+        Vector3 above = new Vector3(bounds.center.x, bounds.max.y + 1f, bounds.center.z);
+        float best = float.MinValue;
+        foreach (RaycastHit hit in Physics.RaycastAll(above, Vector3.down, bounds.size.y + 2f, ~0, QueryTriggerInteraction.Ignore))
+            if (hit.transform.IsChildOf(bed.transform) && hit.point.y > best) best = hit.point.y;
+        if (best > float.MinValue) top = best;
+        return true;
+    }
+
     public static Vector3[] Path(Vector3 from, Vector3 to)
     {
         NavMeshHit start, end;

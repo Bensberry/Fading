@@ -28,6 +28,32 @@ public class GrandmaAI : MonoBehaviour
     [HideInInspector] public float holdUntil;           // she stays at her current stop at least until this time
     public bool IsReacting { get { return isReacting; } }
 
+    // Night: MomLife puts her to bed. Asleep she does not walk and notices nothing; when she wakes up her routine starts again.
+    public bool IsAsleep { get; private set; }
+
+    public void SetAsleep(bool sleep)
+    {
+        if (sleep == IsAsleep) return;
+        IsAsleep = sleep;
+        StopAllCoroutines();
+        isReacting = false;
+        activeClue = null;
+        holdUntil = 0f;
+        if (agent == null) agent = GetComponent<NavMeshAgent>();
+
+        if (sleep)
+        {
+            if (agent.enabled && agent.isOnNavMesh) agent.ResetPath();
+            agent.enabled = false;                                  // so she can lie on the bed
+            if (animator != null) animator.SetFloat("Speed", 0f);
+        }
+        else
+        {
+            agent.enabled = true;
+            if (destinationWaypoints != null && destinationWaypoints.Count >= 2) StartCoroutine(RoutineLoop());
+        }
+    }
+
     [Header("Radio Hearing")]
     [Tooltip("Maximum distance at which Grandma can hear an active radio clue.")]
     public float radioDetectionRange = 30f;
@@ -123,6 +149,9 @@ public class GrandmaAI : MonoBehaviour
 
     private void Update()
     {
+        if (IsAsleep)
+            return;
+
         // ============================================================
         // ANIMATION
         // ============================================================

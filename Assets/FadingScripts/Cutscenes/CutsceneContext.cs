@@ -420,6 +420,7 @@ public class CutsceneContext
         if (cycle != null)
         {
             cycle.autoAdvanceDays = false;
+            cycle.showPhaseTitle = false;                       // no "Day 3" title over the ending
             cycle.SetPhase(DayNightCycle.Phase.Day3, true);
         }
         yield break;
@@ -463,6 +464,7 @@ public class CutsceneContext
         actors["Baby"] = baby;
         AnimationClip lying = GameClips.First(baby, "baby_lie", "sleeping");
         Animator animator = baby.GetComponentInChildren<Animator>();
+        foreach (SkinnedMeshRenderer r in baby.GetComponentsInChildren<SkinnedMeshRenderer>()) r.updateWhenOffscreen = true;   // measure the real pose
         if (!PosePlayer.On(baby).Play(lying, 0.05f) && animator != null) animator.speed = 0f;
         for (int i = 0; i < 3; i++) yield return null;                     // let the pose settle before measuring
 

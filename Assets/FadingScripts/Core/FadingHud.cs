@@ -89,12 +89,13 @@ public class FadingHud : MonoBehaviour
     void OnGUI()
     {
         MakeStyles();
-        DrawProgress();
+        bool cutscene = CutsceneRunner.IsPlaying;          // cutscenes show only subtitles (no bar, candle or goal)
+        if (!cutscene) DrawProgress();
         DrawToast();
         DrawSkipHint();
         DrawSubtitle();
-        DrawObjective();
-        if (candleShown) DrawCandle();
+        if (!cutscene) DrawObjective();
+        if (candleShown && !cutscene) DrawCandle();
     }
 
     void MakeStyles()

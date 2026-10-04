@@ -6,13 +6,15 @@ using UnityEngine.AI;
 // Goes in: nowhere (ChapterRules adds it in the chapters where Mom lives).
 // Gives Mom a life of her own. Her AI script (GrandmaAI, your friend's) still does the walking and the noticing; this decides
 // WHERE she goes and WHAT she does when she gets there:
-//   - NIGHT: she spends most of her time in HER ROOM, sitting on her bed, often crying. Now and then she checks on Luna.
-//   - DAY:   she packs around the whole house (a new random spot in a random room every time) and sometimes goes to her room.
+//   - NIGHT: she SLEEPS in her bed (lying down, she notices nothing).
+//   - DAY:   she gets up and walks around the whole house (a new random spot in a random room every time),
+//            sometimes sits on her bed for a moment, sometimes checks on Luna.
 //   - At every stop she does something different (sits, cries, looks around, sighs) and waits a random time.
 //   - VISION: she only notices a sign when her EYES (at the height of her head) can see it, or when it happens right beside her.
 //
 // Extra animations are optional. Download them from Mixamo and drop them into Assets/Resources/Animations/ with these names:
-//   mom_sit, mom_sit_cry, mom_cry, mom_sad, mom_look, mom_pickup
+//   mom_sit, mom_sit_cry, mom_cry, mom_sad, mom_look, mom_pickup, mom_sleep
+// (without mom_sleep she uses the baby model's sleeping pose, which works on her too)
 // Without them she still cries (head down, shoulders shaking, the 'mom_cry' sound) but she stands instead of sitting.
 public class MomLife : MonoBehaviour
 {
@@ -32,6 +34,7 @@ public class MomLife : MonoBehaviour
     Vector3 bedCenter;
     bool haveBed;
     float baseSpeed = 1f;
+    float standHeight;                     // how high her AI object stands above the floor (to stand her up again after sleeping)
     Coroutine action;
 
     IEnumerator Start()
@@ -51,10 +54,13 @@ public class MomLife : MonoBehaviour
         MakeSpots();
         mom.onArrived += OnArrived;
         mom.onClueNoticed += OnNoticed;
-        if (cycle != null) cycle.onPhaseChanged.AddListener(delegate { BuildSchedule(); });
+        if (cycle != null) cycle.onPhaseChanged.AddListener(delegate { OnPhaseChanged(); });
         BuildSchedule();
 
+        NavMeshHit floor;
+        if (NavMesh.SamplePosition(mom.transform.position, out floor, 3f, NavMesh.AllAreas)) standHeight = mom.transform.position.y - floor.position.y;
         if (bedSpot != null && agent != null && agent.isOnNavMesh) agent.Warp(bedSpot.position);     // the chapter starts with her in her room
+        if (IsNight) StartCoroutine(GoToSleep());
     }
 
     bool IsNight { get { return cycle != null && cycle.IsNight; } }
@@ -131,25 +137,89 @@ public class MomLife : MonoBehaviour
         }
     }
 
-    // Night: mostly her room. Day: everywhere (her usual places, random spots) and her room now and then.
+    // Day: everywhere (her usual places, random spots), her room and Luna's room now and then. (At night she sleeps.)
     void BuildSchedule()
     {
         List<Transform> list = new List<Transform>();
-        if (IsNight && bedSpot != null)
-        {
-            for (int i = 0; i < 3; i++) list.Add(bedSpot);
-            if (childSpot != null) list.Add(childSpot);
-            list.Add(wanderSpots[0]);
-        }
-        else
-        {
-            list.AddRange(original);
-            list.AddRange(wanderSpots);
-            if (bedSpot != null) list.Add(bedSpot);
-            if (childSpot != null) list.Add(childSpot);
-        }
+        list.AddRange(original);
+        list.AddRange(wanderSpots);
+        if (bedSpot != null) list.Add(bedSpot);
+        if (childSpot != null) list.Add(childSpot);
         list.RemoveAll(t => t == null);
         if (list.Count >= 2) mom.destinationWaypoints = list;
+    }
+
+    // ---------- night: she sleeps in her bed; morning: she gets up
+    void OnPhaseChanged()
+    {
+        BuildSchedule();
+        if (IsNight) StartCoroutine(GoToSleep());
+        else WakeUp();
+    }
+
+    IEnumerator GoToSleep()
+    {
+        StopAction();
+        for (float t = 0f; t < 4f && mom.IsReacting; t += Time.deltaTime) yield return null;     // let her finish looking at something
+        if (!IsNight || mom.IsAsleep) yield break;
+        mom.SetAsleep(true);
+
+        float top;
+        Bounds bed;
+        AnimationClip lying = SleepingClip();
+        if (lying == null || !HouseRooms.TryGetBedTop("Bed_Mother", out top, out bed))
+        {
+            if (bedSpot != null) mom.transform.position = bedSpot.position + Vector3.up * standHeight;   // no lying pose: she rests beside her bed
+            yield break;
+        }
+
+        MeasurePoseExactly();
+        pose.Play(lying, 0.3f);
+        for (int i = 0; i < 4; i++) yield return null;                    // let the pose settle before measuring her
+
+        // Lie along the bed, in the middle of it, on top of the mattress.
+        Transform root = mom.transform;
+        Bounds body = ModelBounds();
+        if ((bed.size.x >= bed.size.z) != (body.size.x >= body.size.z)) { root.Rotate(0f, 90f, 0f, Space.World); body = ModelBounds(); }
+        root.position += new Vector3(bed.center.x - body.center.x, top - 0.08f - body.min.y, bed.center.z - body.center.z);
+    }
+
+    void WakeUp()
+    {
+        if (!mom.IsAsleep) return;
+        pose.Stop(0.3f);
+        Vector3 standAt = bedSpot != null ? bedSpot.position : mom.transform.position;
+        mom.transform.position = standAt + Vector3.up * standHeight;
+        mom.transform.rotation = Quaternion.Euler(0f, mom.transform.eulerAngles.y, 0f);
+        mom.SetAsleep(false);
+        if (agent != null && agent.isOnNavMesh) agent.Warp(standAt);
+    }
+
+    static AnimationClip SleepingClip()
+    {
+        AnimationClip clip = GameClips.Get("mom_sleep");
+        if (clip != null) return clip;
+        GameObject babyCast = Resources.Load<GameObject>("Cast/Baby");
+        return babyCast != null ? GameClips.Get("sleeping", babyCast) : null;
+    }
+
+    // Skinned models only update their outline every frame when asked to (needed to measure a new pose).
+    void MeasurePoseExactly()
+    {
+        foreach (SkinnedMeshRenderer r in mom.GetComponentsInChildren<SkinnedMeshRenderer>()) r.updateWhenOffscreen = true;
+    }
+
+    Bounds ModelBounds()
+    {
+        Bounds b = new Bounds(mom.transform.position, Vector3.zero);
+        bool first = true;
+        foreach (Renderer r in mom.GetComponentsInChildren<Renderer>())
+        {
+            if (!r.enabled) continue;
+            if (first) { b = r.bounds; first = false; }
+            else b.Encapsulate(r.bounds);
+        }
+        return b;
     }
 
     // ---------- what she does when she gets there

@@ -19,12 +19,13 @@ using UnityEngine.SceneManagement;
 //   - Grandma is gone, her room stands open, every other door is unlocked too
 //   - each chapter starts in its own day; when the next day begins (N key for now) the next chapter loads
 //   - Chapter1: when Night 1 begins, the bedroom cutscene plays.   Chapter2: the living room cutscene plays at the start of Day 2.
-//   - Chapter3 is the end of the game: after the last night (2 minutes, or N) the ending cutscene plays and the main menu loads
+//   - Chapter3 is the end of the game: after the last night (30 seconds of play, or N) the ending cutscene plays and the main menu loads
 public class ChapterRules : MonoBehaviour
 {
     const int LastChapter = 3;
-    const float LastNightSeconds = 120f;                 // how long the last night lasts before the ending (N skips the wait)
-    const float NightSeconds = 150f;                     // how long Night 1 and Night 2 last before the next day begins by itself
+    const float LastNightSeconds = 30f;                  // how long the last night lasts before the ending (N skips the wait)
+    const float NightSeconds = 30f;                      // how long Night 1 and Night 2 last before the next day begins by itself
+                                                         // (Mom and Luna sleep at night; time during a cutscene does not count)
     const string MainMenuScene = "MainMenu";
 
     DayNightCycle cycle;
@@ -207,7 +208,10 @@ public class ChapterRules : MonoBehaviour
         MusicPlayer music = MusicPlayer.Create();
         if (cycle == null) return;
         music.Play(cycle.IsNight ? "music_night" : "music_day");
-        cycle.onPhaseChanged.AddListener(delegate { music.Play(cycle.IsNight ? "music_night" : "music_day"); });
+        cycle.onPhaseChanged.AddListener(delegate
+        {
+            if (!endingStarted) music.Play(cycle.IsNight ? "music_night" : "music_day");      // the ending keeps its own music
+        });
     }
 
     // Counts the different things the ghost touches (doors do not count): this decides the ending.
@@ -334,8 +338,12 @@ public class ChapterRules : MonoBehaviour
 
     IEnumerator EndTheNightAfter(float seconds)
     {
-        yield return new WaitForSeconds(seconds);
-        while (CutsceneRunner.IsPlaying) yield return null;
+        float t = 0f;
+        while (t < seconds)
+        {
+            if (!CutsceneRunner.IsPlaying) t += Time.deltaTime;                 // only time the player can play counts
+            yield return null;
+        }
         if (cycle != null) cycle.AdvancePhase();                               // Night -> the next Day: OnPhaseChanged loads the next chapter
     }
 
@@ -345,7 +353,7 @@ public class ChapterRules : MonoBehaviour
         float waited = 0f;
         while (waited < LastNightSeconds && !(Keyboard.current != null && Keyboard.current.nKey.wasPressedThisFrame))
         {
-            waited += Time.deltaTime;
+            if (!CutsceneRunner.IsPlaying) waited += Time.deltaTime;
             yield return null;
         }
         while (CutsceneRunner.IsPlaying) yield return null;

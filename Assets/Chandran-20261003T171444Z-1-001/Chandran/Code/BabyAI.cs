@@ -134,6 +134,7 @@ public class BabyAI : MonoBehaviour
     public float roamWaitMin = 2f;
     public float roamWaitMax = 7f;
     [HideInInspector] public float pauseUntil;          // she stays where she is until this time (e.g. while crying)
+    [HideInInspector] public bool asleep;               // night: she sleeps (no crawling, no reactions)
 
     private Transform currentTarget;
 
@@ -262,6 +263,9 @@ public class BabyAI : MonoBehaviour
 
     private void Update()
     {
+        if (asleep)
+            return;
+
         WatchForStall();
 
         // ========================================================
@@ -464,7 +468,7 @@ public class BabyAI : MonoBehaviour
             // after a clue interruption.
             // ----------------------------------------------------
 
-            if (Time.time < pauseUntil)
+            if (Time.time < pauseUntil || asleep)
             {
                 SetCrawlingAnimation(false);
                 yield return null;
@@ -615,7 +619,7 @@ public class BabyAI : MonoBehaviour
         {
             while (true)
             {
-                if (Time.time < pauseUntil)
+                if (Time.time < pauseUntil || asleep)
                 {
                     SetCrawlingAnimation(false);
                     yield return null;
@@ -1095,11 +1099,11 @@ public class BabyAI : MonoBehaviour
         // --------------------------------------------------------
 
         SetCrawlingAnimation(true);
-
+        float giveUpAt = Time.time + 6f;                    // she stays on her bed: if the teddy is out of reach, she stops trying
 
         while (true)
         {
-            if (teddy == null)
+            if (teddy == null || Time.time > giveUpAt)
                 break;
 
 
