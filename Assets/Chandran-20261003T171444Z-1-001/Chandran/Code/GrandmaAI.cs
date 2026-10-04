@@ -46,6 +46,7 @@ public class GrandmaAI : MonoBehaviour
     private int currentIndex = -1;
 
     private bool isReacting = false;
+    private float nextRadioLogTime = 0f;
     private ClueGoal activeClue;
 
     private void Start()
@@ -202,12 +203,17 @@ public class GrandmaAI : MonoBehaviour
                         clue.transform.position
                     );
 
-                Debug.Log(
-                    $"[GRANDMA RADIO CHECK] {clue.name}: " +
-                    $"active = {clue.goalAchieved}, " +
-                    $"distance = {radioDistance:F1}, " +
-                    $"hearing range = {radioDetectionRange}"
-                );
+                // Log at most every 2 seconds (this runs every frame and used to flood the Console).
+                if (Time.time >= nextRadioLogTime)
+                {
+                    nextRadioLogTime = Time.time + 2f;
+                    Debug.Log(
+                        $"[GRANDMA RADIO CHECK] {clue.name}: " +
+                        $"active = {clue.goalAchieved}, " +
+                        $"distance = {radioDistance:F1}, " +
+                        $"hearing range = {radioDetectionRange}"
+                    );
+                }
 
                 if (
                     radioDistance <=

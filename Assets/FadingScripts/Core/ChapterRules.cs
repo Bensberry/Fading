@@ -54,6 +54,7 @@ public class ChapterRules : MonoBehaviour
     static void TryCreate(string sceneName)
     {
         if (ChapterNumber(sceneName) < 0) return;
+        NpcModelSetup.Run();                           // hook Mom's model to her AI before the NPCs start (safe to run twice)
         if (FindFirstObjectByType<ChapterRules>() != null) return;        // already running
         LightFadeIn.StartIfPending();                  // coming from the main menu: start in the blinding light and fade out of it
         new GameObject("ChapterRules").AddComponent<ChapterRules>();
