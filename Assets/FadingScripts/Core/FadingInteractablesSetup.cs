@@ -79,6 +79,22 @@ public class FadingInteractablesSetup : MonoBehaviour
         }
     }
 
+    // The player's interaction ray only looks at the "Interactable" layer (see PlayerInteractor.layers),
+    // so every touchable object of the house is moved onto that layer when the scene starts.
+    void Start()
+    {
+        int layer = LayerMask.NameToLayer("Interactable");
+        if (layer < 0) return;                                           // the layer does not exist in this project: nothing to do
+        foreach (Interactable i in GetComponentsInChildren<Interactable>(true))
+            SetLayerRecursively(i.transform, layer);
+    }
+
+    static void SetLayerRecursively(Transform t, int layer)
+    {
+        t.gameObject.layer = layer;
+        foreach (Transform child in t) SetLayerRecursively(child, layer);
+    }
+
     static T Add<T>(GameObject g, AudioClip clip) where T : Interactable
     {
         T i = g.AddComponent<T>();
