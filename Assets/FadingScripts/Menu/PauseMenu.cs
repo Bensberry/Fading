@@ -16,6 +16,9 @@ public class PauseMenu : MonoBehaviour
     public string mainMenuScene = "MainMenu";
 
     bool paused, inSettings;
+
+    // True while the pause menu is open (other scripts hide their on-screen hints then).
+    public static bool IsOpen { get; private set; }
     GameObject pauseCamera;
     Canvas canvas;
     GameObject optionsGroup, settingsGroup;
@@ -39,6 +42,7 @@ public class PauseMenu : MonoBehaviour
     void Pause()
     {
         paused = true;
+        IsOpen = true;
         Time.timeScale = 0f;
         AudioListener.pause = true;
         SwitchOffGameplay();
@@ -53,6 +57,7 @@ public class PauseMenu : MonoBehaviour
     void Resume()
     {
         paused = false;
+        IsOpen = false;
         inSettings = false;
         if (canvas != null) Destroy(canvas.gameObject);
         if (pauseCamera != null) Destroy(pauseCamera);
@@ -211,5 +216,6 @@ public class PauseMenu : MonoBehaviour
     {
         // If the scene is left while paused (e.g. MAIN MENU), never leave the game frozen.
         if (paused) { Time.timeScale = 1f; AudioListener.pause = false; }
+        IsOpen = false;
     }
 }

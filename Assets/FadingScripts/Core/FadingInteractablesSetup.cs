@@ -31,6 +31,7 @@ public class FadingInteractablesSetup : MonoBehaviour
 
     void Awake()
     {
+        RemoveStrayInteractables();
         GameAudio.FillEmptySlots(this);          // sound files named like the slots (candleWhoosh, doorCreak, lullaby ...) in Resources/Audio fill empty slots
         foreach (Transform t in GetComponentsInChildren<Transform>(true))
         {
@@ -87,7 +88,18 @@ public class FadingInteractablesSetup : MonoBehaviour
         int layer = LayerMask.NameToLayer("Interactable");
         if (layer < 0) return;                                           // the layer does not exist in this project: nothing to do
         foreach (Interactable i in GetComponentsInChildren<Interactable>(true))
-            SetLayerRecursively(i.transform, layer);
+            if (i.transform != transform) SetLayerRecursively(i.transform, layer);      // never the whole house
+    }
+
+    // A touchable script on the HOUSE ITSELF (this object) made the whole house touchable: "Touch [F]" showed everywhere
+    // and F would slide the entire house. It was added by accident in the scenes, so it is removed here when the game starts.
+    void RemoveStrayInteractables()
+    {
+        foreach (Interactable stray in GetComponents<Interactable>())
+        {
+            Debug.LogWarning("[SETUP] Removed a " + stray.GetType().Name + " that was attached to the whole house (" + name + ").");
+            DestroyImmediate(stray);                       // right away, before other scripts look for touchable things
+        }
     }
 
     static void SetLayerRecursively(Transform t, int layer)

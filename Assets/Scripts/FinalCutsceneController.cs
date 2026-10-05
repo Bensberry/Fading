@@ -53,6 +53,7 @@ public class FinalCutsceneController : MonoBehaviour
         // Hide Interaction UI prompt
         if (UINotifier.Instance != null && UINotifier.Instance.interactUI != null)
         {
+            UINotifier.Instance.promptsBlocked = true;
             UINotifier.Instance.interactUI.SetActive(false);
         }
 

@@ -23,6 +23,7 @@ public class PhotoAlbumInteraction : MonoBehaviour
 
     void Update()
     {
+        ShowPromptIfUseful();
         if (isPlayerInProximity && Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame && !isInteracting)
         {
             TryStartSequence();
@@ -99,12 +100,25 @@ public class PhotoAlbumInteraction : MonoBehaviour
         }
     }
 
+    // The [F] Interact prompt shows only while the player is here AND this step of Granny's puzzle can be done now.
+    private void ShowPromptIfUseful()
+    {
+        bool want = isPlayerInProximity && !isInteracting && characterAnimator != null && (characterAnimator.GetBool("hasLookedAtClock") && !characterAnimator.GetBool("hasLookedAtPhotoAlbum"));
+        if (UINotifier.Instance != null) UINotifier.WantPrompt(this, want);
+        else if (interactUI != null) interactUI.SetActive(want);
+    }
+
+    private void OnDisable()
+    {
+        UINotifier.WantPrompt(this, false);
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
         {
             isPlayerInProximity = true;
-            if (interactUI != null) interactUI.SetActive(true);
+
         }
     }
 
@@ -113,7 +127,7 @@ public class PhotoAlbumInteraction : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             isPlayerInProximity = false;
-            if (interactUI != null) interactUI.SetActive(false);
+
         }
     }
 }   

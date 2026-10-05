@@ -36,6 +36,7 @@ public class PlayerInteractor : MonoBehaviour
 
     void OnGUI()
     {
+        if (CutsceneRunner.IsPlaying || PauseMenu.IsOpen) return;              // no crosshair or prompt over cutscenes and menus
         if (promptStyle == null)
         {
             promptStyle = new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, fontSize = 20 };
@@ -43,7 +44,13 @@ public class PlayerInteractor : MonoBehaviour
         }
         float cx = Screen.width / 2f, cy = Screen.height / 2f;
         GUI.Label(new Rect(cx - 20, cy - 15, 40, 30), current != null ? "( + )" : "+", promptStyle);
-        if (current != null && !current.IsBusy)
+        if (current != null && !current.IsBusy && !FriendPromptShowing())
             GUI.Label(new Rect(cx - 250, cy + 30, 500, 30), current.prompt + "  [F]", promptStyle);
+    }
+
+    // Chapter 0: Granny's puzzle shows its own "[F] Interact" box; then this prompt stays away so they do not overlap.
+    static bool FriendPromptShowing()
+    {
+        return UINotifier.Instance != null && UINotifier.Instance.interactUI != null && UINotifier.Instance.interactUI.activeInHierarchy;
     }
 }

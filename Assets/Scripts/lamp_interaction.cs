@@ -31,10 +31,24 @@ public class LampInteraction : MonoBehaviour
 
     void Update()
     {
+        ShowPromptIfUseful();
         if (isPlayerInProximity && Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame && !isFlickering)
         {
             StartCoroutine(FlickerAndAnimateRoutine());
         }
+    }
+
+    // The [F] Interact prompt shows only while the player is here AND this step of Granny's puzzle can be done now.
+    private void ShowPromptIfUseful()
+    {
+        bool want = isPlayerInProximity && !isFlickering && characterAnimator != null && (!characterAnimator.GetBool("hasFlickered"));
+        if (UINotifier.Instance != null) UINotifier.WantPrompt(this, want);
+        else if (interactUI != null) interactUI.SetActive(want);
+    }
+
+    private void OnDisable()
+    {
+        UINotifier.WantPrompt(this, false);
     }
 
     private void OnTriggerEnter(Collider other)
@@ -42,7 +56,7 @@ public class LampInteraction : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             isPlayerInProximity = true;
-            if (interactUI != null) interactUI.SetActive(true);
+
         }
     }
 
@@ -51,7 +65,7 @@ public class LampInteraction : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             isPlayerInProximity = false;
-            if (interactUI != null) interactUI.SetActive(false);
+
         }
     }
 

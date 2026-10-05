@@ -30,6 +30,9 @@ public class FadingHud : MonoBehaviour
     float progressScareTime = -100f;
 
     bool candleShown;
+
+    // Chapter 0 hides the candle display until the tutorial has explained the candle (H).
+    public static bool CandleHudAllowed = true;
     int hintsLeft, hintsMax;
     float cooldown01;
     bool burnedOut;
@@ -95,7 +98,7 @@ public class FadingHud : MonoBehaviour
         DrawSkipHint();
         DrawSubtitle();
         if (!cutscene) DrawObjective();
-        if (candleShown && !cutscene) DrawCandle();
+        if (candleShown && !cutscene && CandleHudAllowed) DrawCandle();
     }
 
     void MakeStyles()

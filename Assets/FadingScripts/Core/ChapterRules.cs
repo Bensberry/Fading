@@ -229,6 +229,7 @@ public class ChapterRules : MonoBehaviour
     void SetUpChapter0()
     {
         StoryProgress.Reset();                           // a new game starts here
+        FadingHud.CandleHudAllowed = false;              // the candle display waits until the tutorial explains it
         FamilyProgress.ResetAll();                       // the progress bar starts empty
         MakeGrandmaPuzzleEasier();
         LockOtherDoors();
@@ -275,6 +276,7 @@ public class ChapterRules : MonoBehaviour
     // ---------- Chapters 1, 2, 3
     void SetUpLaterChapter()
     {
+        FadingHud.CandleHudAllowed = true;
         if (cycle != null) cycle.SetPhase(StartPhase(chapter), true);     // start in this chapter's day (this also shuts all doors)
         RemoveGrandma();
 

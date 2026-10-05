@@ -75,13 +75,17 @@ public class PrologueTutorial : MonoBehaviour
             case 1: FadingHud.SetObjective("Hold  Left Shift  to move faster." + tab); break;
             case 2: FadingHud.SetObjective("Hold the RIGHT MOUSE button and move the mouse to look around." + tab); break;
             case 3: FadingHud.SetObjective("Look at an object and press  F  to touch it. It drifts back after 5 seconds." + tab); break;
-            case 4: FadingHud.SetObjective("Your candle can show you what to touch next. Press  H.  It burns low after each use." + tab); break;
+            case 4:
+                FadingHud.CandleHudAllowed = true;                     // the candle display appears when the candle is explained
+                FadingHud.SetObjective("Your candle can show you what to touch next. Press  H.  It burns low after each use." + tab);
+                break;
         }
     }
 
     void GoToFinalGoal()
     {
         step = 99;
+        FadingHud.CandleHudAllowed = true;
         FadingHud.SetObjective(FinalGoal);
         FadingHud.Toast("Prologue: the family is asleep. They must notice you before the nights run out.", 5f);
     }
@@ -89,6 +93,7 @@ public class PrologueTutorial : MonoBehaviour
     void Finish()
     {
         finished = true;
+        FadingHud.CandleHudAllowed = true;
         FadingHud.SetObjective("");
     }
 
