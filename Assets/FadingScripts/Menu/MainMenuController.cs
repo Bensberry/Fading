@@ -8,6 +8,7 @@ using UnityEngine.UI;
 // The menu: a pitch black screen, the title lit by a candle burning on the right, PLAY and QUIT on the left.
 // PLAY: the text fades away, the candle flares, then the screen fades to black while the game scene
 //       loads in the background, and the game starts.
+// CREDITS: shows who made what (GameCredits.cs). BACK, Esc or the right mouse button goes back.
 // QUIT: closes the game (in the Unity Editor it just stops Play mode).
 // Everything is built from code at start, so the scene file stays tiny. The look comes from 'style'
 // (see MenuStyle in MenuKit.cs); the candle settings are on the CandleTransition component.
@@ -49,7 +50,9 @@ public class MainMenuController : MonoBehaviour
     RectTransform glowRect;
     TextMeshProUGUI quoteLabel;
     TextMeshProUGUI title;
-    MenuButton playButton, quitButton;
+    MenuButton playButton, creditsButton, quitButton, backButton;
+    TextMeshProUGUI creditsText;
+    bool showingCredits;
     bool starting;
 
     void Start()
@@ -64,7 +67,9 @@ public class MainMenuController : MonoBehaviour
         Canvas canvas = MenuKit.MakeCanvas("MenuCanvas", 0);
         title = MenuKit.MakeTitle(canvas.transform, style);
         playButton = MenuKit.MakeOption(canvas.transform, "PLAY", 0, style, StartGame);
-        quitButton = MenuKit.MakeOption(canvas.transform, "QUIT", 1, style, QuitGame);
+        creditsButton = MenuKit.MakeOption(canvas.transform, "CREDITS", 1, style, ShowCredits);
+        quitButton = MenuKit.MakeOption(canvas.transform, "QUIT", 2, style, QuitGame);
+        MakeCredits(canvas.transform);
         MakeGlow(canvas.transform);                       // under the full-screen overlay
         fadeImage = MakeFadeOverlay(canvas.transform);
         quoteLabel = MenuKit.MakeLabel(canvas.transform, "FlashQuote", flashQuote, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
@@ -150,6 +155,62 @@ public class MainMenuController : MonoBehaviour
         return image;
     }
 
+    // ---------- credits
+    void MakeCredits(Transform canvas)
+    {
+        creditsText = MenuKit.MakeLabel(canvas, "Credits", GameCredits.Text, new Vector2(0.5f, 0.54f), new Vector2(0.5f, 0.5f),
+                                        new Vector2(1700f, 860f), 30, 1f, style, TextAlignmentOptions.Center);
+        creditsText.richText = true;
+        creditsText.alpha = 0f;
+        backButton = MenuKit.MakeOption(canvas, "BACK", 0, style, HideCredits);
+        RectTransform rt = (RectTransform)backButton.transform;
+        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.07f);
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        backButton.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
+        backButton.Visibility = 0f;
+        backButton.Interactable = false;
+    }
+
+    void ShowCredits()
+    {
+        if (starting || showingCredits) return;
+        showingCredits = true;
+        StartCoroutine(SwitchPage(true));
+    }
+
+    void HideCredits()
+    {
+        if (!showingCredits) return;
+        showingCredits = false;
+        StartCoroutine(SwitchPage(false));
+    }
+
+    IEnumerator SwitchPage(bool toCredits)
+    {
+        playButton.Interactable = creditsButton.Interactable = quitButton.Interactable = false;
+        backButton.Interactable = false;
+        for (float t = 0f; t < 0.5f; t += Time.deltaTime)
+        {
+            float k = Mathf.SmoothStep(0f, 1f, t / 0.5f);
+            SetTextVisibility(toCredits ? 1f - k : k);
+            creditsText.alpha = toCredits ? k : 1f - k;
+            backButton.Visibility = creditsText.alpha;
+            yield return null;
+        }
+        SetTextVisibility(toCredits ? 0f : 1f);
+        creditsText.alpha = backButton.Visibility = toCredits ? 1f : 0f;
+        backButton.Interactable = toCredits;
+        playButton.Interactable = creditsButton.Interactable = quitButton.Interactable = !toCredits;
+    }
+
+    void Update()
+    {
+        if (!showingCredits) return;
+        bool back = (UnityEngine.InputSystem.Keyboard.current != null && UnityEngine.InputSystem.Keyboard.current.escapeKey.wasPressedThisFrame) ||
+                    (UnityEngine.InputSystem.Mouse.current != null && UnityEngine.InputSystem.Mouse.current.rightButton.wasPressedThisFrame);
+        if (back) HideCredits();
+    }
+
     // ---------- buttons
     void QuitGame()
     {
@@ -166,6 +227,7 @@ public class MainMenuController : MonoBehaviour
         starting = true;
         GameAudio.Play("flash_swell", 1f);                 // the sound of the candle's light swelling
         playButton.Interactable = false;
+        creditsButton.Interactable = false;
         quitButton.Interactable = false;
         StartCoroutine(PlaySequence());
     }
@@ -241,6 +303,7 @@ public class MainMenuController : MonoBehaviour
     {
         title.alpha = v;
         playButton.Visibility = v;
+        creditsButton.Visibility = v;
         quitButton.Visibility = v;
     }
 }

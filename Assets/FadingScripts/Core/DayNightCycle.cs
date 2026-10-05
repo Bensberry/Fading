@@ -237,7 +237,7 @@ public class DayNightCycle : MonoBehaviour
 
     void OnGUI()
     {
-        if (!showPhaseTitle) return;
+        if (!showPhaseTitle || CutsceneRunner.IsPlaying) return;     // never over a cutscene
         float age = Time.time - titleTime;
         if (age > 4f) return;
         if (titleStyle == null)

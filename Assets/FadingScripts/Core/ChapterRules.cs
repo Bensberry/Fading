@@ -246,7 +246,7 @@ public class ChapterRules : MonoBehaviour
     // The intro cutscene plays a moment after the scene starts (after the white fade from the main menu), then the tutorial begins.
     IEnumerator OpeningCutscene()
     {
-        yield return new WaitForSeconds(3.5f);
+        yield return null;                                         // straight away: from the menu's white light into the cutscene
         CutsceneRunner.Play(new ArrivalCutscene(), AddTutorial);       // he comes home through the fog, then the candle scene
     }
 
