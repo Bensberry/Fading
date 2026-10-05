@@ -4,6 +4,8 @@ Put every file in **`Assets/Resources/Audio/`** and name it **exactly** like the
 A missing file is fine: the game just plays nothing there. Music and ambience should loop cleanly.
 Sounds with no file keep using the quiet generated ones (room hum, footsteps, a soft chime).
 
+Crossed out = already in the game (5 of 59).
+
 ## 1. Most important (biggest effect, do these first)
 | File name | What | Length |
 |---|---|---|
@@ -14,7 +16,7 @@ Sounds with no file keep using the quiet generated ones (room hum, footsteps, a 
 | `MatchStrike` | match scratch + flare (plays when the menu candle is lit) | 1-2 s |
 | `footstep_1` ... `footstep_4` | soft footsteps on a wooden floor (4 variations) | 0.2-0.4 s each |
 | `door_locked` | a door handle rattling, locked | 0.5-1 s |
-| `room_ambience` | quiet house at night: faint wind, wood creaks, distant clock (loops) | 20-60 s |
+| ~~`room_ambience`~~ | ~~quiet house at night: faint wind, wood creaks, distant clock (loops)~~ **DONE: Distant cricket ambient sound.mp3** | 20-60 s |
 
 ## 2. Game feedback sounds
 | File name | What | Length |
@@ -35,10 +37,10 @@ These fill the sound slots of the objects in the house. The name must match exac
 | `photoTap` | tapping a photo frame |
 | `calendarRustle` | a paper calendar rustling |
 | `chairCreak` | Grandma's rocking chair creaking |
-| `lampBuzz` | Grandma's lamp buzzing / flickering |
-| `albumPage` | a photo-album page turning |
-| `clockChime` | Grandma's clock chiming |
-| `radioSong` | a short old song from Mom's radio (music, can be 30-60 s) |
+| ~~`lampBuzz`~~ | ~~Grandma's lamp buzzing / flickering~~ **DONE: mix_00s (lamp switch)** |
+| ~~`albumPage`~~ | ~~a photo-album page turning~~ **DONE: page-turning** |
+| ~~`clockChime`~~ | ~~Grandma's clock chiming~~ **DONE: clock-chiming-1** |
+| ~~`radioSong`~~ | ~~a short old song from Mom's radio (music, can be 30-60 s)~~ **DONE: Cant_Help.mp3 (friend's radio)** |
 | `mugSlide` | a mug sliding on a table |
 | `fogSqueak` | a finger squeaking on a foggy window |
 | `lullaby` | a music-box lullaby (loops) |
