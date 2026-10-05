@@ -6,7 +6,8 @@ using UnityEngine.SceneManagement;
 // On-screen TOUCH CONTROLS:
 //   joystick (bottom left, fixed)   walk
 //   anywhere else                   drag to look around
-//   a quick tap anywhere            touches what the crosshair is on (= F); or tap an object directly
+//   a quick tap on the LEFT half    touches what the crosshair is on (= F); or tap an object there directly
+//   the right half                  only looks around (taps there do nothing)
 //   buttons (right side)            HINT (= H), RUN (on / off), II (pause, = Esc)
 //   during cutscenes          SKIP (= Space)        during the tutorial   SKIP TUTORIAL (= Tab)
 // Other scripts ask it what happened this frame (MobileControls.InteractPressed, .Move, .LookDegrees ...), so every
@@ -158,7 +159,7 @@ public class MobileControls : MonoBehaviour
 
         if (moveTouch < 0 && Vector2.Distance(pos, PadCentre()) < PadRadius() * 1.6f) { moveTouch = id; movePosition = pos; return; }
         if (lookTouch < 0) lookTouch = id;
-        taps[id] = new TapCandidate { start = Time.unscaledTime, from = pos };
+        if (pos.x < Screen.width * 0.5f) taps[id] = new TapCandidate { start = Time.unscaledTime, from = pos };   // taps: left half only
     }
 
     // A finger that moves too far is a drag (looking), not a tap.
