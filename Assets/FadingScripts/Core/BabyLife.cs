@@ -139,7 +139,7 @@ public class BabyLife : MonoBehaviour
     {
         while (true)
         {
-            yield return new WaitForSeconds(Random.Range(12f, 25f));
+            yield return new WaitForSeconds(Random.Range(7f, 14f));
             if (player == null || baby.asleep || CutsceneRunner.IsPlaying || crying != null) continue;
             if (Vector3.Distance(player.position, baby.transform.position) > 4f) continue;
 
@@ -148,10 +148,26 @@ public class BabyLife : MonoBehaviour
             yield return new WaitForSeconds(0.6f);
             face.Smile(true);
             GameAudio.PlayAt("baby_giggle", baby.transform.position, 0.8f);
+            FamilyProgress.Award("luna:sees-you", 4f, 2f, "Luna smiled at you");
             yield return new WaitForSeconds(2.6f);
             face.Smile(false);
             face.LookAt(null);
         }
+    }
+
+    // A sign close to her: a quick happy smile and a giggle.
+    public void Delight()
+    {
+        if (baby == null || baby.asleep || crying != null) return;
+        StartCoroutine(SmileFor(2.2f));
+    }
+
+    IEnumerator SmileFor(float seconds)
+    {
+        face.Smile(true);
+        GameAudio.PlayAt("baby_giggle", baby.transform.position, 0.7f);
+        yield return new WaitForSeconds(seconds);
+        if (crying == null) face.Smile(false);
     }
 
     // ---------- crying

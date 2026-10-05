@@ -23,8 +23,10 @@ using UnityEngine.SceneManagement;
 public class ChapterRules : MonoBehaviour
 {
     const int LastChapter = 3;
-    const float LastNightSeconds = 30f;                  // how long the last night lasts before the ending (N skips the wait)
-    const float NightSeconds = 30f;                      // how long Night 1 and Night 2 last before the next day begins by itself
+    const float LastNightSeconds = 120f;                 // the longest the last night can last before the ending (N skips the wait)
+    const float NightSeconds = 120f;                     // the longest Night 1 and Night 2 can last before the next day begins
+                                                         // (each night ends ~5 s after its quest is done: see NightQuest)
+    const float SecondsAfterNightQuest = 5f;
                                                          // (Mom and Luna sleep at night; time during a cutscene does not count)
     const string MainMenuScene = "MainMenu";
 
@@ -110,6 +112,8 @@ public class ChapterRules : MonoBehaviour
         gameObject.AddComponent<BabyLife>();           // Luna crawls around by day, smiles at the ghost, cries when frightened
         gameObject.AddComponent<FamilyFear>();         // scaring them pushes the progress bar back
         gameObject.AddComponent<FamilyProgress>();     // the "they feel you" bar; when it is full the good ending plays
+        gameObject.AddComponent<ChapterGoals>();       // the day's checklist on the goal line
+        gameObject.AddComponent<NightQuest>();         // the night's memory lights
         FamilyProgress.Filled += OnProgressFull;
         gameObject.AddComponent<HouseEmptying>();      // boxes appear, things on shelves and walls disappear
         AbilityLoss.StartFor(gameObject, chapter);     // vision, then speed, then hearing
@@ -305,8 +309,9 @@ public class ChapterRules : MonoBehaviour
         yield return new WaitForSeconds(5f);
         while (CutsceneRunner.IsPlaying) yield return null;
         FadingHud.SetObjective(goal);
-        yield return new WaitForSeconds(14f);
+        yield return new WaitForSeconds(9f);
         FadingHud.SetObjective("");
+        ChapterGoals.Active = true;                      // from now on the goal line shows the day's checklist
     }
 
     IEnumerator PlayAfter(float seconds, Cutscene cutscene)
@@ -342,10 +347,11 @@ public class ChapterRules : MonoBehaviour
 
     IEnumerator EndTheNightAfter(float seconds)
     {
-        float t = 0f;
-        while (t < seconds)
+        float t = 0f, afterQuest = 0f;
+        while (t < seconds && afterQuest < SecondsAfterNightQuest)
         {
             if (!CutsceneRunner.IsPlaying) t += Time.deltaTime;                 // only time the player can play counts
+            if (NightQuest.Complete) afterQuest += Time.deltaTime;              // the dream is delivered: dawn comes soon
             yield return null;
         }
         if (cycle != null) cycle.AdvancePhase();                               // Night -> the next Day: OnPhaseChanged loads the next chapter
@@ -354,14 +360,15 @@ public class ChapterRules : MonoBehaviour
     // The last night lasts LastNightSeconds (press N to skip the wait), then the ending plays and the main menu loads.
     IEnumerator EndingAfterTheLastNight()
     {
-        float waited = 0f;
-        while (waited < LastNightSeconds && !(Keyboard.current != null && Keyboard.current.nKey.wasPressedThisFrame))
+        float waited = 0f, afterQuest = 0f;
+        while (waited < LastNightSeconds && afterQuest < SecondsAfterNightQuest && !(Keyboard.current != null && Keyboard.current.nKey.wasPressedThisFrame))
         {
             if (!CutsceneRunner.IsPlaying) waited += Time.deltaTime;
+            if (NightQuest.Complete) afterQuest += Time.deltaTime;
             yield return null;
         }
         while (CutsceneRunner.IsPlaying) yield return null;
-        CutsceneRunner.Play(new EndingCutscene(StoryProgress.PickEnding()), () => SceneManager.LoadScene(MainMenuScene));
+        CutsceneRunner.Play(new EndingCutscene(FamilyProgress.PickEnding()), () => SceneManager.LoadScene(MainMenuScene));
     }
 
     IEnumerator GoToNextChapterAfter(float seconds)

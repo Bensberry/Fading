@@ -163,6 +163,7 @@ public class CandleHint : MonoBehaviour
     bool FindTarget(out Transform target, out string text)
     {
         if (FindPuzzleTarget(out target, out text)) return true;
+        if (NightQuest.TryHint(transform.position, out target, out text)) return true;      // at night: the memory lights
         return FindNearestUntouched(out target, out text);
     }
 

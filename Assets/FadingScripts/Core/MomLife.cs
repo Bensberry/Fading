@@ -338,7 +338,11 @@ public class MomLife : MonoBehaviour
             FamilyLife.Say("Mom", "Luna?! I'm coming, baby!", mom.transform.position, 25f);
             StartCoroutine(Hurry(7f));
         }
-        else FamilyLife.Say("Mom", NoticeLines[Random.Range(0, NoticeLines.Length)], mom.transform.position);
+        else
+        {
+            FamilyLife.Say("Mom", NoticeLines[Random.Range(0, NoticeLines.Length)], mom.transform.position);
+            if (clue != null) FamilyProgress.Award("mom:" + clue.name, 10f, 3f, "Mom noticed the " + FamilyProgress.Pretty(clue.name));
+        }
     }
 
     IEnumerator Hurry(float seconds)

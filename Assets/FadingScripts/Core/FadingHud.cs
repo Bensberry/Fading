@@ -28,6 +28,8 @@ public class FadingHud : MonoBehaviour
     bool progressShown;
     float progress01;
     float progressScareTime = -100f;
+    string gainText = "";
+    float gainTime = -100f;
 
     bool candleShown;
 
@@ -71,6 +73,14 @@ public class FadingHud : MonoBehaviour
         FadingHud h = Instance;
         h.progressShown = true;
         h.progress01 = Mathf.Clamp01(value01);
+    }
+
+    // "+10  Mom noticed the coffee mug" under the bar for a moment, and the bar glows.
+    public static void ProgressGain(string text)
+    {
+        FadingHud h = Instance;
+        h.gainText = text;
+        h.gainTime = Time.unscaledTime;
     }
 
     // The bar flashes red for a moment (the ghost frightened the family).
@@ -123,6 +133,15 @@ public class FadingHud : MonoBehaviour
         smallStyle.alignment = TextAnchor.MiddleLeft;
         DrawBox(new Rect(x - 3f, y - 3f, w + 6f, h + 6f), new Color(0f, 0f, 0f, 0.55f));
         DrawBox(new Rect(x, y, w, h), new Color(0.2f, 0.16f, 0.1f, 0.9f));
+        float gain = Mathf.Clamp01(1f - (Time.unscaledTime - gainTime) / 2.8f);
+        if (gain > 0f)
+        {
+            DrawBox(new Rect(x - 3f - 4f * gain, y - 3f - 4f * gain, w + 6f + 8f * gain, h + 6f + 8f * gain), new Color(1f, 0.85f, 0.5f, 0.35f * gain));
+            smallStyle.alignment = TextAnchor.MiddleCenter;
+            smallStyle.normal.textColor = new Color(1f, 0.9f, 0.6f, Mathf.Clamp01(gain * 1.6f));
+            GUI.Label(new Rect(x - w * 0.25f, y + h * 1.3f + (1f - gain) * 6f, w * 1.5f, h * 1.8f), gainText, smallStyle);
+            smallStyle.alignment = TextAnchor.MiddleLeft;
+        }
         Color fill = Color.Lerp(new Color(1f, 0.6f, 0.2f), new Color(1f, 0.95f, 0.7f), progress01);
         DrawBox(new Rect(x, y, w * progress01, h), Color.Lerp(fill, new Color(0.85f, 0.15f, 0.12f), scare));
     }

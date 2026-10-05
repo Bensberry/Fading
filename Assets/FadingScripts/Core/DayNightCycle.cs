@@ -103,7 +103,7 @@ public class DayNightCycle : MonoBehaviour
     // (The values saved in the scene are older and too timid, so ChapterRules calls this when a chapter starts.)
     public void UseStoryLook()
     {
-        daySeconds = 90f;                 // how long each day lasts before the night comes
+        daySeconds = 150f;                // how long each day lasts before the night comes (sooner when the day's goals are done)
         transitionSeconds = 8f;           // how slowly the light changes between day and night
 
         nightLightColor = new Color(0.45f, 0.55f, 0.95f);

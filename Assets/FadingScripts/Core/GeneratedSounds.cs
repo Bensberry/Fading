@@ -7,6 +7,9 @@ using UnityEngine;
 //   candle_out      a soft breath (a candle goes out)
 //   candle_relight  a small bright flare (a candle lights)
 //   ability_lost    a slow, sinking tone (a sense fades)
+//   notice_chime    two soft bell notes (Mom or Luna noticed you: points on the bar)
+//   memory_collect  three rising bell notes (a memory light gathered)
+//   dream_swell     a warm chord (the dream is delivered)
 public static class GeneratedSounds
 {
     const int Rate = 22050;
@@ -20,6 +23,9 @@ public static class GeneratedSounds
             case "candle_out": return Clip(name, 0.8f, (t, r) => Noise(r) * Envelope(t, 0.05f, 0.8f) * 0.25f);
             case "candle_relight": return Clip(name, 0.7f, CandleRelight);
             case "ability_lost": return Clip(name, 2.5f, AbilityLost);
+            case "notice_chime": return Clip(name, 1.2f, (t, r) => Bell(t, 659f) + Bell(t - 0.12f, 988f));
+            case "memory_collect": return Clip(name, 1.4f, (t, r) => Bell(t, 784f) + Bell(t - 0.1f, 1175f) * 0.8f + Bell(t - 0.2f, 1568f) * 0.6f);
+            case "dream_swell": return Clip(name, 3.5f, DreamSwell);
             default: return null;
         }
     }
@@ -42,6 +48,19 @@ public static class GeneratedSounds
     {
         float pitch = Mathf.Lerp(220f, 110f, t / 2.5f);
         return Mathf.Sin(2f * Mathf.PI * pitch * t) * Envelope(t, 0.4f, 2.5f) * 0.3f;
+    }
+
+    // A soft bell note that starts at t = 0.
+    static float Bell(float t, float pitch)
+    {
+        if (t < 0f) return 0f;
+        return (Mathf.Sin(2f * Mathf.PI * pitch * t) + 0.3f * Mathf.Sin(4f * Mathf.PI * pitch * t)) * Mathf.Exp(-t * 3.5f) * Mathf.Min(1f, t / 0.005f) * 0.18f;
+    }
+
+    static float DreamSwell(float t, System.Random r)
+    {
+        float env = Envelope(t, 1.6f, 3.5f);
+        return (Mathf.Sin(2f * Mathf.PI * 262f * t) + Mathf.Sin(2f * Mathf.PI * 330f * t) + Mathf.Sin(2f * Mathf.PI * 392f * t)) * 0.08f * env;
     }
 
     // Rises to 1 at 'peak' seconds, then falls back to 0 at 'length'.

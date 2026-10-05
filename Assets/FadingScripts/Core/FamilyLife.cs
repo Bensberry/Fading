@@ -75,11 +75,33 @@ public class FamilyLife : MonoBehaviour
     }
 
     // Called by FamilyReactions when the ghost touches something: Luna turns to look at it (if she is near).
-    public void ReactTo(Vector3 where)
+    // Luna (awake and within 8 m) feels it: she turns to look, smiles, and that counts on the bar.
+    // A moment later, if NOBODY reacted, a small line tells the player (so they learn that Mom must SEE things).
+    public void ReactTo(Transform touched)
     {
-        if (baby == null || baby.asleep || Vector3.Distance(baby.transform.position, where) > 8f) return;
-        FamilyGaze gaze = baby.GetComponent<FamilyGaze>();
-        if (gaze != null) gaze.LookAt(where);
+        if (CutsceneRunner.IsPlaying || touched == null) return;
+        Vector3 where = touched.position;
+        if (baby != null && !baby.asleep && baby.isActiveAndEnabled && Vector3.Distance(baby.transform.position, where) <= 8f)
+        {
+            FamilyGaze gaze = baby.GetComponent<FamilyGaze>();
+            if (gaze != null) gaze.LookAt(where);
+            BabyLife babyLife = GetComponent<BabyLife>();
+            if (babyLife != null) babyLife.Delight();
+            FamilyProgress.Award("luna:" + touched.name, 5f, 1f, "Luna felt you near the " + FamilyProgress.Pretty(touched.name));
+        }
+        StartCoroutine(TellIfNobodySaw(touched.name));
+    }
+
+    float nextNobodyLine;
+
+    IEnumerator TellIfNobodySaw(string objectName)
+    {
+        yield return new WaitForSeconds(3.5f);
+        if (FamilyProgress.SecondsSinceLastAward < 3.5f) yield break;          // somebody reacted
+        if (Time.time < nextNobodyLine || CutsceneRunner.IsPlaying) yield break;
+        nextNobodyLine = Time.time + 15f;
+        bool asleep = (mom != null && mom.IsAsleep) || (baby != null && baby.asleep);
+        FadingHud.Toast(asleep ? "They are asleep... (tonight: find the memory lights)" : "No one saw that. Let Mom SEE it.", 2.5f);
     }
 
     // ---------- floating dust

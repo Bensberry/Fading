@@ -71,8 +71,12 @@ public class CutsceneContext
             string type = b.GetType().Name;
             if (type == "GrandmaAI" || type == "BabyAI") Hide(b.GetComponentsInChildren<Renderer>());
         }
+        savedFog = RenderSettings.fog;
+        RenderSettings.fog = false;                          // cutscenes are shown clearly, without the game's fog
         for (int i = 0; i < 4; i++) yield return null;
     }
+
+    bool savedFog;
 
     void Hide(Renderer[] renderers)
     {
@@ -95,6 +99,7 @@ public class CutsceneContext
         foreach (GameObject g in spawned) if (g != null) Object.Destroy(g);
         foreach (Mannequin m in standIns.Values) if (m.root != null) Object.Destroy(m.root);
         foreach (Renderer r in hidden) if (r != null) r.enabled = true;
+        RenderSettings.fog = savedFog;
         barTop.color = barBottom.color = new Color(0f, 0f, 0f, 0f);
 
         yield return Fade(0f, 1f);

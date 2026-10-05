@@ -24,7 +24,7 @@ public static class FamilyReactions
             if (sign is DoorToggle) continue;
 
             Transform touched = sign.transform;                                     // everybody looks at what was touched
-            sign.onInteract.AddListener(() => LookAt(touched.position));
+            sign.onInteract.AddListener(() => LookAt(touched));
 
             if (sign is LightSign || sign is MusicBoxInteraction) continue;      // these run their own clue
 
@@ -43,9 +43,9 @@ public static class FamilyReactions
         }
     }
 
-    static void LookAt(Vector3 where)
+    static void LookAt(Transform touched)
     {
         FamilyLife life = Object.FindFirstObjectByType<FamilyLife>();
-        if (life != null) life.ReactTo(where);
+        if (life != null) life.ReactTo(touched);
     }
 }
