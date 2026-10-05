@@ -223,7 +223,7 @@ public class EndingCutscene : Cutscene
         yield return c.Title("Models by Poly by Google and Ray Larson (CC-BY), via Poly Pizza  -  Characters and animations: Mixamo", 4.5f);
         yield return c.Title("Thank you for playing.", 3.5f);
         yield return c.Title(SecretMemories.Found < SecretMemories.Total
-            ? "You found " + SecretMemories.Found + " of " + SecretMemories.Total + " secret memories. Choose other dreams, reach Mom or Luna differently, and see what else stays hidden."
+            ? "You found " + SecretMemories.Found + " of " + SecretMemories.Total + " secret memories. Choose other dreams, rest in other ways, reach Mom or Luna differently, and see what else stays hidden."
             : "You found every secret memory. Thank you for remembering them all.", 5.5f);
         yield return c.Letterbox(false, 0.3f);
     }

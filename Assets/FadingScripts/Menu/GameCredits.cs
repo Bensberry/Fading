@@ -7,10 +7,10 @@ public static class GameCredits
         "made for the game jam \"Everything Is Temporary\"\n\n" +
         "<b>MODELS</b>\n" +
         "Kenney: Furniture Kit, Nature Kit (CC0)\n" +
-        "Poly by Google: swing set, fountain, gazebo, trampoline, ceiling fan, toy airplane (CC-BY 3.0)\n" +
+        "Poly by Google: fountain, gazebo, trampoline, ceiling fan, toy airplane (CC-BY 3.0)\n" +
         "Ray Larson: park bench (CC-BY)   -   Household Props pack\n" +
         "Poly Pizza: Kenney (radio), Aaron Clifford (cup), jeremy (clock), Daniel Doran (chair), jiang liu (bear), Bruno Oliveira (gramophone)\n" +
-        "Characters and animations: Mixamo\n\n" +
+        "Characters and animations: Mixamo   -   Voices: made with Chatterbox (Resemble AI)\n\n" +
         "<b>TEXTURES</b>\nPoly Haven (CC0)\n\n" +
         "<b>MUSIC</b>\nPixabay\n\n" +
         "<b>SOUND EFFECTS</b>\n" +

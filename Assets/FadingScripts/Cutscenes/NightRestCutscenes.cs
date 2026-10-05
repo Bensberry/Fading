@@ -26,6 +26,7 @@ public class StarsCutscene : Cutscene
         yield return c.CameraLight(true, 0.4f);
         MusicPlayer.Create().Play("music_dream", 2f);
 
+        SecretMemories.SawRest("stars");
         Vector3 houseSeat = c.ToHouse(seat), houseAhead = c.ToHouse(seat + facing * 4f);
         yield return c.Spawn("Father", houseSeat, houseAhead);
         yield return c.Pose("Father", "mom_sit");
@@ -92,6 +93,7 @@ public class SleepBesideCutscene : Cutscene
         yield return c.Letterbox(true, 0.3f);
         yield return c.CameraLight(true, 0.45f);
         MusicPlayer.Create().Play("music_dream", 2f);
+        SecretMemories.SawRest(mom ? "mom" : "luna");
         if (mom) yield return BesideMom(c);
         else yield return BesideLuna(c);
         yield return c.Fade(1f, 3f);
@@ -105,7 +107,7 @@ public class SleepBesideCutscene : Cutscene
         yield return c.Pose("Baby", "sleeping");
         yield return c.LieDown("Baby", new Vector3(-2.86f, 0.40f, 13.45f), new Vector3(-2.86f, 0.4f, 14.3f));
         yield return c.BabyAsleep();
-        yield return c.Spawn("Father", new Vector3(-3.95f, 0f, 13.1f), new Vector3(-2.86f, 0.5f, 13.5f));
+        yield return c.Spawn("Father", new Vector3(-4.7f, 0f, 12.2f), new Vector3(-2.86f, 0.5f, 13.5f));   // a few steps back from her bed
         yield return c.Pose("Father", "mom_sad");                         // standing quietly, head a little bowed
         yield return c.Glow(new Vector3(-1.5f, 2.0f, 12f), Moon, 1.6f, 6f);
         yield return c.Glimmers(new Vector3(-3.2f, 1.0f, 13.3f), 14, 1.0f);
