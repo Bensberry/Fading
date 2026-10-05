@@ -41,7 +41,7 @@ public class PlayerInteractor : MonoBehaviour
     bool PressedThisFrame()
     {
 #if ENABLE_INPUT_SYSTEM
-        return Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame;
+        return (Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame) || MobileControls.InteractPressed;
 #else
         return Input.GetKeyDown(KeyCode.F);
 #endif
@@ -52,14 +52,14 @@ public class PlayerInteractor : MonoBehaviour
         if (CutsceneRunner.IsPlaying || PauseMenu.IsOpen) return;              // no crosshair or prompt over cutscenes and menus
         if (promptStyle == null)
         {
-            promptStyle = new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, fontSize = 20 };
+            promptStyle = new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, fontSize = Mathf.Max(20, Mathf.RoundToInt(Screen.height * 0.026f)) };
             promptStyle.normal.textColor = Color.white;
         }
         float cx = Screen.width / 2f, cy = Screen.height / 2f;
         GUI.Label(new Rect(cx - 20, cy - 15, 40, 30), current != null ? "( + )" : "+", promptStyle);
         if (current != null && !current.IsBusy && !FriendPromptShowing() && current.prompt.Length > 0)
         {
-            GUI.Label(new Rect(cx - 250, cy + 30, 500, 30), current.prompt + "  [F]", promptStyle);
+            GUI.Label(new Rect(cx - 250, cy + 30, 500, 30), current.prompt + "  " + MobileControls.Label("F"), promptStyle);
             if (cueStyle == null) cueStyle = new GUIStyle(promptStyle) { fontSize = 15 };
             if (momSees)
             {

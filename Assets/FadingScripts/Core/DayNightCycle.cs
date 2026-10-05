@@ -242,7 +242,7 @@ public class DayNightCycle : MonoBehaviour
         if (age > 4f) return;
         if (titleStyle == null)
         {
-            titleStyle = new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, fontSize = 42 };
+            titleStyle = new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, fontSize = Mathf.Max(42, Mathf.RoundToInt(Screen.height * 0.05f)) };
         }
         float alpha = age < 0.8f ? age / 0.8f : (age > 3f ? 4f - age : 1f);
         titleStyle.normal.textColor = new Color(1f, 0.95f, 0.85f, alpha);

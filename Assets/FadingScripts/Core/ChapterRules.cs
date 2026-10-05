@@ -286,7 +286,7 @@ public class ChapterRules : MonoBehaviour
         string goal;
         switch (chapter)
         {
-            case 1: goal = "Touch things (F) where Mom can SEE them, so she and Luna feel you. Be gentle: too much at once, slammed doors or startling Luna will frighten them."; break;
+            case 1: goal = "Touch things (" + MobileControls.Label("F") + ") where Mom can SEE them, so she and Luna feel you. Be gentle: too much at once, slammed doors or startling Luna will frighten them."; break;
             case 2: goal = "There are more boxes now, and less time. Keep reaching them."; break;
             default: goal = "The last night. Make them feel you one more time."; break;
         }

@@ -32,7 +32,8 @@ public class PauseMenu : MonoBehaviour
     void Update()
     {
         if (CutsceneRunner.IsPlaying) return;                    // no pausing during a cutscene (Space skips it)
-        if (Keyboard.current == null || !Keyboard.current.escapeKey.wasPressedThisFrame) return;
+        bool pressed = (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame) || MobileControls.PausePressed;   // Esc, Android back, or II
+        if (!pressed) return;
         if (!paused) Pause();
         else if (inSettings) ShowOptions();
         else Resume();

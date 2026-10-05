@@ -118,7 +118,7 @@ public class Playground : MonoBehaviour
 
     void BuildForestEdge()
     {
-        const float step = 2.8f;
+        float step = Application.isMobilePlatform ? 4.2f : 2.8f;           // phones: fewer trees (they are taller than you can see past anyway)
         for (float x = -40f; x <= 24f; x += step)
             for (float z = -28f; z <= 36f; z += step)
             {
@@ -165,7 +165,7 @@ public class Playground : MonoBehaviour
         FlowerBed(-14f, -1.8f, 3f, 0.8f, 12);
         FlowerBed(-2.8f, -1.8f, 3f, 0.8f, 12);
         FlowerBed(-5f, 16.4f, 2.5f, 0.8f, 10);
-        for (int i = 0; i < 40; i++) Place("Nature/grass", Rand(-21f, 5f), Rand(-12f, 31f), Rand(0f, 360f), Rand(0.25f, 0.45f), false, false);
+        for (int i = 0; i < (Application.isMobilePlatform ? 15 : 40); i++) Place("Nature/grass", Rand(-21f, 5f), Rand(-12f, 31f), Rand(0f, 360f), Rand(0.25f, 0.45f), false, false);
     }
 
     void FlowerBed(float x, float z, float width, float depth, int count)

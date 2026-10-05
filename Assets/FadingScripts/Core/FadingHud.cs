@@ -217,7 +217,7 @@ public class FadingHud : MonoBehaviour
         if (!skipHint) return;
         smallStyle.alignment = TextAnchor.MiddleRight;
         smallStyle.normal.textColor = new Color(1f, 1f, 1f, 0.55f);
-        GUI.Label(new Rect(Screen.width - 340f, Screen.height * 0.9f, 320f, 40f), "SPACE / ENTER   skip", smallStyle);
+        GUI.Label(new Rect(Screen.width - 340f, Screen.height * 0.9f, 320f, 40f),(MobileControls.Active ? "" : "SPACE / ENTER   skip"), smallStyle);
         smallStyle.alignment = TextAnchor.MiddleLeft;
     }
 
@@ -239,7 +239,7 @@ public class FadingHud : MonoBehaviour
         float x = Screen.width * 0.02f, y = Screen.height * 0.9f;
         float pip = Screen.height * 0.025f;
         smallStyle.normal.textColor = new Color(1f, 0.85f, 0.6f, 0.9f);
-        GUI.Label(new Rect(x, y - pip * 1.6f, 300, pip * 1.5f), burnedOut ? "Candle  (burned out)" : "Candle  [H] hint", smallStyle);
+        GUI.Label(new Rect(x, y - pip * 1.6f, 300, pip * 1.5f),burnedOut ? "Candle  (burned out)" : "Candle  " + MobileControls.Label("H") + " hint", smallStyle);
 
         for (int i = 0; i < hintsMax; i++)
         {

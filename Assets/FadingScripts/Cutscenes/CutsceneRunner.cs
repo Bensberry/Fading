@@ -65,8 +65,8 @@ public class CutsceneRunner : MonoBehaviour
 
     static bool SkipPressed()
     {
-        return Keyboard.current != null &&
-               (Keyboard.current.spaceKey.wasPressedThisFrame || Keyboard.current.enterKey.wasPressedThisFrame);
+        return (Keyboard.current != null &&
+               (Keyboard.current.spaceKey.wasPressedThisFrame || Keyboard.current.enterKey.wasPressedThisFrame)) || MobileControls.SkipPressed;
     }
 
     // ---------- the player must not move or touch things during a cutscene

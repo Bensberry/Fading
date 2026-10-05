@@ -32,7 +32,7 @@ public class LampInteraction : MonoBehaviour
     void Update()
     {
         ShowPromptIfUseful();
-        if (isPlayerInProximity && Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame && !isFlickering)
+        if (isPlayerInProximity &&((Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame) || MobileControls.InteractPressed) && !isFlickering)
         {
             StartCoroutine(FlickerAndAnimateRoutine());
         }

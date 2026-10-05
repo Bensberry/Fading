@@ -94,6 +94,11 @@ public class FirstPersonController : MonoBehaviour
     // =========================================================
     void HandleMouseLook()
     {
+        if (MobileControls.Active)                                   // phone: drag on the right half of the screen to look
+        {
+            LookBy(MobileControls.LookDegrees.x, MobileControls.LookDegrees.y);
+            return;
+        }
         if (Mouse.current == null) return;
 
         if (holdRightMouseToLook)
@@ -110,12 +115,17 @@ public class FirstPersonController : MonoBehaviour
         }
 
         Vector2 mouseDelta = Mouse.current.delta.ReadValue();
+        LookBy(mouseDelta.x * lookSensitivity, mouseDelta.y * lookSensitivity);
+    }
+
+    void LookBy(float yawDegrees, float pitchDegrees)
+    {
 
         // Horizontal rotation
-        transform.Rotate(Vector3.up * (mouseDelta.x * lookSensitivity));
+        transform.Rotate(Vector3.up * yawDegrees);
 
         // Vertical rotation
-        verticalRotation -= mouseDelta.y * lookSensitivity;
+        verticalRotation -= pitchDegrees;
         verticalRotation = Mathf.Clamp(verticalRotation, -89f, 89f);
 
         if (playerCameraRoot != null)
@@ -129,7 +139,7 @@ public class FirstPersonController : MonoBehaviour
     // =========================================================
     void HandleMovement()
     {
-        if (Keyboard.current == null) return;
+        if (Keyboard.current == null && !MobileControls.Active) return;
 
         Vector3 wanted = ReadWantedDirection() * CurrentSpeed();
 
@@ -186,13 +196,18 @@ public class FirstPersonController : MonoBehaviour
         float moveX = 0f;
         float moveZ = 0f;
 
-        if (Keyboard.current.aKey.isPressed) moveX -= 1f;
-        if (Keyboard.current.dKey.isPressed) moveX += 1f;
-        if (Keyboard.current.sKey.isPressed) moveZ -= 1f;
-        if (Keyboard.current.wKey.isPressed) moveZ += 1f;
+        if (Keyboard.current != null)
+        {
+            if (Keyboard.current.aKey.isPressed) moveX -= 1f;
+            if (Keyboard.current.dKey.isPressed) moveX += 1f;
+            if (Keyboard.current.sKey.isPressed) moveZ -= 1f;
+            if (Keyboard.current.wKey.isPressed) moveZ += 1f;
+        }
+        moveX += MobileControls.Move.x;                              // the on-screen joystick (phones)
+        moveZ += MobileControls.Move.y;
 
         Vector3 move = transform.right * moveX + transform.forward * moveZ;
-        return move.normalized;
+        return Vector3.ClampMagnitude(move, 1f);
     }
 
     // =========================================================
@@ -200,7 +215,7 @@ public class FirstPersonController : MonoBehaviour
     // =========================================================
     float CurrentSpeed()
     {
-        bool running = Keyboard.current.leftShiftKey.isPressed;
+        bool running = (Keyboard.current != null && Keyboard.current.leftShiftKey.isPressed) || MobileControls.Running;
         float speed = running ? runSpeed : walkSpeed;
         return speed * AbilityLoss.SpeedMultiplier;
     }

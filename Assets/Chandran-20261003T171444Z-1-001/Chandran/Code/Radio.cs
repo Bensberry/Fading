@@ -140,7 +140,7 @@ public class RadioClue : MonoBehaviour
     private bool FKeyPressedThisFrame()
     {
 #if ENABLE_INPUT_SYSTEM
-        if (Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame)
+        if ((Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame) || MobileControls.InteractPressed)
             return true;
 #endif
         return Input.GetKeyDown(KeyCode.F);

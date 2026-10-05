@@ -182,7 +182,7 @@ public class NightQuest : MonoBehaviour
         if (!active) return;
         if (Complete) return;
         if (carrying) FadingHud.SetObjective("Tonight:  bring the memories to Mom's bed or Luna's bed  (her dream, her bar)");
-        else FadingHud.SetObjective("Tonight:  gather the memory lights  " + found + "/" + (found + lights.Count) + "     [H] your candle shows the way");
+        else FadingHud.SetObjective("Tonight:  gather the memory lights  " + found + "/" + (found + lights.Count) +"     " + MobileControls.Label("H") + " your candle shows the way");
     }
 
     // For the candle hint (H): the next light, or the sleeping family.

@@ -54,7 +54,7 @@ public class RestSpot : Interactable
         if (body != null) body.enabled = false;
         string oldPrompt = prompt;
         prompt = "";
-        FadingHud.Toast(kind == Kind.Slide ? "Wheee..." : "[F] or [Space] to get up", 2f);
+        FadingHud.Toast(kind == Kind.Slide ? "Wheee..." : (MobileControls.Active ? "TOUCH to get up" : "[F] or [Space] to get up"), 2f);
         float eyeHeight = cameraRoot.position.y - player.transform.position.y;
 
         // Turn to face the right way, move onto the seat.
@@ -120,7 +120,7 @@ public class RestSpot : Interactable
     {
         if (Time.frameCount <= enteredFrame + 1 || CutsceneRunner.IsPlaying) return false;
 #if ENABLE_INPUT_SYSTEM
-        return Keyboard.current != null && (Keyboard.current.fKey.wasPressedThisFrame || Keyboard.current.spaceKey.wasPressedThisFrame);
+        return (Keyboard.current != null && (Keyboard.current.fKey.wasPressedThisFrame || Keyboard.current.spaceKey.wasPressedThisFrame)) || MobileControls.InteractPressed;
 #else
         return Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.Space);
 #endif

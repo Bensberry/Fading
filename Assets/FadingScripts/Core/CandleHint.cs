@@ -53,7 +53,7 @@ public class CandleHint : MonoBehaviour
     bool HintPressed()
     {
 #if ENABLE_INPUT_SYSTEM
-        return Keyboard.current != null && Keyboard.current.hKey.wasPressedThisFrame;
+        return (Keyboard.current != null && Keyboard.current.hKey.wasPressedThisFrame) || MobileControls.HintPressed;
 #else
         return Input.GetKeyDown(KeyCode.H);
 #endif

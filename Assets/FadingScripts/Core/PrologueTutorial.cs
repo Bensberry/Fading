@@ -49,8 +49,8 @@ public class PrologueTutorial : MonoBehaviour
     {
         switch (step)
         {
-            case 0: return AnyKey(Key.W) || AnyKey(Key.A) || AnyKey(Key.S) || AnyKey(Key.D);
-            case 1: return AnyKey(Key.LeftShift);
+            case 0: return AnyKey(Key.W) || AnyKey(Key.A) || AnyKey(Key.S) || AnyKey(Key.D) || MobileControls.Move.magnitude > 0.3f;
+            case 1: return AnyKey(Key.LeftShift) || MobileControls.Running;
             case 2: return lookedPixels > 600f;
             case 3: return touchedSomething;
             case 4: return usedHint;
@@ -68,6 +68,8 @@ public class PrologueTutorial : MonoBehaviour
     void ShowStep()
     {
         stepStartTime = Time.time;
+        MobileControls.TutorialShowing = true;
+        if (MobileControls.Active) { ShowTouchStep(); return; }
         string tab = "      [Tab] skip tutorial";
         switch (step)
         {
@@ -82,9 +84,26 @@ public class PrologueTutorial : MonoBehaviour
         }
     }
 
+    // The same steps for a phone (touch controls, see MobileControls).
+    void ShowTouchStep()
+    {
+        switch (step)
+        {
+            case 0: FadingHud.SetObjective("You are a ghost. Put your thumb on the LEFT side of the screen and move it to walk.", true); break;
+            case 1: FadingHud.SetObjective("Tap  RUN  to move faster (tap again to walk).", true); break;
+            case 2: FadingHud.SetObjective("Drag on the RIGHT side of the screen to look around.", true); break;
+            case 3: FadingHud.SetObjective("Look at an object and tap  TOUCH.  It drifts back after 5 seconds.", true); break;
+            case 4:
+                FadingHud.CandleHudAllowed = true;
+                FadingHud.SetObjective("Your candle can show you what to touch next. Tap  HINT.  It burns low after each use.", true);
+                break;
+        }
+    }
+
     void GoToFinalGoal()
     {
         step = 99;
+        MobileControls.TutorialShowing = false;
         FadingHud.CandleHudAllowed = true;
         FadingHud.SetObjective(FinalGoal);
         FadingHud.Toast("Prologue: the family is asleep. They must notice you before the nights run out.", 5f);
@@ -93,6 +112,7 @@ public class PrologueTutorial : MonoBehaviour
     void Finish()
     {
         finished = true;
+        MobileControls.TutorialShowing = false;
         FadingHud.CandleHudAllowed = true;
         FadingHud.SetObjective("");
     }
@@ -110,7 +130,7 @@ public class PrologueTutorial : MonoBehaviour
     static bool SkipPressed()
     {
 #if ENABLE_INPUT_SYSTEM
-        return Keyboard.current != null && Keyboard.current.tabKey.wasPressedThisFrame;
+        return (Keyboard.current != null && Keyboard.current.tabKey.wasPressedThisFrame) || MobileControls.TutorialSkipPressed;
 #else
         return Input.GetKeyDown(KeyCode.Tab);
 #endif
@@ -119,7 +139,8 @@ public class PrologueTutorial : MonoBehaviour
     static float MouseMovement()
     {
 #if ENABLE_INPUT_SYSTEM
-        return (Mouse.current != null && Mouse.current.rightButton.isPressed) ? Mouse.current.delta.ReadValue().magnitude : 0f;
+        float mouse = (Mouse.current != null && Mouse.current.rightButton.isPressed) ? Mouse.current.delta.ReadValue().magnitude : 0f;
+        return mouse + MobileControls.LookPixels;
 #else
         return 0f;
 #endif
