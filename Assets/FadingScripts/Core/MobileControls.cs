@@ -164,6 +164,7 @@ public class MobileControls : MonoBehaviour
 
     void OnGUI()
     {
+        if (Event.current.type != EventType.Repaint) return;     // only drawing here: skip the extra layout / input passes
         if (!InGame) return;
         if (label == null) label = new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold };
         label.fontSize = Mathf.RoundToInt(2.6f * U);

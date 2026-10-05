@@ -237,6 +237,7 @@ public class DayNightCycle : MonoBehaviour
 
     void OnGUI()
     {
+        if (Event.current.type != EventType.Repaint) return;     // only drawing here: skip the extra layout / input passes
         if (!showPhaseTitle || CutsceneRunner.IsPlaying) return;     // never over a cutscene
         float age = Time.time - titleTime;
         if (age > 4f) return;

@@ -14,6 +14,7 @@ using UnityEngine.Rendering.Universal;
 //   2  ~2.2 megapixels, hard shadows 15 m, bloom, 2 lamps per object, view 70 m
 //   1  ~1.4 megapixels, no shadows, no bloom, 1 lamp per object, view 55 m, small yard things vanish sooner
 //   0  ~0.9 megapixels, like 1 but no screen effects at all and 30 fps (steady instead of stuttering)
+// Mom and Luna: 2 bones per vertex instead of 4, Luna's teeth and tongue (hidden in her mouth) are not drawn.
 // Always: small yard things (flowers, rocks, bushes) are not drawn far away (14-32 m), no anti-aliasing, lamps and candles never cast shadows, depth of field / motion blur / film grain / lens flare off.
 public class MobilePerformance : MonoBehaviour
 {
@@ -134,8 +135,9 @@ public class MobilePerformance : MonoBehaviour
         else if (Level < ceiling && Time.unscaledTime - smoothSince >= SmoothSecondsToRise) SetLevel(Level + 1);
     }
 
-    // ---------- a hidden readout for testing: tap the screen with THREE fingers to show / hide "Quality 2   57 fps"
-    bool showReadout, threeFingersDown;
+    // ---------- a hidden readout for testing: tap the screen with THREE fingers to show / hide "Quality 2   57 fps".
+    // While it shows, tapping the readout itself hides / shows Mom and Luna (to see how much they cost).
+    bool showReadout, threeFingersDown, familyHidden;
     float shownFps, fpsTimer;
     int fpsFrames;
     GUIStyle readoutStyle;
@@ -147,6 +149,11 @@ public class MobilePerformance : MonoBehaviour
             foreach (var t in UnityEngine.InputSystem.Touchscreen.current.touches) if (t.press.isPressed) fingers++;
         if (fingers >= 3 && !threeFingersDown) showReadout = !showReadout;
         threeFingersDown = fingers >= 3;
+        if (showReadout && fingers == 1 && UnityEngine.InputSystem.Touchscreen.current.primaryTouch.press.wasPressedThisFrame)
+        {
+            Vector2 p = UnityEngine.InputSystem.Touchscreen.current.primaryTouch.position.ReadValue();
+            if (ReadoutRect().Contains(new Vector2(p.x, Screen.height - p.y))) { familyHidden = !familyHidden; HideFamily(familyHidden); }
+        }
 
         fpsFrames++;
         fpsTimer += Time.unscaledDeltaTime;
@@ -155,17 +162,46 @@ public class MobilePerformance : MonoBehaviour
 
     void OnGUI()
     {
+        if (Event.current.type != EventType.Repaint) return;     // only drawing here: skip the extra layout / input passes
         if (!showReadout) return;
         if (readoutStyle == null) readoutStyle = new GUIStyle(GUI.skin.label);
         readoutStyle.fontSize = Mathf.RoundToInt(Screen.height * 0.025f);
         readoutStyle.normal.textColor = Color.yellow;
-        GUI.Label(new Rect(Screen.width * 0.4f, Screen.height * 0.005f, Screen.width * 0.3f, readoutStyle.fontSize * 1.6f),
-                  "Quality " + Level + "   " + Mathf.RoundToInt(shownFps) + " fps", readoutStyle);
+        GUI.Label(ReadoutRect(), "Quality " + Level + "   " + Mathf.RoundToInt(shownFps) + " fps" +
+                  (familyHidden ? "   (Mom + Luna hidden)" : "   (tap: hide Mom + Luna)"), readoutStyle);
+    }
+
+    static Rect ReadoutRect() { return new Rect(Screen.width * 0.3f, Screen.height * 0.005f, Screen.width * 0.45f, Screen.height * 0.06f); }
+
+    static void HideFamily(bool hide)
+    {
+        foreach (GrandmaAI m in FindObjectsByType<GrandmaAI>(FindObjectsSortMode.None))
+            foreach (Renderer r in m.GetComponentsInChildren<Renderer>(true)) r.forceRenderingOff = hide;
+        foreach (BabyAI b in FindObjectsByType<BabyAI>(FindObjectsSortMode.None))
+            foreach (Renderer r in b.GetComponentsInChildren<Renderer>(true)) r.forceRenderingOff = hide;
+    }
+
+    // Mom and Luna cost less to animate: fewer bones per vertex, and Luna's teeth and tongue are not drawn.
+    static void TuneFamily()
+    {
+        foreach (GrandmaAI m in FindObjectsByType<GrandmaAI>(FindObjectsSortMode.None)) TuneCharacter(m.gameObject);
+        foreach (BabyAI b in FindObjectsByType<BabyAI>(FindObjectsSortMode.None)) TuneCharacter(b.gameObject);
+    }
+
+    static void TuneCharacter(GameObject who)
+    {
+        foreach (SkinnedMeshRenderer r in who.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+        {
+            r.quality = SkinQuality.Bone2;
+            string n = r.name.ToLower();
+            if ((n.Contains("teeth") || n.Contains("tongue")) && r.enabled) r.enabled = false;
+        }
     }
 
     // ---------- lights, cameras and screen effects (also the ones made later: checked every 2 seconds)
     void TuneScene()
     {
+        TuneFamily();
         foreach (Light l in FindObjectsByType<Light>(FindObjectsSortMode.None))
         {
             if (l.type != LightType.Directional) { if (l.shadows != LightShadows.None) l.shadows = LightShadows.None; }

@@ -51,6 +51,7 @@ public class PlayerInteractor : MonoBehaviour
 
     void OnGUI()
     {
+        if (Event.current.type != EventType.Repaint) return;     // only drawing here: skip the extra layout / input passes
         if (CutsceneRunner.IsPlaying || PauseMenu.IsOpen) return;              // no crosshair or prompt over cutscenes and menus
         if (promptStyle == null)
         {

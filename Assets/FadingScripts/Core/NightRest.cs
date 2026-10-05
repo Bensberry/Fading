@@ -58,6 +58,7 @@ public class NightRest : MonoBehaviour
 
     void OnGUI()
     {
+        if (Event.current.type != EventType.Repaint) return;     // only drawing here: skip the extra layout / input passes
         if (!(nearMom || nearLuna) || PlayerInteractor.HasTarget || CutsceneRunner.IsPlaying || PauseMenu.IsOpen) return;
         if (style == null) style = new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, wordWrap = true };
         style.fontSize = Mathf.Max(18, Mathf.RoundToInt(Screen.height * 0.024f));

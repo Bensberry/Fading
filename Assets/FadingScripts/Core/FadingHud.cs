@@ -120,6 +120,7 @@ public class FadingHud : MonoBehaviour
     // ---------- drawing
     void OnGUI()
     {
+        if (Event.current.type != EventType.Repaint) return;     // only drawing here: skip the extra layout / input passes
         MakeStyles();
         bool cutscene = CutsceneRunner.IsPlaying;          // cutscenes show only subtitles (no bar, candle or goal)
         if (!cutscene) DrawProgress();

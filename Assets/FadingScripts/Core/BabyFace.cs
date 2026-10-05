@@ -106,11 +106,14 @@ public class BabyFace : MonoBehaviour
 
     void Want(string shape, float value) { wanted[shape] = value; }
 
+    // Only when the value really changes: every change makes the phone reshape her whole face again.
     void SetShape(string shape, float value)
     {
         List<Shape> list;
         if (!shapes.TryGetValue(shape, out list)) return;
-        foreach (Shape s in list) if (s.renderer != null) s.renderer.SetBlendShapeWeight(s.index, value);
+        foreach (Shape s in list)
+            if (s.renderer != null && Mathf.Abs(s.renderer.GetBlendShapeWeight(s.index) - value) > 0.5f)
+                s.renderer.SetBlendShapeWeight(s.index, value);
     }
 
     // Turn the head toward the target (after the animation has posed her).
