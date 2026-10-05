@@ -217,7 +217,6 @@ public class MobilePerformance : MonoBehaviour
             float[] cull = new float[32];
             cull[Playground.SmallThingsLayer] = SmallThingsDistance[Level];
             c.layerCullDistances = cull;
-            c.layerCullSpherical = true;
             UniversalAdditionalCameraData data = c.GetUniversalAdditionalCameraData();
             if (data != null && c.cameraType == CameraType.Game && farClip[c] > 1f) data.renderPostProcessing = Level > 0;
         }
