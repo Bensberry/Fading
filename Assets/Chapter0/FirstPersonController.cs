@@ -62,6 +62,12 @@ public class FirstPersonController : MonoBehaviour
         controller.stepOffset = stepOffset;
         controller.skinWidth = skinWidth;
 
+        // Chapter 1-3: the player has a kinematic Rigidbody with "Interpolate" on. Interpolation makes physics write
+        // its own (older) position back onto the player every frame, which undid most of our walking and turning
+        // (jerky movement, very visible on phones). The CharacterController moves the player, so no interpolation.
+        Rigidbody body = GetComponent<Rigidbody>();
+        if (body != null) body.interpolation = RigidbodyInterpolation.None;
+
         // Remember starting position and rotation
         startPosition = transform.position;
         startRotation = transform.rotation;
