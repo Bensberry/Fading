@@ -13,14 +13,14 @@ using UnityEngine.Rendering.Universal;
 //   3  85% resolution (less on huge tablet screens), soft shadows 25 m, bloom, 3 lamps per object, view 90 m
 //   2  ~2.2 megapixels, hard shadows 15 m, bloom, 2 lamps per object, view 70 m
 //   1  ~1.4 megapixels, no shadows, no bloom, 1 lamp per object, view 55 m, small yard things vanish sooner
-//   0  ~0.9 megapixels, like 1 but no screen effects at all and 30 fps (steady instead of stuttering)
+//   0  ~0.9 megapixels, like 1 but no screen effects at all
 // Mom and Luna: 2 bones per vertex instead of 4, Luna's teeth and tongue (hidden in her mouth) are not drawn.
 // Always: small yard things (flowers, rocks, bushes) are not drawn far away (14-32 m), no anti-aliasing, lamps and candles never cast shadows, depth of field / motion blur / film grain / lens flare off.
 public class MobilePerformance : MonoBehaviour
 {
     public static int Level { get; private set; } = -1;
 
-    const string SaveKey = "fading_mobile_quality";
+    const string SaveKey = "fading_mobile_quality_v2";       // (v2: the old saved level could be stuck at 0)
     const float TooSlowFps = 45f, SmoothFps = 58f;
     const float CheckSeconds = 3f, SmoothSecondsToRise = 15f;
 
@@ -71,7 +71,7 @@ public class MobilePerformance : MonoBehaviour
         PlayerPrefs.SetInt(SaveKey, Level);
         PlayerPrefs.Save();
 
-        Application.targetFrameRate = Level == 0 ? 30 : 60;
+        Application.targetFrameRate = 60;          // never capped lower, so a device can always climb back to a better level
         QualitySettings.lodBias = LodBias[Level];
         UniversalRenderPipelineAsset urp = GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset;
         if (urp != null)
@@ -124,7 +124,7 @@ public class MobilePerformance : MonoBehaviour
         float fps = frames / seconds;
         frames = 0;
         measureStart = Time.unscaledTime;
-        float wanted = Level == 0 ? 28f : TooSlowFps;
+        float wanted = TooSlowFps;
 
         if (fps < wanted && Level > 0)
         {
