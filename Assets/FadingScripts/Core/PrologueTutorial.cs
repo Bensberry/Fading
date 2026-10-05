@@ -92,7 +92,7 @@ public class PrologueTutorial : MonoBehaviour
             case 0: FadingHud.SetObjective("You are a ghost. Put your thumb on the LEFT side of the screen and move it to walk.", true); break;
             case 1: FadingHud.SetObjective("Tap  RUN  to move faster (tap again to walk).", true); break;
             case 2: FadingHud.SetObjective("Drag on the RIGHT side of the screen to look around.", true); break;
-            case 3: FadingHud.SetObjective("Tap an object to touch it.  It drifts back after 5 seconds.", true); break;
+            case 3: FadingHud.SetObjective("Put the crosshair on an object and tap the screen to touch it.  It drifts back after 5 seconds.", true); break;
             case 4:
                 FadingHud.CandleHudAllowed = true;
                 FadingHud.SetObjective("Your candle can show you what to touch next. Tap  HINT.  It burns low after each use.", true);

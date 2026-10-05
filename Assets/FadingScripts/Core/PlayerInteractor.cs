@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 #endif
 
 // Put this on the player's camera. Look at an interactable and press F.
-// On phones: tap the object itself (anywhere on the screen) instead (MobileControls.TapPosition).
+// On phones: tap anywhere to touch what the crosshair is on, or tap an object directly.
 public class PlayerInteractor : MonoBehaviour
 {
     public float reach = 3.5f;
@@ -31,7 +31,7 @@ public class PlayerInteractor : MonoBehaviour
         {
             if (MobileControls.InteractPressed && !RestSpot.AnyoneResting)
             {
-                Interactable tapped = TappedObject();
+                Interactable tapped = current != null ? current : TappedObject();     // the crosshair's object first
                 if (tapped != null) tapped.TryInteract();
             }
         }

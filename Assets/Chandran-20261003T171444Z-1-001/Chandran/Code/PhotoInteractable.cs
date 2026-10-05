@@ -196,7 +196,7 @@ public class PhotoInteractable : MonoBehaviour
         if (isHeldNow && heldLastFrame &&
             ((UnityEngine.InputSystem.Mouse.current != null &&
               UnityEngine.InputSystem.Mouse.current.leftButton.wasPressedThisFrame) ||
-             MobileControls.TappedOn(gameObject)))
+             MobileControls.TappedOn(gameObject, 4.5f, false)))
         {
             ToggleInspectMode();
         }

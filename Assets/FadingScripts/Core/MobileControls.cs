@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 // On-screen TOUCH CONTROLS:
 //   joystick (bottom left, fixed)   walk
 //   anywhere else                   drag to look around
-//   a quick tap on something        touches it (= F on that object: PlayerInteractor uses TapPosition)
+//   a quick tap anywhere            touches what the crosshair is on (= F); or tap an object directly
 //   buttons (right side)            HINT (= H), RUN (on / off), II (pause, = Esc)
 //   during cutscenes          SKIP (= Space)        during the tutorial   SKIP TUTORIAL (= Tab)
 // Other scripts ask it what happened this frame (MobileControls.InteractPressed, .Move, .LookDegrees ...), so every
@@ -183,16 +183,34 @@ public class MobileControls : MonoBehaviour
 
     static float Dpi() { return Screen.dpi > 50f ? Screen.dpi : Screen.width / 6f; }
 
-    // True on the frame the player TAPPED this object (or one of its parts), within 'reach' metres.
+    // True on the frame the player tapped the screen while this object is under the CROSSHAIR (tap anywhere),
+    // or tapped this object itself (or one of its parts), within 'reach' metres.
     // Any script can use it: if (MobileControls.TappedOn(gameObject)) ...
-    // It counts as a hit when the tap's ray hits the object first, or (for objects without a solid collider)
-    // when the tap lands close to the object on screen.
-    public static bool TappedOn(GameObject target, float reach = 4.5f)
+    // crosshairCounts = false: only a tap on the object itself counts (e.g. the photo you are holding).
+    public static bool TappedOn(GameObject target, float reach = 4.5f, bool crosshairCounts = true)
     {
         if (!Active || target == null || !InteractPressed) return false;
         Camera cam = Camera.main;
         if (cam == null) return false;
-        Ray ray = cam.ScreenPointToRay(TapPosition);
+        if (crosshairCounts && AimedAt(cam, target, reach)) return true;
+        return TouchedOnScreen(cam, target, reach, TapPosition);
+    }
+
+    // Is the crosshair (the middle of the screen) on this object?
+    static bool AimedAt(Camera cam, GameObject target, float reach)
+    {
+        Ray centre = cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
+        if (Physics.SphereCast(centre, 0.15f, out RaycastHit hit, reach, ~0, QueryTriggerInteraction.Ignore) && hit.transform.IsChildOf(target.transform))
+            return true;
+        Bounds b;
+        if (!AreaOf(target, out b) || Vector3.Distance(cam.transform.position, b.center) > reach + b.extents.magnitude) return false;
+        return Vector3.Angle(cam.transform.forward, b.center - cam.transform.position) < 10f;     // e.g. an invisible trigger zone
+    }
+
+    // Did the tap land on the object itself?
+    static bool TouchedOnScreen(Camera cam, GameObject target, float reach, Vector2 tap)
+    {
+        Ray ray = cam.ScreenPointToRay(tap);
         if (Physics.Raycast(ray, out RaycastHit hit, reach, ~0, QueryTriggerInteraction.Ignore) && hit.transform.IsChildOf(target.transform))
             return true;
 
@@ -202,7 +220,7 @@ public class MobileControls : MonoBehaviour
         Vector3 onScreen = cam.WorldToScreenPoint(b.center);
         if (onScreen.z <= 0f) return false;                                    // behind the camera
         float size = Mathf.Max(0.35f * Dpi(), ScreenSize(cam, b));
-        return Vector2.Distance(new Vector2(onScreen.x, onScreen.y), TapPosition) < size;
+        return Vector2.Distance(new Vector2(onScreen.x, onScreen.y), tap) < size;
     }
 
     // Where the object is: its visible parts, or (for an invisible trigger zone, like Grandma's clock) its colliders.
