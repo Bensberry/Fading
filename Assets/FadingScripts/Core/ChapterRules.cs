@@ -116,6 +116,7 @@ public class ChapterRules : MonoBehaviour
         gameObject.AddComponent<ChapterGoals>();       // the day's checklist on the goal line
         gameObject.AddComponent<NightQuest>();         // the night's memory lights (and the dream cutscenes)
         gameObject.AddComponent<Playground>();         // the back yard playground
+        gameObject.AddComponent<ZoneCulling>();        // phones: inside the house the yard is not drawn, outside the rooms are not
         gameObject.AddComponent<NightSky>();           // stars and the moon at night
         gameObject.AddComponent<NightRest>();          // rest beside Mom or Luna to end the night (after bringing her a dream)
 
