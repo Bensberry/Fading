@@ -40,7 +40,14 @@ public class MobileControls : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void Create()
     {
+        // Only in a real phone build. Never in the Unity Editor (even with the Android build target or the Device Simulator)
+        // and never on Windows, so the mouse and keyboard always work there.
+#if UNITY_EDITOR || !(UNITY_ANDROID || UNITY_IOS)
+        return;
+#else
         if (!Application.isMobilePlatform) return;
+#endif
+#pragma warning disable CS0162
         GameObject g = new GameObject("MobileControls");
         DontDestroyOnLoad(g);
         g.AddComponent<MobileControls>();
@@ -53,6 +60,7 @@ public class MobileControls : MonoBehaviour
         Screen.orientation = ScreenOrientation.AutoRotation;               // landscape only, either way round
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
         Application.targetFrameRate = 60;
+#pragma warning restore CS0162
     }
 
     // The word to show for a key in hints: "[F]" on PC, "TOUCH" on a phone.
