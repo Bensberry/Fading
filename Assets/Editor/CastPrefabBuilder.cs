@@ -46,6 +46,7 @@ public static class CastPrefabBuilder
         string prefabPath = "Assets/Resources/Cast/" + name + ".prefab";
         if (!force && File.Exists(prefabPath) && HasClipLibrary(prefabPath)) return false;
 
+        if (name == "Father") EnsureHumanoid(modelPath);           // it must use a human rig to play Mom's idle / walk
         GameObject model = AssetDatabase.LoadAssetAtPath<GameObject>(modelPath);
         if (model == null) { Debug.LogWarning("CastPrefabBuilder: model not found: " + modelPath); return false; }
 
@@ -79,6 +80,16 @@ public static class CastPrefabBuilder
         Object.DestroyImmediate(root);
         Debug.Log("CastPrefabBuilder: created " + prefabPath);
         return true;
+    }
+
+    // Switch a model to a Humanoid rig (and reimport it) if it is not one yet.
+    static void EnsureHumanoid(string modelPath)
+    {
+        ModelImporter importer = AssetImporter.GetAtPath(modelPath) as ModelImporter;
+        if (importer == null || importer.animationType == ModelImporterAnimationType.Human) return;
+        importer.animationType = ModelImporterAnimationType.Human;
+        importer.avatarSetup = ModelImporterAvatarSetup.CreateFromThisModel;
+        importer.SaveAndReimport();
     }
 
     static bool HasClipLibrary(string prefabPath)
