@@ -96,7 +96,7 @@ MonoBehaviour:
     - line: '|   disableDepthAndStencilBuffers: 0'
     - line: '|   androidStartInFullscreen: 1'
     - line: '|   androidRenderOutsideSafeArea: 1'
-    - line: '|   androidUseSwappy: 1'
+    - line: '|   androidUseSwappy: 0'
     - line: '|   androidRequestedVisibleInsets: 0'
     - line: '|   androidSystemBarsBehavior: 2'
     - line: '|   androidDisplayOptions: 1'
