@@ -120,7 +120,7 @@ public class Playground : MonoBehaviour
 
     void BuildForestEdge()
     {
-        float step = Application.isMobilePlatform ? 4.2f : 2.8f;           // phones: fewer trees (they are taller than you can see past anyway)
+        float step = Application.isMobilePlatform ? 5f : 2.8f;           // phones: fewer trees (they are taller than you can see past anyway)
         for (float x = -40f; x <= 24f; x += step)
             for (float z = -28f; z <= 36f; z += step)
             {
@@ -356,8 +356,20 @@ public class Playground : MonoBehaviour
             box.size = new Vector3(Mathf.Abs(s.x) * trunkOnly, Mathf.Abs(s.y), Mathf.Abs(s.z) * trunkOnly);
         }
         foreach (Renderer r in g.GetComponentsInChildren<Renderer>())
-            if (size < 1f) r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;     // small things: no shadows (cheaper)
+            if (size < (Application.isMobilePlatform ? 2.5f : 1f)) r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;     // small things: no shadows (cheaper)
+        if (Application.isMobilePlatform) HideWhenTiny(g, size);
         return g;
+    }
+
+    // Phones: a yard model is not drawn at all once it looks tiny on screen (far away). Up close nothing changes.
+    static void HideWhenTiny(GameObject g, float size)
+    {
+        Renderer[] renderers = g.GetComponentsInChildren<Renderer>();
+        if (renderers.Length == 0 || g.GetComponent<LODGroup>() != null) return;
+        float smallest = size < 1f ? 0.015f : 0.02f;          // share of the screen height: flowers vanish past ~25 m, bigger things past ~45 m+
+        LODGroup lod = g.AddComponent<LODGroup>();
+        lod.SetLODs(new[] { new LOD(smallest, renderers) });
+        lod.RecalculateBounds();
     }
 
     // Make a bench / swing set a place to rest. 'seatHeight' = the seat as a fraction of the model's height.

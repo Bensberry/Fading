@@ -4,7 +4,7 @@ using UnityEngine.Rendering.Universal;
 
 // Goes in: nowhere (it starts by itself, ONLY in a phone build; on PC and in the Editor it does nothing).
 // Makes the game run smoothly on Android phones by drawing a bit less:
-//   - draws the 3D picture at 85% resolution (text and buttons stay sharp), no anti-aliasing
+//   - draws the 3D picture at 85% resolution, less on very big screens like tablets (text and buttons stay sharp), no anti-aliasing
 //   - shadows as far as on PC (25 m); lamps and candles never cast shadows; at most 3 lamps light each object
 //   - the camera does not draw very far away objects
 //   - heavy screen effects (bloom quality, depth of field, motion blur, film grain, lens flare) are switched off
@@ -12,6 +12,7 @@ using UnityEngine.Rendering.Universal;
 public class MobilePerformance : MonoBehaviour
 {
     const float RenderScale = 0.85f;          // 85% resolution for the 3D view (a phone screen is small and sharp)
+    const float MaxMegapixels = 3.3f;         // tablets (e.g. 3000 x 2120): at most about this many pixels are drawn
     const float ShadowDistance = 25f;          // the same as on PC
     const float ViewDistance = 90f;           // the whole house and yard still fit in this
 
@@ -35,15 +36,22 @@ public class MobilePerformance : MonoBehaviour
     {
         QualitySettings.vSyncCount = 0;                       // phones ignore V-Sync; the frame rate below is used instead
         Application.targetFrameRate = 60;
-        QualitySettings.lodBias = 0.6f;
 
         UniversalRenderPipelineAsset urp = GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset;
         if (urp == null) return;
-        urp.renderScale = RenderScale;
+        urp.renderScale = ScaleFor(Screen.width, Screen.height);
         urp.msaaSampleCount = 1;
         urp.shadowDistance = ShadowDistance;
         urp.shadowCascadeCount = 1;
         urp.maxAdditionalLightsCount = 3;
+    }
+
+    // 85% on a phone; on a huge tablet screen a bit less, so the picture never has more than MaxMegapixels.
+    static float ScaleFor(int width, int height)
+    {
+        float megapixels = width * (float)height / 1000000f;
+        if (megapixels <= 0f) return RenderScale;
+        return Mathf.Clamp(Mathf.Sqrt(MaxMegapixels / megapixels), 0.65f, RenderScale);
     }
 
     void Start() { InvokeRepeating(nameof(TuneScene), 0f, 2f); }
