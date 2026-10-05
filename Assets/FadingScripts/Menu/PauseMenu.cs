@@ -2,11 +2,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 // Goes in: nowhere by hand. ChapterRules adds it to the game scenes (Chapter0 / Chapter1).
 // Press Esc: the game freezes and the title page from the main menu appears (black screen, lit candle),
 // with RESUME, SETTINGS, MAIN MENU and QUIT. Esc again resumes (Esc inside SETTINGS goes back).
 // SETTINGS has three sliders: FOG, LIGHTING and SENSITIVITY. They are saved between runs (see GameSettings).
+// Below them OLD PHONE MODE (on / off) with a GRAPHICS slider for older phones (see MobilePerformance).
 //
 // How the black candle page covers the game: a second camera far away from the house looks at a candle,
 // drawn over everything. The game's sun/moon and ambient light are switched off while paused, so they can't light it.
@@ -152,13 +154,57 @@ public class PauseMenu : MonoBehaviour
         MenuKit.MakeOption(optionsGroup.transform, "QUIT", 3, style, QuitGame);
 
         settingsGroup = MakeGroup("Settings");
-        MenuKit.MakeSlider(settingsGroup.transform, "Fog", 0.58f, style, 0f, 100f, GameSettings.Fog, v => Mathf.RoundToInt(v).ToString(),
+        MenuKit.MakeSlider(settingsGroup.transform, "Fog", 0.64f, style, 0f, 100f, GameSettings.Fog, v => Mathf.RoundToInt(v).ToString(),
                            v => { GameSettings.Fog = v; GameSettings.ApplyFog(); });
-        MenuKit.MakeSlider(settingsGroup.transform, "Lighting", 0.44f, style, 0f, 100f, GameSettings.Lighting, v => Mathf.RoundToInt(v).ToString(),
+        MenuKit.MakeSlider(settingsGroup.transform, "Lighting", 0.53f, style, 0f, 100f, GameSettings.Lighting, v => Mathf.RoundToInt(v).ToString(),
                            v => { GameSettings.Lighting = v; GameSettings.ApplyLighting(); KeepDarkWhilePaused(); });
-        MenuKit.MakeSlider(settingsGroup.transform, "Sensitivity", 0.30f, style, 0f, 100f, GameSettings.Sensitivity, v => Mathf.RoundToInt(v).ToString(),
+        MenuKit.MakeSlider(settingsGroup.transform, "Sensitivity", 0.42f, style, 0f, 100f, GameSettings.Sensitivity, v => Mathf.RoundToInt(v).ToString(),
                            v => { GameSettings.Sensitivity = v; GameSettings.ApplySensitivity(); });
-        MenuKit.MakeOption(settingsGroup.transform, "BACK", 4, style, ShowOptions);
+        BuildOldPhoneMode();
+        PlaceAt(MenuKit.MakeOption(settingsGroup.transform, "BACK", 4, style, ShowOptions), 0.08f);
+    }
+
+    // OLD PHONE MODE: ON / OFF. When it is on, a GRAPHICS slider appears (Lowest .. High). See MobilePerformance.
+    MenuButton oldPhoneButton;
+    GameObject graphicsSlider, graphicsLabel;
+
+    void BuildOldPhoneMode()
+    {
+        oldPhoneButton = MenuKit.MakeOption(settingsGroup.transform, OldPhoneText(), 3, style, ToggleOldPhoneMode);
+        PlaceAt(oldPhoneButton, 0.30f);
+
+        Slider slider = MenuKit.MakeSlider(settingsGroup.transform, "Graphics", 0.18f, style, 0f, 3f, MobilePerformance.Level,
+                                           v => MobilePerformance.LevelNames[Mathf.RoundToInt(v)],
+                                           v => MobilePerformance.Level = Mathf.RoundToInt(v));
+        slider.wholeNumbers = true;
+        graphicsSlider = slider.gameObject;
+        Transform label = settingsGroup.transform.Find("GraphicsLabel");
+        graphicsLabel = label != null ? label.gameObject : null;
+        ShowGraphicsSlider();
+    }
+
+    void ToggleOldPhoneMode()
+    {
+        MobilePerformance.OldPhoneMode = !MobilePerformance.OldPhoneMode;
+        TMPro.TextMeshProUGUI text = oldPhoneButton.GetComponent<TMPro.TextMeshProUGUI>();
+        if (text != null) text.text = OldPhoneText();
+        ShowGraphicsSlider();
+    }
+
+    static string OldPhoneText() { return "OLD PHONE MODE   " + (MobilePerformance.OldPhoneMode ? "ON" : "OFF"); }
+
+    void ShowGraphicsSlider()
+    {
+        bool on = MobilePerformance.OldPhoneMode;
+        if (graphicsSlider != null) graphicsSlider.SetActive(on);
+        if (graphicsLabel != null) graphicsLabel.SetActive(on);
+    }
+
+    // Put a menu option at this height of the screen (0 = bottom, 1 = top).
+    void PlaceAt(MenuButton button, float height)
+    {
+        RectTransform rt = (RectTransform)button.transform;
+        rt.anchorMin = rt.anchorMax = new Vector2(style.leftMargin, height);
     }
 
     // ApplyLighting also sets the game's ambient light; remember it for later and keep the page dark.

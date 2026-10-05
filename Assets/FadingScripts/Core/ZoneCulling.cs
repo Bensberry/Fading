@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// Goes in: nowhere (ChapterRules adds it in Chapter 1-3). Works on phones / tablets only; on PC it does nothing.
+// Goes in: nowhere (ChapterRules adds it in Chapter 1-3). Works only while OLD PHONE MODE is on (Settings).
 // "Render distance" by zone, like in Minecraft, so phones have much less to draw:
 //   inside the house  -> the yard's things and the night sky (stars, moon) are not drawn (the big trees and the lamps stay)
 //   out in the yard   -> the furniture and things inside the house are not drawn (walls, roof, windows, doors stay)
@@ -25,7 +25,6 @@ public class ZoneCulling : MonoBehaviour
 
     void Start()
     {
-        if (!Application.isMobilePlatform) { enabled = false; return; }
         house = Playground.HouseTransform();
         Transform floors = house != null ? house.Find("Structure/Floors") : null;
         if (floors == null || !BoundsOf(floors, out footprint)) { enabled = false; return; }
@@ -35,7 +34,7 @@ public class ZoneCulling : MonoBehaviour
     {
         if (yard == null) { GameObject y = GameObject.Find("Yard"); if (y != null) yard = y.transform; }
         Camera cam = Camera.main;
-        Zone now = (cam == null || CutsceneRunner.IsPlaying) ? Zone.Both : ZoneOf(cam.transform.position);
+        Zone now = (cam == null || CutsceneRunner.IsPlaying || !MobilePerformance.OldPhoneMode) ? Zone.Both : ZoneOf(cam.transform.position);
         if (now == zone && Time.time < nextRefresh) return;
         zone = now;
         nextRefresh = Time.time + RefreshSeconds;
