@@ -4,9 +4,10 @@ using UnityEngine.SceneManagement;
 
 // Goes in: nowhere. It starts by itself on phones and tablets (Android), and does nothing on PC.
 // On-screen TOUCH CONTROLS:
-//   left half of the screen   a joystick appears where your thumb lands: walk
-//   right half of the screen  drag to look around
-//   buttons (right side)      TOUCH (= F), HINT (= H), RUN (on / off), II (pause, = Esc)
+//   joystick (bottom left, fixed)   walk
+//   anywhere else                   drag to look around
+//   a quick tap on something        touches it (= F on that object: PlayerInteractor uses TapPosition)
+//   buttons (right side)            HINT (= H), RUN (on / off), II (pause, = Esc)
 //   during cutscenes          SKIP (= Space)        during the tutorial   SKIP TUTORIAL (= Tab)
 // Other scripts ask it what happened this frame (MobileControls.InteractPressed, .Move, .LookDegrees ...), so every
 // keyboard control in the game also works with touch. MobileControls.Label("F") gives the right word for hints on screen.
@@ -25,6 +26,10 @@ public class MobileControls : MonoBehaviour
     public static bool PausePressed { get { return pauseFrame == Time.frameCount; } }
     public static bool SkipPressed { get { return skipFrame == Time.frameCount; } }
     public static bool TutorialSkipPressed { get { return tutorialSkipFrame == Time.frameCount; } }
+    public static Vector2 TapPosition { get; private set; }       // where the last tap was (screen pixels)
+
+    const float TapSeconds = 0.3f;            // a touch shorter than this...
+    const float TapInches = 0.15f;            // ...that moved less than this is a tap, not a drag
 
     // While the tutorial runs, PrologueTutorial switches this on (shows the SKIP TUTORIAL button).
     public static bool TutorialShowing;
@@ -33,7 +38,9 @@ public class MobileControls : MonoBehaviour
 
     int moveTouch = -1, lookTouch = -1;
     readonly System.Collections.Generic.HashSet<int> known = new System.Collections.Generic.HashSet<int>();   // fingers already handled
-    Vector2 moveOrigin, movePosition;
+    struct TapCandidate { public float start; public Vector2 from; public bool moved; }
+    readonly System.Collections.Generic.Dictionary<int, TapCandidate> taps = new System.Collections.Generic.Dictionary<int, TapCandidate>();
+    Vector2 movePosition;
     Texture2D circle;
 
     // ---------- start by itself on touch devices
@@ -62,13 +69,13 @@ public class MobileControls : MonoBehaviour
 #pragma warning restore CS0162
     }
 
-    // The word to show for a key in hints: "[F]" on PC, "TOUCH" on a phone.
+    // The word to show for a key in hints: "[F]" on PC, "TAP" on a phone.
     public static string Label(string key)
     {
         if (!Active) return "[" + key + "]";
         switch (key)
         {
-            case "F": return "TOUCH";
+            case "F": return "TAP";
             case "H": return "HINT";
             case "Esc": return "II";
             case "Space": return "SKIP";
@@ -99,8 +106,9 @@ public class MobileControls : MonoBehaviour
                 Vector2 pos = touch.position.ReadValue();
                 bool ended = phase == UnityEngine.InputSystem.TouchPhase.Ended || phase == UnityEngine.InputSystem.TouchPhase.Canceled;
 
-                if (ended) { known.Remove(id); }
+                if (ended) { known.Remove(id); EndTap(id, pos); }
                 else if (known.Add(id)) Begin(id, pos);                       // a new finger (even if it already moved this frame)
+                else WatchTap(id, pos);
 
                 if (id == moveTouch)
                 {
@@ -123,8 +131,7 @@ public class MobileControls : MonoBehaviour
         if (!moveSeen) moveTouch = -1;
         if (!lookSeen) lookTouch = -1;
 
-        float radius = Screen.height * 0.11f;
-        Move = moveTouch >= 0 ? Vector2.ClampMagnitude((movePosition - moveOrigin) / radius, 1f) : Vector2.zero;
+        Move = moveTouch >= 0 ? Vector2.ClampMagnitude((movePosition - PadCentre()) / PadRadius(), 1f) : Vector2.zero;
         LookDegrees = new Vector2(look.x, look.y);
         LookPixels = lookPixels;
     }
@@ -134,11 +141,10 @@ public class MobileControls : MonoBehaviour
     // Screens report their pixels per inch; if one does not, a 6-inch-wide screen is assumed.
     static float DegreesPerPixel()
     {
-        float dpi = Screen.dpi > 50f ? Screen.dpi : Screen.width / 6f;
-        return DegreesPerInch / dpi;
+        return DegreesPerInch / Dpi();
     }
 
-    // A new finger: a button, the joystick (left half) or looking (right half).
+    // A new finger: a button, the joystick, or looking (and maybe a tap).
     void Begin(int id, Vector2 pos)
     {
         Vector2 gui = new Vector2(pos.x, Screen.height - pos.y);           // OnGUI counts from the top
@@ -147,21 +153,46 @@ public class MobileControls : MonoBehaviour
 
         if (Hit(PauseRect(), gui)) { pauseFrame = Time.frameCount; return; }
         if (TutorialShowing && Hit(TutorialRect(), gui)) { tutorialSkipFrame = Time.frameCount; return; }
-        if (Hit(InteractRect(), gui)) { interactFrame = Time.frameCount; return; }
         if (Hit(HintRect(), gui)) { hintFrame = Time.frameCount; return; }
         if (Hit(RunRect(), gui)) { Running = !Running; return; }
 
-        if (pos.x < Screen.width * 0.45f) { if (moveTouch < 0) { moveTouch = id; moveOrigin = movePosition = pos; } }
-        else if (lookTouch < 0) lookTouch = id;
+        if (moveTouch < 0 && Vector2.Distance(pos, PadCentre()) < PadRadius() * 1.6f) { moveTouch = id; movePosition = pos; return; }
+        if (lookTouch < 0) lookTouch = id;
+        taps[id] = new TapCandidate { start = Time.unscaledTime, from = pos };
     }
+
+    // A finger that moves too far is a drag (looking), not a tap.
+    void WatchTap(int id, Vector2 pos)
+    {
+        TapCandidate t;
+        if (!taps.TryGetValue(id, out t) || t.moved) return;
+        if (Vector2.Distance(pos, t.from) > TapInches * Dpi()) { t.moved = true; taps[id] = t; }
+    }
+
+    // Finger lifted: if it was short and still, it was a tap on whatever is under it.
+    void EndTap(int id, Vector2 pos)
+    {
+        TapCandidate t;
+        if (!taps.TryGetValue(id, out t)) return;
+        taps.Remove(id);
+        if (t.moved || Time.unscaledTime - t.start > TapSeconds || Vector2.Distance(pos, t.from) > TapInches * Dpi()) return;
+        if (CutsceneRunner.IsPlaying || PauseMenu.IsOpen) return;
+        TapPosition = pos;
+        interactFrame = Time.frameCount;
+    }
+
+    static float Dpi() { return Screen.dpi > 50f ? Screen.dpi : Screen.width / 6f; }
+
+    // The fixed joystick, bottom left (screen pixels, measured from the bottom like touches are).
+    static Vector2 PadCentre() { return new Vector2(19f * U, 19f * U); }
+    static float PadRadius() { return 12f * U; }
 
     static bool Hit(Rect r, Vector2 p) { return r.Contains(p); }
 
     // ---------- where the buttons are (screen-size independent)
     static float U { get { return Screen.height / 100f; } }        // 1 unit = 1% of the screen height
-    static Rect InteractRect() { return new Rect(Screen.width - 26f * U, Screen.height - 30f * U, 22f * U, 22f * U); }
-    static Rect HintRect() { return new Rect(Screen.width - 20f * U, Screen.height - 50f * U, 14f * U, 14f * U); }
-    static Rect RunRect() { return new Rect(Screen.width - 44f * U, Screen.height - 20f * U, 14f * U, 14f * U); }
+    static Rect HintRect() { return new Rect(Screen.width - 22f * U, Screen.height - 24f * U, 18f * U, 18f * U); }
+    static Rect RunRect() { return new Rect(Screen.width - 22f * U, Screen.height - 44f * U, 15f * U, 15f * U); }
     static Rect PauseRect() { return new Rect(Screen.width - 12f * U, 2f * U, 10f * U, 10f * U); }
     static Rect SkipRect() { return new Rect(Screen.width - 26f * U, 3f * U, 22f * U, 9f * U); }
     static Rect TutorialRect() { return new Rect(2f * U, 3f * U, 34f * U, 9f * U); }
@@ -179,20 +210,17 @@ public class MobileControls : MonoBehaviour
         if (CutsceneRunner.IsPlaying) { Pill(SkipRect(), "SKIP", 0.35f); return; }
         if (PauseMenu.IsOpen) return;
 
-        Round(InteractRect(), "TOUCH", 0.4f);
         Round(HintRect(), "HINT", 0.3f);
         Round(RunRect(), Running ? "RUN\nON" : "RUN", Running ? 0.45f : 0.25f);
         Round(PauseRect(), "II", 0.3f);
         if (TutorialShowing) Pill(TutorialRect(), "SKIP TUTORIAL", 0.3f);
 
-        if (moveTouch >= 0)                                                 // the joystick under the thumb
-        {
-            float r = Screen.height * 0.11f;
-            Vector2 o = new Vector2(moveOrigin.x, Screen.height - moveOrigin.y);
-            Vector2 k = o + new Vector2(Move.x, -Move.y) * r;
-            Draw(new Rect(o.x - r, o.y - r, 2f * r, 2f * r), new Color(1f, 1f, 1f, 0.15f));
-            Draw(new Rect(k.x - r * 0.4f, k.y - r * 0.4f, r * 0.8f, r * 0.8f), new Color(1f, 0.9f, 0.75f, 0.45f));
-        }
+        // the fixed joystick: its ring always shows, the knob follows the thumb
+        float r = PadRadius();
+        Vector2 o = new Vector2(PadCentre().x, Screen.height - PadCentre().y);
+        Vector2 k = o + new Vector2(Move.x, -Move.y) * r;
+        Draw(new Rect(o.x - r, o.y - r, 2f * r, 2f * r), new Color(1f, 1f, 1f, moveTouch >= 0 ? 0.18f : 0.1f));
+        Draw(new Rect(k.x - r * 0.42f, k.y - r * 0.42f, r * 0.84f, r * 0.84f), new Color(1f, 0.9f, 0.75f, moveTouch >= 0 ? 0.5f : 0.3f));
     }
 
     void Round(Rect r, string text, float alpha)

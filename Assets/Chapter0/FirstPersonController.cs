@@ -100,7 +100,7 @@ public class FirstPersonController : MonoBehaviour
     // =========================================================
     void HandleMouseLook()
     {
-        if (MobileControls.Active)                                   // phone: drag on the right half of the screen to look
+        if (MobileControls.Active)                                   // phone: drag anywhere outside the joystick to look
         {
             LookBy(MobileControls.LookDegrees.x, MobileControls.LookDegrees.y);
             return;

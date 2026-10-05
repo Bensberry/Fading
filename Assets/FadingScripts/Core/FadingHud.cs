@@ -258,7 +258,7 @@ public class FadingHud : MonoBehaviour
         }
     }
 
-    // How wide centred text may be. On phones it stays between the joystick side and the touch buttons on the right.
+    // How wide centred text may be. On phones it stays clear of the joystick (left) and the buttons (right).
     public static float CenterWidth(float share)
     {
         float w = Screen.width * share;

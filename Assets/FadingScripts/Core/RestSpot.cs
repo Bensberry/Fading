@@ -57,7 +57,7 @@ public class RestSpot : Interactable
         if (body != null) body.enabled = false;
         string oldPrompt = prompt;
         prompt = "";
-        FadingHud.Toast(kind == Kind.Slide ? "Wheee..." : (MobileControls.Active ? "TOUCH to get up" : "[F] or [Space] to get up"), 2f);
+        FadingHud.Toast(kind == Kind.Slide ? "Wheee..." : (MobileControls.Active ? "Tap to get up" : "[F] or [Space] to get up"), 2f);
         float eyeHeight = cameraRoot.position.y - player.transform.position.y;
 
         // Turn to face the right way, move onto the seat.

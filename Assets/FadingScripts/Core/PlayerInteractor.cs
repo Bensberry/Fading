@@ -4,6 +4,7 @@ using UnityEngine.InputSystem;
 #endif
 
 // Put this on the player's camera. Look at an interactable and press F.
+// On phones: tap the object itself (anywhere on the screen) instead (MobileControls.TapPosition).
 public class PlayerInteractor : MonoBehaviour
 {
     public float reach = 3.5f;
@@ -26,7 +27,15 @@ public class PlayerInteractor : MonoBehaviour
 
         if (RestSpot.AnyoneResting) current = null;                                // sitting / swinging: F means "get up"
         HasTarget = current != null;
-        if (current != null && PressedThisFrame())
+        if (MobileControls.Active)
+        {
+            if (MobileControls.InteractPressed && !RestSpot.AnyoneResting)
+            {
+                Interactable tapped = TappedObject();
+                if (tapped != null) tapped.TryInteract();
+            }
+        }
+        else if (current != null && PressedThisFrame())
             current.TryInteract();
 
         // Cues under the prompt: will Mom SEE this? Is Luna close enough to feel it? (checked a few times a second)
@@ -38,6 +47,18 @@ public class PlayerInteractor : MonoBehaviour
             BabyAI baby = FindAnyObjectByType<BabyAI>();
             lunaNear = baby != null && !baby.asleep && baby.isActiveAndEnabled && Vector3.Distance(baby.transform.position, current.transform.position) <= 8f;
         }
+    }
+
+    // Phones: the touchable thing under the finger that tapped (within reach), or null.
+    Interactable TappedObject()
+    {
+        Camera cam = GetComponent<Camera>();
+        if (cam == null) cam = Camera.main;
+        if (cam == null) return null;
+        Ray ray = cam.ScreenPointToRay(MobileControls.TapPosition);
+        float far = reach + Vector3.Distance(cam.transform.position, transform.position);
+        if (!Physics.SphereCast(ray, aimRadius * 0.5f, out RaycastHit hit, far, layers, QueryTriggerInteraction.Ignore)) return null;
+        return hit.collider.GetComponentInParent<Interactable>();
     }
 
     bool PressedThisFrame()
