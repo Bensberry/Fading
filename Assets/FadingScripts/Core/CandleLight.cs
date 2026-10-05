@@ -71,7 +71,7 @@ public class CandleLight : MonoBehaviour
     void LateUpdate()
     {
         if (flame == null) return;
-        float dt = Mathf.Max(Time.deltaTime, 0.0001f);
+        float dt = Mathf.Max(MobileControls.Active ? Time.smoothDeltaTime : Time.deltaTime, 0.0001f);   // phones: even frame times (see FirstPersonController)
 
         Vector3 velocity = (transform.position - lastPos) / dt;
         lastPos = transform.position;

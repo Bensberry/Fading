@@ -71,7 +71,7 @@ PlayerSettings:
   disableDepthAndStencilBuffers: 0
   androidStartInFullscreen: 1
   androidRenderOutsideSafeArea: 1
-  androidUseSwappy: 0
+  androidUseSwappy: 1
   androidRequestedVisibleInsets: 0
   androidSystemBarsBehavior: 2
   androidDisplayOptions: 1
@@ -451,32 +451,44 @@ PlayerSettings:
       m_SubKind: App Store
   - m_BuildTarget: Android
     m_Icons:
-    - m_Textures: []
+    - m_Textures:
+      - {fileID: 2800000, guid: bfae18942fc859e4bb4f71cc062dcdc9, type: 3}
+      - {fileID: 2800000, guid: 3b3116354bfc64e4d9629791d6d74451, type: 3}
       m_Width: 432
       m_Height: 432
       m_Kind: 2
       m_SubKind: 
-    - m_Textures: []
+    - m_Textures:
+      - {fileID: 2800000, guid: bfae18942fc859e4bb4f71cc062dcdc9, type: 3}
+      - {fileID: 2800000, guid: 3b3116354bfc64e4d9629791d6d74451, type: 3}
       m_Width: 324
       m_Height: 324
       m_Kind: 2
       m_SubKind: 
-    - m_Textures: []
+    - m_Textures:
+      - {fileID: 2800000, guid: bfae18942fc859e4bb4f71cc062dcdc9, type: 3}
+      - {fileID: 2800000, guid: 3b3116354bfc64e4d9629791d6d74451, type: 3}
       m_Width: 216
       m_Height: 216
       m_Kind: 2
       m_SubKind: 
-    - m_Textures: []
+    - m_Textures:
+      - {fileID: 2800000, guid: bfae18942fc859e4bb4f71cc062dcdc9, type: 3}
+      - {fileID: 2800000, guid: 3b3116354bfc64e4d9629791d6d74451, type: 3}
       m_Width: 162
       m_Height: 162
       m_Kind: 2
       m_SubKind: 
-    - m_Textures: []
+    - m_Textures:
+      - {fileID: 2800000, guid: bfae18942fc859e4bb4f71cc062dcdc9, type: 3}
+      - {fileID: 2800000, guid: 3b3116354bfc64e4d9629791d6d74451, type: 3}
       m_Width: 108
       m_Height: 108
       m_Kind: 2
       m_SubKind: 
-    - m_Textures: []
+    - m_Textures:
+      - {fileID: 2800000, guid: bfae18942fc859e4bb4f71cc062dcdc9, type: 3}
+      - {fileID: 2800000, guid: 3b3116354bfc64e4d9629791d6d74451, type: 3}
       m_Width: 81
       m_Height: 81
       m_Kind: 2

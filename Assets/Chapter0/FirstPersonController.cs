@@ -142,12 +142,15 @@ public class FirstPersonController : MonoBehaviour
         if (Keyboard.current == null && !MobileControls.Active) return;
 
         Vector3 wanted = ReadWantedDirection() * CurrentSpeed();
+        // Phones report uneven frame times (12 ms, 21 ms, ...) even at a steady 60 fps: walking with them judders.
+        // The smoothed frame time keeps every step the same size.
+        float dt = MobileControls.Active ? Time.smoothDeltaTime : Time.deltaTime;
 
         // Accelerate / Decelerate
         horizontalVelocity = Vector3.MoveTowards(
             horizontalVelocity,
             wanted,
-            acceleration * Time.deltaTime
+            acceleration * dt
         );
 
         // Ground check & floor lock logic combined BEFORE Move() call
@@ -164,7 +167,7 @@ public class FirstPersonController : MonoBehaviour
         }
         else
         {
-            verticalVelocity += gravity * Time.deltaTime;
+            verticalVelocity += gravity * dt;
         }
 
         // Clamp downward movement if trying to sink below initial floor Y
@@ -178,7 +181,7 @@ public class FirstPersonController : MonoBehaviour
         }
 
         // Single Move call per frame eliminates stutter
-        controller.Move(movementVector * Time.deltaTime);
+        controller.Move(movementVector * dt);
     }
 
     // Is there something to stand on within 3 m below the player? (then gravity may work normally)

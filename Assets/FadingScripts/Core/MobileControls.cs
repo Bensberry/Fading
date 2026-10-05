@@ -29,7 +29,7 @@ public class MobileControls : MonoBehaviour
     // While the tutorial runs, PrologueTutorial switches this on (shows the SKIP TUTORIAL button).
     public static bool TutorialShowing;
 
-    const float FullSwipeDegrees = 160f;      // dragging across the whole screen width turns this far
+    const float DegreesPerInch = 75f;         // dragging one inch (2.5 cm) of screen turns this far (the same on every phone / tablet)
 
     int moveTouch = -1, lookTouch = -1;
     readonly System.Collections.Generic.HashSet<int> known = new System.Collections.Generic.HashSet<int>();   // fingers already handled
@@ -113,7 +113,7 @@ public class MobileControls : MonoBehaviour
                     else
                     {
                         Vector2 d = touch.delta.ReadValue();
-                        look += d / Screen.width * FullSwipeDegrees * SensitivityFactor();
+                        look += d * DegreesPerPixel() * SensitivityFactor();
                         lookPixels += d.magnitude;
                         lookSeen = true;
                     }
@@ -130,6 +130,13 @@ public class MobileControls : MonoBehaviour
     }
 
     static float SensitivityFactor() { return Mathf.Lerp(0.4f, 2f, GameSettings.Sensitivity / 100f); }
+
+    // Screens report their pixels per inch; if one does not, a 6-inch-wide screen is assumed.
+    static float DegreesPerPixel()
+    {
+        float dpi = Screen.dpi > 50f ? Screen.dpi : Screen.width / 6f;
+        return DegreesPerInch / dpi;
+    }
 
     // A new finger: a button, the joystick (left half) or looking (right half).
     void Begin(int id, Vector2 pos)
