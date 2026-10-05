@@ -193,7 +193,8 @@ public class PhotoInteractable : MonoBehaviour
         // =====================================================
 
         if (isHeldNow &&
-            Input.GetMouseButtonDown(0))
+            UnityEngine.InputSystem.Mouse.current != null &&
+            UnityEngine.InputSystem.Mouse.current.leftButton.wasPressedThisFrame)
         {
             ToggleInspectMode();
         }

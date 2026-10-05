@@ -57,21 +57,24 @@ public class PlayerInteractor : MonoBehaviour
             promptStyle = new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, fontSize = Mathf.Max(20, Mathf.RoundToInt(Screen.height * 0.026f)) };
             promptStyle.normal.textColor = Color.white;
         }
+        // Sizes follow the font size, so the text fits on every screen (PC and phone).
         float cx = Screen.width / 2f, cy = Screen.height / 2f;
-        GUI.Label(new Rect(cx - 20, cy - 15, 40, 30), current != null ? "( + )" : "+", promptStyle);
+        float line = promptStyle.fontSize * 1.5f, half = Screen.width * 0.4f;
+        GUI.Label(new Rect(cx - line * 2f, cy - line / 2f, line * 4f, line), current != null ? "( + )" : "+", promptStyle);
         if (current != null && !current.IsBusy && !FriendPromptShowing() && current.prompt.Length > 0)
         {
-            GUI.Label(new Rect(cx - 250, cy + 30, 500, 30), current.prompt + "  " + MobileControls.Label("F"), promptStyle);
-            if (cueStyle == null) cueStyle = new GUIStyle(promptStyle) { fontSize = 15 };
+            GUI.Label(new Rect(cx - half, cy + line, half * 2f, line), current.prompt + "  " + MobileControls.Label("F"), promptStyle);
+            if (cueStyle == null) cueStyle = new GUIStyle(promptStyle) { fontSize = Mathf.RoundToInt(promptStyle.fontSize * 0.7f) };
+            float cueLine = cueStyle.fontSize * 1.5f;
             if (momSees)
             {
                 cueStyle.normal.textColor = new Color(1f, 0.72f, 0.42f);
-                GUI.Label(new Rect(cx - 250, cy + 56, 500, 24), "Mom can see this", cueStyle);
+                GUI.Label(new Rect(cx - half, cy + line * 2f, half * 2f, cueLine), "Mom can see this", cueStyle);
             }
             if (lunaNear)
             {
                 cueStyle.normal.textColor = new Color(0.65f, 0.8f, 1f);
-                GUI.Label(new Rect(cx - 250, cy + (momSees ? 78 : 56), 500, 24), "Luna is close enough to feel it", cueStyle);
+                GUI.Label(new Rect(cx - half, cy + line * 2f + (momSees ? cueLine : 0f), half * 2f, cueLine), "Luna is close enough to feel it", cueStyle);
             }
         }
     }

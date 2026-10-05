@@ -59,14 +59,15 @@ public class NightRest : MonoBehaviour
     void OnGUI()
     {
         if (!(nearMom || nearLuna) || PlayerInteractor.HasTarget || CutsceneRunner.IsPlaying || PauseMenu.IsOpen) return;
-        if (style == null) style = new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter };
+        if (style == null) style = new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, wordWrap = true };
         style.fontSize = Mathf.Max(18, Mathf.RoundToInt(Screen.height * 0.024f));
         bool allowed = FamilyProgress.DreamsGiven(nearMom) >= DreamsNeeded;
         style.normal.textColor = allowed ? new Color(0.75f, 0.85f, 1f, 0.95f) : new Color(1f, 1f, 1f, 0.45f);
         string who = nearMom ? "Mom" : "Luna";
         string text = allowed ? "Watch over " + who + "  " + MobileControls.Label("F") + "   (rest until morning)"
                               : "Bring " + who + " a memory first, then you can watch over her";
-        GUI.Label(new Rect(0, Screen.height * 0.62f, Screen.width, 40f), text, style);
+        float w = FadingHud.CenterWidth(0.8f);
+        GUI.Label(new Rect((Screen.width - w) / 2f, Screen.height * 0.62f, w, style.fontSize * 3.2f), text, style);
     }
 
     static float Flat(Vector3 a, Vector3 b)

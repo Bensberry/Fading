@@ -246,6 +246,6 @@ public class DayNightCycle : MonoBehaviour
         }
         float alpha = age < 0.8f ? age / 0.8f : (age > 3f ? 4f - age : 1f);
         titleStyle.normal.textColor = new Color(1f, 0.95f, 0.85f, alpha);
-        GUI.Label(new Rect(0, Screen.height * 0.2f, Screen.width, 60), PhaseName(Current), titleStyle);
+        GUI.Label(new Rect(0, Screen.height * 0.2f, Screen.width, titleStyle.fontSize * 1.6f), PhaseName(Current), titleStyle);
     }
 }

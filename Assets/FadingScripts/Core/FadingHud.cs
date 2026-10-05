@@ -189,7 +189,8 @@ public class FadingHud : MonoBehaviour
         float age = Time.unscaledTime - toastStart;
         if (age > toastLength) return;
         float alpha = Mathf.Clamp01(Mathf.Min(age / 0.25f, (toastLength - age) / 0.5f));
-        float w = Screen.width * 0.6f, h = Screen.height * 0.11f;
+        float w = CenterWidth(0.6f);
+        float h = Mathf.Max(Screen.height * 0.11f, toastStyle.CalcHeight(new GUIContent(toast), w - 20f) + 20f);
         Rect box = new Rect((Screen.width - w) / 2f, Screen.height * 0.14f - (1f - alpha) * 10f, w, h);
         DrawBox(box, new Color(0.05f, 0.04f, 0.03f, 0.75f * alpha));
         toastStyle.normal.textColor = new Color(1f, 0.93f, 0.8f, alpha);
@@ -201,10 +202,11 @@ public class FadingHud : MonoBehaviour
         float age = Time.unscaledTime - subtitleStart;
         if (age > subtitleLength || subtitleText.Length == 0) return;
         float alpha = Mathf.Clamp01(Mathf.Min(age / 0.3f, (subtitleLength - age) / 0.4f));
-        float w = Screen.width * 0.7f, h = Screen.height * 0.14f;
-        Rect box = new Rect((Screen.width - w) / 2f, Screen.height * 0.72f, w, h);
+        float w = CenterWidth(0.7f);
         toastStyle.richText = true;
-        string speaker = subtitleSpeaker.Length > 0 ? "<color=#ffcc88><size=70%>" + subtitleSpeaker.ToUpper() + "</size></color>\n" : "";
+        string speaker = subtitleSpeaker.Length > 0 ? "<color=#ffcc88><size=" + Mathf.RoundToInt(toastStyle.fontSize * 0.7f) + ">" + subtitleSpeaker.ToUpper() + "</size></color>\n" : "";
+        float h = Mathf.Max(Screen.height * 0.14f, toastStyle.CalcHeight(new GUIContent(speaker + subtitleText), w) + 10f);
+        Rect box = new Rect((Screen.width - w) / 2f, Mathf.Min(Screen.height * 0.72f, Screen.height * 0.97f - h), w, h);
         Color old = GUI.color;
         GUI.color = new Color(1f, 1f, 1f, alpha);
         toastStyle.normal.textColor = new Color(1f, 0.97f, 0.9f, 1f);
@@ -217,7 +219,7 @@ public class FadingHud : MonoBehaviour
         if (!skipHint) return;
         smallStyle.alignment = TextAnchor.MiddleRight;
         smallStyle.normal.textColor = new Color(1f, 1f, 1f, 0.55f);
-        GUI.Label(new Rect(Screen.width - 340f, Screen.height * 0.9f, 320f, 40f),(MobileControls.Active ? "" : "SPACE / ENTER   skip"), smallStyle);
+        GUI.Label(new Rect(Screen.width * 0.6f, Screen.height * 0.9f, Screen.width * 0.38f, smallStyle.fontSize * 1.8f),(MobileControls.Active ? "" : "SPACE / ENTER   skip"), smallStyle);
         smallStyle.alignment = TextAnchor.MiddleLeft;
     }
 
@@ -227,8 +229,9 @@ public class FadingHud : MonoBehaviour
         float age = Time.unscaledTime - objectiveTime;
         float alpha = objectiveSticky ? 1f : Mathf.Clamp01(Mathf.Min(age / 0.4f, (ObjectiveSeconds - age) / 1.5f));
         if (alpha <= 0f) return;
-        float w = Screen.width * 0.7f, h = Screen.height * 0.09f;
-        Rect box = new Rect((Screen.width - w) / 2f, Screen.height * 0.84f, w, h);
+        float w = CenterWidth(0.7f);
+        float h = Mathf.Max(Screen.height * 0.09f, objectiveStyle.CalcHeight(new GUIContent(objective), w - 20f) + 12f);
+        Rect box = new Rect((Screen.width - w) / 2f, Mathf.Min(Screen.height * 0.84f, Screen.height * 0.98f - h), w, h);
         DrawBox(box, new Color(0f, 0f, 0f, 0.5f * alpha));
         objectiveStyle.normal.textColor = new Color(0.9f, 0.95f, 1f, alpha);
         GUI.Label(box, objective, objectiveStyle);
@@ -236,10 +239,10 @@ public class FadingHud : MonoBehaviour
 
     void DrawCandle()
     {
-        float x = Screen.width * 0.02f, y = Screen.height * 0.9f;
+        float x = Screen.width * 0.02f, y = Screen.height * (MobileControls.Active ? 0.2f : 0.9f);   // phones: top left, away from the thumb
         float pip = Screen.height * 0.025f;
         smallStyle.normal.textColor = new Color(1f, 0.85f, 0.6f, 0.9f);
-        GUI.Label(new Rect(x, y - pip * 1.6f, 300, pip * 1.5f),burnedOut ? "Candle  (burned out)" : "Candle  " + MobileControls.Label("H") + " hint", smallStyle);
+        GUI.Label(new Rect(x, y - smallStyle.fontSize * 1.7f, Screen.width * 0.4f, smallStyle.fontSize * 1.6f),burnedOut ? "Candle  (burned out)" : "Candle  " + MobileControls.Label("H") + " hint", smallStyle);
 
         for (int i = 0; i < hintsMax; i++)
         {
@@ -252,6 +255,14 @@ public class FadingHud : MonoBehaviour
             DrawBox(new Rect(x, y + pip * 1.2f, barW, pip * 0.3f), new Color(0f, 0f, 0f, 0.5f));
             DrawBox(new Rect(x, y + pip * 1.2f, barW * (1f - cooldown01), pip * 0.3f), new Color(1f, 0.6f, 0.2f, 0.9f));
         }
+    }
+
+    // How wide centred text may be. On phones it stays between the joystick side and the touch buttons on the right.
+    public static float CenterWidth(float share)
+    {
+        float w = Screen.width * share;
+        if (MobileControls.Active) w = Mathf.Min(w, Screen.width - 2f * Screen.height * 0.47f);
+        return Mathf.Max(w, Screen.width * 0.4f);
     }
 
     static void DrawBox(Rect r, Color c)

@@ -8,6 +8,7 @@ public static class PerformanceTuner
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     static void Apply()
     {
+        if (Application.isMobilePlatform) return;            // phones: MobilePerformance sets 60 frames per second instead
         QualitySettings.vSyncCount = 1;
         Application.targetFrameRate = -1;
     }
