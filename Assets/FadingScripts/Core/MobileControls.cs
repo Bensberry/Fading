@@ -58,8 +58,7 @@ public class MobileControls : MonoBehaviour
         Screen.autorotateToLandscapeLeft = true;
         Screen.autorotateToLandscapeRight = true;
         Screen.orientation = ScreenOrientation.AutoRotation;               // landscape only, either way round
-        Screen.sleepTimeout = SleepTimeout.NeverSleep;
-        Application.targetFrameRate = 60;
+        Screen.sleepTimeout = SleepTimeout.NeverSleep;                      // (the frame rate is set by MobilePerformance)
 #pragma warning restore CS0162
     }
 

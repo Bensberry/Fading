@@ -1,20 +1,40 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
-// Goes in: nowhere (it starts by itself, ONLY in a phone build; on PC and in the Editor it does nothing).
-// Makes the game run smoothly on Android phones by drawing a bit less:
-//   - draws the 3D picture at 85% resolution, less on very big screens like tablets (text and buttons stay sharp), no anti-aliasing
-//   - shadows as far as on PC (25 m); lamps and candles never cast shadows; at most 3 lamps light each object
-//   - the camera does not draw very far away objects
-//   - heavy screen effects (bloom quality, depth of field, motion blur, film grain, lens flare) are switched off
-// Lights, cameras and effects made later (cutscenes, the candle...) are checked again every 2 seconds.
+// Goes in: nowhere (it starts by itself, ONLY in a phone / tablet build; on PC and in the Editor it does nothing).
+// AUTOMATIC QUALITY, so the game runs smoothly on ANY phone:
+//   1. It guesses a starting level from the device (how much memory it has).
+//   2. While you play it measures the frame rate. Too slow (under 45 fps for 3 seconds) -> one level lower.
+//      Smooth for a long time (58+ fps for 15 seconds) -> one level higher, but never back to a level that was too slow.
+//   3. The level it ends on is saved, so the next time the game starts there straight away.
+// Levels (3 = best):
+//   3  85% resolution (less on huge tablet screens), soft shadows 25 m, bloom, 3 lamps per object, view 90 m
+//   2  ~2.2 megapixels, hard shadows 15 m, bloom, 2 lamps per object, view 70 m
+//   1  ~1.4 megapixels, no shadows, no bloom, 1 lamp per object, view 55 m, small yard things vanish sooner
+//   0  ~0.9 megapixels, like 1 but no screen effects at all and 30 fps (steady instead of stuttering)
+// Always: no anti-aliasing, lamps and candles never cast shadows, depth of field / motion blur / film grain / lens flare off.
 public class MobilePerformance : MonoBehaviour
 {
-    const float RenderScale = 0.85f;          // 85% resolution for the 3D view (a phone screen is small and sharp)
-    const float MaxMegapixels = 3.3f;         // tablets (e.g. 3000 x 2120): at most about this many pixels are drawn
-    const float ShadowDistance = 25f;          // the same as on PC
-    const float ViewDistance = 90f;           // the whole house and yard still fit in this
+    public static int Level { get; private set; } = -1;
+
+    const string SaveKey = "fading_mobile_quality";
+    const float TooSlowFps = 45f, SmoothFps = 58f;
+    const float CheckSeconds = 3f, SmoothSecondsToRise = 15f;
+
+    static readonly float[] Megapixels = { 0.9f, 1.4f, 2.2f, 3.3f };
+    static readonly float[] ShadowDistance = { 0f, 0f, 15f, 25f };
+    static readonly int[] LampsPerObject = { 1, 1, 2, 3 };
+    static readonly float[] ViewDistance = { 50f, 55f, 70f, 90f };
+    static readonly float[] LodBias = { 0.5f, 0.6f, 0.8f, 1f };
+
+    int ceiling = 3;                       // a level that was too slow is never tried again (this session)
+    float measureStart, smoothSince;
+    int frames;
+    readonly Dictionary<Camera, float> farClip = new Dictionary<Camera, float>();
+    readonly HashSet<Light> softened = new HashSet<Light>();
+    readonly HashSet<Bloom> bloomsOff = new HashSet<Bloom>();
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     static void Create()
@@ -25,48 +45,140 @@ public class MobilePerformance : MonoBehaviour
         if (!Application.isMobilePlatform) return;
 #endif
 #pragma warning disable CS0162
-        TunePipeline();
+        QualitySettings.vSyncCount = 0;                // phones ignore V-Sync; Application.targetFrameRate is used instead
         GameObject g = new GameObject("MobilePerformance");
         DontDestroyOnLoad(g);
-        g.AddComponent<MobilePerformance>();
+        g.AddComponent<MobilePerformance>().SetLevel(StartLevel());
 #pragma warning restore CS0162
     }
 
-    static void TunePipeline()
+    // The saved level, or a guess from the device's memory.
+    static int StartLevel()
     {
-        QualitySettings.vSyncCount = 0;                       // phones ignore V-Sync; the frame rate below is used instead
-        Application.targetFrameRate = 60;
+        int saved = PlayerPrefs.GetInt(SaveKey, -1);
+        if (saved >= 0) return Mathf.Clamp(saved, 0, 3);
+        int memoryMb = SystemInfo.systemMemorySize;
+        if (memoryMb < 3500) return 0;
+        if (memoryMb < 5500) return 1;
+        return 2;                                      // even strong devices start at 2 and earn level 3
+    }
 
+    void SetLevel(int level)
+    {
+        Level = Mathf.Clamp(level, 0, 3);
+        PlayerPrefs.SetInt(SaveKey, Level);
+        PlayerPrefs.Save();
+
+        Application.targetFrameRate = Level == 0 ? 30 : 60;
+        QualitySettings.lodBias = LodBias[Level];
         UniversalRenderPipelineAsset urp = GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset;
-        if (urp == null) return;
-        urp.renderScale = ScaleFor(Screen.width, Screen.height);
-        urp.msaaSampleCount = 1;
-        urp.shadowDistance = ShadowDistance;
-        urp.shadowCascadeCount = 1;
-        urp.maxAdditionalLightsCount = 3;
+        if (urp != null)
+        {
+            urp.renderScale = ScaleFor(Megapixels[Level]);
+            urp.msaaSampleCount = 1;
+            urp.shadowDistance = ShadowDistance[Level];
+            urp.shadowCascadeCount = 1;
+            urp.maxAdditionalLightsCount = LampsPerObject[Level];
+        }
+        TuneScene();
+        RestartMeasuring();
     }
 
-    // 85% on a phone; on a huge tablet screen a bit less, so the picture never has more than MaxMegapixels.
-    static float ScaleFor(int width, int height)
+    // The share of the screen's resolution that gives about this many megapixels (never above 85%).
+    static float ScaleFor(float megapixels)
     {
-        float megapixels = width * (float)height / 1000000f;
-        if (megapixels <= 0f) return RenderScale;
-        return Mathf.Clamp(Mathf.Sqrt(MaxMegapixels / megapixels), 0.65f, RenderScale);
+        float screen = Screen.width * (float)Screen.height / 1000000f;
+        if (screen <= 0f) return 0.75f;
+        return Mathf.Clamp(Mathf.Sqrt(megapixels / screen), 0.5f, 0.85f);
     }
 
-    void Start() { InvokeRepeating(nameof(TuneScene), 0f, 2f); }
+    void Start() { InvokeRepeating(nameof(TuneScene), 1f, 2f); }
 
+    // ---------- measuring the frame rate
+    void RestartMeasuring()
+    {
+        measureStart = Time.unscaledTime;
+        smoothSince = Time.unscaledTime;
+        frames = 0;
+    }
+
+    void OnEnable() { UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded; }
+    void OnDisable() { UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded; }
+    void OnSceneLoaded(UnityEngine.SceneManagement.Scene s, UnityEngine.SceneManagement.LoadSceneMode m)
+    {
+        TuneScene();
+        measureStart = Time.unscaledTime + 3f;       // loading a scene always hitches: wait 3 s before judging
+        smoothSince = measureStart;
+        frames = 0;
+    }
+
+    void Update()
+    {
+        if (Time.timeScale == 0f || Time.unscaledTime < measureStart) return;    // paused or just loaded
+        frames++;
+        float seconds = Time.unscaledTime - measureStart;
+        if (seconds < CheckSeconds) return;
+
+        float fps = frames / seconds;
+        frames = 0;
+        measureStart = Time.unscaledTime;
+        float wanted = Level == 0 ? 28f : TooSlowFps;
+
+        if (fps < wanted && Level > 0)
+        {
+            ceiling = Level - 1;
+            SetLevel(Level - 1);
+        }
+        else if (fps < SmoothFps) smoothSince = Time.unscaledTime;
+        else if (Level < ceiling && Time.unscaledTime - smoothSince >= SmoothSecondsToRise) SetLevel(Level + 1);
+    }
+
+    // ---------- a hidden readout for testing: tap the screen with THREE fingers to show / hide "Quality 2   57 fps"
+    bool showReadout, threeFingersDown;
+    float shownFps, fpsTimer;
+    int fpsFrames;
+    GUIStyle readoutStyle;
+
+    void LateUpdate()
+    {
+        int fingers = 0;
+        if (UnityEngine.InputSystem.Touchscreen.current != null)
+            foreach (var t in UnityEngine.InputSystem.Touchscreen.current.touches) if (t.press.isPressed) fingers++;
+        if (fingers >= 3 && !threeFingersDown) showReadout = !showReadout;
+        threeFingersDown = fingers >= 3;
+
+        fpsFrames++;
+        fpsTimer += Time.unscaledDeltaTime;
+        if (fpsTimer >= 0.5f) { shownFps = fpsFrames / fpsTimer; fpsFrames = 0; fpsTimer = 0f; }
+    }
+
+    void OnGUI()
+    {
+        if (!showReadout) return;
+        if (readoutStyle == null) readoutStyle = new GUIStyle(GUI.skin.label);
+        readoutStyle.fontSize = Mathf.RoundToInt(Screen.height * 0.025f);
+        readoutStyle.normal.textColor = Color.yellow;
+        GUI.Label(new Rect(Screen.width * 0.4f, Screen.height * 0.005f, Screen.width * 0.3f, readoutStyle.fontSize * 1.6f),
+                  "Quality " + Level + "   " + Mathf.RoundToInt(shownFps) + " fps", readoutStyle);
+    }
+
+    // ---------- lights, cameras and screen effects (also the ones made later: checked every 2 seconds)
     void TuneScene()
     {
         foreach (Light l in FindObjectsByType<Light>(FindObjectsSortMode.None))
         {
-            if (l.type != LightType.Directional && l.shadows != LightShadows.None) l.shadows = LightShadows.None;
+            if (l.type != LightType.Directional) { if (l.shadows != LightShadows.None) l.shadows = LightShadows.None; }
+            else if (Level < 3 && l.shadows == LightShadows.Soft) { l.shadows = LightShadows.Hard; softened.Add(l); }
+            else if (Level == 3 && softened.Remove(l)) l.shadows = LightShadows.Soft;
         }
 
         foreach (Camera c in Camera.allCameras)
         {
-            if (c.farClipPlane > ViewDistance) c.farClipPlane = ViewDistance;
+            if (!farClip.ContainsKey(c)) farClip[c] = c.farClipPlane;
+            c.farClipPlane = Mathf.Min(farClip[c], ViewDistance[Level]);
             c.allowMSAA = false;
+            UniversalAdditionalCameraData data = c.GetUniversalAdditionalCameraData();
+            if (data != null && c.cameraType == CameraType.Game && farClip[c] > 1f) data.renderPostProcessing = Level > 0;
         }
 
         foreach (Volume v in FindObjectsByType<Volume>(FindObjectsSortMode.None))
@@ -74,13 +186,23 @@ public class MobilePerformance : MonoBehaviour
             VolumeProfile p = v.HasInstantiatedProfile() ? v.profile : v.sharedProfile;   // the build's copy, never saved
             if (p == null) continue;
             Bloom bloom;
-            if (p.TryGet(out bloom)) bloom.highQualityFiltering.Override(false);
+            if (p.TryGet(out bloom))
+            {
+                bloom.highQualityFiltering.Override(false);
+                if (Level <= 1 && bloom.active) { bloom.active = false; bloomsOff.Add(bloom); }
+                else if (Level >= 2 && bloomsOff.Remove(bloom)) bloom.active = true;
+            }
             Off<DepthOfField>(p);
             Off<MotionBlur>(p);
             Off<FilmGrain>(p);
             Off<ScreenSpaceLensFlare>(p);
             Off<ChromaticAberration>(p);
         }
+        softened.RemoveWhere(l => l == null);
+        bloomsOff.RemoveWhere(b => b == null);
+        List<Camera> gone = new List<Camera>();
+        foreach (Camera c in farClip.Keys) if (c == null) gone.Add(c);
+        foreach (Camera c in gone) farClip.Remove(c);
     }
 
     static void Off<T>(VolumeProfile p) where T : VolumeComponent
