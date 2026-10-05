@@ -101,6 +101,17 @@ public class CutsceneContext
     }
 
     // The end: if the cutscene was skipped, quickly fade to black first; then give the view back to the player and fade into the game.
+    // A cutscene can end in darkness (the rest cutscenes: morning comes straight away, no glimpse of the night).
+    // The black screen stays until the next cutscene starts or the next chapter loads.
+    bool stayDark;
+    static Canvas leftoverDark;
+
+    public IEnumerator EndInDarkness()
+    {
+        stayDark = true;
+        yield break;
+    }
+
     public IEnumerator Finish(bool skipped)
     {
         FadingHud.ClearSubtitle();
@@ -118,6 +129,7 @@ public class CutsceneContext
         foreach (DoorToggle d in reLock) if (d != null) { d.CloseInstant(); d.SetLocked(true); }
         barTop.color = barBottom.color = new Color(0f, 0f, 0f, 0f);
 
+        if (stayDark) { fade.color = Color.black; leftoverDark = canvas; yield break; }     // stays black: morning comes next
         yield return Fade(0f, 1f);
         if (canvas != null) Object.Destroy(canvas.gameObject);
     }
@@ -125,6 +137,7 @@ public class CutsceneContext
     // ---------------------------------------------------------------- screen layers and camera
     void BuildScreenLayers()
     {
+        if (leftoverDark != null) Object.Destroy(leftoverDark.gameObject);      // the darkness left by a rest cutscene
         canvas = MenuKit.MakeCanvas("CutsceneCanvas", 900);
         fade = MakeLayer("Fade", Vector2.zero, Vector2.one, new Color(0f, 0f, 0f, 0f));
         barTop = MakeLayer("BarTop", new Vector2(0f, 0.9f), Vector2.one, new Color(0f, 0f, 0f, 0f));

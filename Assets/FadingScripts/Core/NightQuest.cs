@@ -24,11 +24,14 @@ public class NightQuest : MonoBehaviour
     public static bool Carrying { get { return Instance != null && Instance.carrying; } }
 
     // Resting (NightRest, the star bench): the night is over, morning comes a few seconds later.
+    public static bool Rested { get; private set; }               // the night ended by resting: morning comes at once
+
     public static void FinishNight()
     {
         if (Instance == null) return;
         Instance.Stop();
         Complete = true;
+        Rested = true;
         FadingHud.SetObjective("");
     }
 
@@ -39,7 +42,7 @@ public class NightQuest : MonoBehaviour
     bool active, carrying;
     int found;
 
-    void Awake() { Instance = this; Complete = false; }
+    void Awake() { Instance = this; Complete = false; Rested = false; }
 
     void Start()
     {
@@ -63,6 +66,7 @@ public class NightQuest : MonoBehaviour
         Stop();
         active = true;
         Complete = false;
+        Rested = false;
         found = 0;
         carrying = false;
 

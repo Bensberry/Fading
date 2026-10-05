@@ -334,7 +334,7 @@ public class ChapterRules : MonoBehaviour
     IEnumerator EndTheNightAfter(float seconds)
     {
         float t = 0f, afterQuest = 0f;
-        while (t < seconds && afterQuest < SecondsAfterNightQuest)
+        while (t < seconds && afterQuest < SecondsAfterNightQuest && !NightQuest.Rested)        // resting: morning at once
         {
             if (!CutsceneRunner.IsPlaying) t += Time.deltaTime;                 // only time the player can play counts
             if (NightQuest.Complete) afterQuest += Time.deltaTime;              // the dream is delivered: dawn comes soon
@@ -347,7 +347,7 @@ public class ChapterRules : MonoBehaviour
     IEnumerator EndingAfterTheLastNight()
     {
         float waited = 0f, afterQuest = 0f;
-        while (waited < LastNightSeconds && afterQuest < SecondsAfterNightQuest && !(Keyboard.current != null && Keyboard.current.nKey.wasPressedThisFrame))
+        while (waited < LastNightSeconds && afterQuest < SecondsAfterNightQuest && !NightQuest.Rested && !(Keyboard.current != null && Keyboard.current.nKey.wasPressedThisFrame))
         {
             if (!CutsceneRunner.IsPlaying) waited += Time.deltaTime;
             if (NightQuest.Complete) afterQuest += Time.deltaTime;

@@ -20,6 +20,7 @@ public class StarsCutscene : Cutscene
 
     public override IEnumerator Play(CutsceneContext c)
     {
+        yield return c.EndInDarkness();                                    // (also when skipped: straight on to the morning)
         yield return c.FadeNow(1f, Color.black);
         yield return c.Letterbox(true, 0.3f);
         yield return c.CameraLight(true, 0.4f);
@@ -40,7 +41,7 @@ public class StarsCutscene : Cutscene
         yield return c.MoveCamera(cam + Vector3.up * 0.3f, seat + Vector3.up * 30f + facing * 18f, 5f, 62f);
         yield return c.Say("", "Just for a moment... I'll close my eyes.", 4f, "voice_rest_stars_b");
         yield return c.Fade(1f, 3f);
-        yield return c.Letterbox(false, 0.3f);
+        yield return c.EndInDarkness();                                    // straight on to the morning
     }
 }
 
@@ -86,6 +87,7 @@ public class SleepBesideCutscene : Cutscene
 
     public override IEnumerator Play(CutsceneContext c)
     {
+        yield return c.EndInDarkness();                                    // (also when skipped: straight on to the morning)
         yield return c.FadeNow(1f, Color.black);
         yield return c.Letterbox(true, 0.3f);
         yield return c.CameraLight(true, 0.45f);
@@ -93,7 +95,7 @@ public class SleepBesideCutscene : Cutscene
         if (mom) yield return BesideMom(c);
         else yield return BesideLuna(c);
         yield return c.Fade(1f, 3f);
-        yield return c.Letterbox(false, 0.3f);
+        yield return c.EndInDarkness();                                    // straight on to the morning
     }
 
     // Standing beside her bed, watching her sleep.
