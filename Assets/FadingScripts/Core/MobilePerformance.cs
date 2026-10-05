@@ -67,6 +67,20 @@ public class MobilePerformance : MonoBehaviour
 
     public static void Apply() { if (instance != null) instance.Tune(); }
 
+    // The render pipeline settings are a project file: in the Unity Editor a change made while playing would be
+    // saved into it. So the original values always go back when the game stops.
+    void OnApplicationQuit()
+    {
+        UniversalRenderPipelineAsset urp = GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset;
+        if (!captured || urp == null) return;
+        urp.renderScale = renderScale;
+        urp.msaaSampleCount = msaa;
+        urp.shadowDistance = shadowDistance;
+        urp.shadowCascadeCount = cascades;
+        urp.maxAdditionalLightsCount = lamps;
+        QualitySettings.lodBias = lodBias;
+    }
+
     void Start() { InvokeRepeating(nameof(Tune), 0.5f, 2f); }        // also catches lights / cameras made later
 
     void Tune()
