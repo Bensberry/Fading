@@ -213,8 +213,12 @@ public class DayNightCycle : MonoBehaviour
 
     IEnumerator EndDayAfter(float seconds)
     {
-        for (float t = 0f; t < seconds; yield return null)
+        float t = 0f;
+        while (t < seconds)
+        {
             if (!CutsceneRunner.IsPlaying && !PauseMenu.IsOpen) t += Time.deltaTime;      // cutscenes do not eat the day
+            yield return null;
+        }
         dayTimer = null;
         AdvancePhase();
     }
