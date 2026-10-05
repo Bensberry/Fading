@@ -3,8 +3,8 @@ using UnityEngine;
 // Goes in: nowhere (ChapterRules calls PropDressing.Run() when a chapter starts, BEFORE the signs are counted).
 // Puts more things in the house (models from Assets/Resources/Props/, the Household Props pack) and makes 12 of them
 // new touchable CLUES (each has its own small script in FadingScripts/Objects, like every other sign):
-//   Mom notices:   cup of tea, flowers, desk fan, globe, alarm clock, ceiling fan, the anniversary glass
-//   Luna feels:    her doll, rubber duck, toy airplane, piggy bank, a wrapped present
+//   Mom notices:   cup of tea, flowers, globe, alarm clock, the ceiling fans (living room, her room), the anniversary glass
+//   Luna feels:    her doll, rubber duck, toy airplane, piggy bank, a wrapped present, the ceiling fan in her room
 // plus a few things that are only decoration (books, a candlestick, a plant, a telescope, a trophy, a packing box).
 // Positions are house-model points (x, height of the furniture top, z), measured from FadingHouse.glb.
 // Each clue can have its own sound in Assets/Resources/Audio/ (the last word of each line below; see the audio list).
@@ -19,10 +19,11 @@ public static class PropDressing
         // ---- Mom's clues (kitchen, her room, living room)
         Clue<PropCupOfTea>("CupOfTea", "INT_Prop_CupOfTea", "Kitchen", -11.75f, 0.76f, 8.15f, 0.13f, true, 0f, "tea_clink");
         Clue<PropFlowers>("Flowers", "INT_Prop_Flowers", "Kitchen", -13.0f, 0.92f, 10.15f, 0.45f, false, 0f, "flowers_rustle");
-        Clue<PropDeskFan>("DeskFan", "INT_Prop_DeskFan", "MotherRoom", -14.33f, 0.85f, 10.85f, 0.35f, false, 180f, "fan_whir");
+        Clue<PropCeilingFan>("CeilingFan", "INT_Prop_CeilingFan_Mother", "MotherRoom", -12.15f, 2.7f, 12.0f, 1.1f, true, 0f, "ceiling_fan", true);
         Clue<PropGlobe>("Globe", "INT_Prop_Globe", "MotherRoom", -14.82f, 0.85f, 10.85f, 0.32f, false, 0f, "globe_spin");
         Clue<PropAlarmClock>("AlarmClock", "INT_Prop_AlarmClock", "MotherRoom", -10.68f, 0.55f, 14.2f, 0.18f, false, 180f, "clock_ring");
         Clue<PropCeilingFan>("CeilingFan", "INT_Prop_CeilingFan", "LivingRoom", -12.6f, 2.7f, 2.8f, 1.2f, true, 0f, "ceiling_fan", true);
+        Clue<PropCeilingFan>("CeilingFan", "INT_Prop_CeilingFan_Child", "ChildRoom", -3.5f, 2.7f, 10.5f, 1.1f, true, 0f, "ceiling_fan", true);
         Clue<PropWineGlass>("WineGlass", "INT_Prop_WineGlass", "LivingRoom", -10.38f, 0.8f, 0.32f, 0.16f, false, 0f, "glass_ring");
 
         // ---- Luna's clues (her room)

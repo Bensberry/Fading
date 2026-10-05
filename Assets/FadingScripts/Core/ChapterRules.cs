@@ -23,10 +23,10 @@ using UnityEngine.SceneManagement;
 public class ChapterRules : MonoBehaviour
 {
     const int LastChapter = 3;
-    const float LastNightSeconds = 180f;                 // nights last as long as days (DayNightCycle.daySeconds)                 // the longest the last night can last before the ending (N skips the wait)
-    const float NightSeconds = 180f;                     // the longest Night 1 and Night 2 can last before the next day begins
+    const float LastNightSeconds = 90f;                  // the longest a night lasts (days last 2 minutes: DayNightCycle.daySeconds)                 // the longest the last night can last before the ending (N skips the wait)
+    const float NightSeconds = 90f;                     // the longest Night 1 and Night 2 can last before the next day begins
                                                          // (each night ends ~5 s after its quest is done: see NightQuest)
-    const float SecondsAfterNightQuest = 5f;
+    const float SecondsAfterNightQuest = 8f;
                                                          // (Mom and Luna sleep at night; time during a cutscene does not count)
     const string MainMenuScene = "MainMenu";
 
@@ -360,10 +360,10 @@ public class ChapterRules : MonoBehaviour
         if (loadingNext || chapter >= LastChapter) yield break;
         loadingNext = true;
         string next = ChapterName(chapter + 1);
-        FadingHud.Toast(chapter == 0 ? "Morning comes..." : "Another day begins...", seconds + 1f);
         yield return new WaitForSeconds(seconds);
+        while (CutsceneRunner.IsPlaying) yield return null;
 
-        if (Application.CanStreamedLevelBeLoaded(next)) SceneManager.LoadScene(next);
+        if (Application.CanStreamedLevelBeLoaded(next)) LightFadeIn.BlindThenLoad(this, next, "Day " + (chapter + 1));   // blinded by the morning light
         else
         {
             FadingHud.Toast(next + " scene is missing from File > Build Profiles (Scene List).", 6f);

@@ -14,8 +14,8 @@ using UnityEngine;
 // Change BarPoints to make the bars harder (bigger) or easier (smaller), and FeltAt for how full "feels you" is.
 public class FamilyProgress : MonoBehaviour
 {
-    public const float BarPoints = 90f;                       // there are many clues now: the bars need more
-    public const float FeltAt = 0.8f;                         // a bar at least this full at the end = "she noticed you"
+    public const float BarPoints = 70f;
+    public const float FeltAt = 0.7f;                         // a bar at least this full at the end = "she noticed you"
 
     public enum Who { Mom, Luna, Both }
 

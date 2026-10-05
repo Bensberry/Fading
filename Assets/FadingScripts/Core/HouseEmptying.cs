@@ -25,7 +25,7 @@ public class HouseEmptying : MonoBehaviour
                 "Rug_Runner", "Rug_Guest", "Rug_Child", "Rug_Living", "Coat_Rack",
                 "Bookshelf_Guest", "Bookshelf_Child", "CoffeeTable", "ToyChest",
                 "Armchair_Mother", "Armchair", "FloorLamp_Living", "Mom_PhotoBox",
-                "INT_Hallway_FamilyPhoto", "INT_Child_Mobile", "INT_Prop_Globe", "INT_Prop_DeskFan", "INT_Prop_Present",
+                "INT_Hallway_FamilyPhoto", "INT_Child_Mobile", "INT_Prop_Globe", "INT_Prop_Present",
                 "INT_Prop_Flowers", "Prop_Telescope", "Prop_Lamp" },    // stage 3 (adds to stages 1 and 2)
     };
 

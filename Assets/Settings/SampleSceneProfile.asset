@@ -88,6 +88,8 @@ MonoBehaviour:
   m_Name: SampleSceneProfile
   m_EditorClassIdentifier: 
   components:
+  - {fileID: 5810276431001000005}
+  - {fileID: 5810276431001000004}
   - {fileID: 5810276431001000003}
   - {fileID: 5810276431001000002}
   - {fileID: 5810276431001000001}
@@ -230,3 +232,42 @@ MonoBehaviour:
   response:
     m_OverrideState: 1
     m_Value: 0.8
+
+--- !u!114 &5810276431001000004
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 558a8e2b6826cf840aae193990ba9f2e, type: 3}
+  m_Name: ShadowsMidtonesHighlights
+  m_EditorClassIdentifier: 
+  active: 1
+  shadows:
+    m_OverrideState: 1
+    m_Value: {x: 0.9, y: 0.96, z: 1.12, w: -0.03}
+  midtones:
+    m_OverrideState: 1
+    m_Value: {x: 1, y: 0.99, z: 0.98, w: 0}
+  highlights:
+    m_OverrideState: 1
+    m_Value: {x: 1.08, y: 1.01, z: 0.9, w: 0.02}
+--- !u!114 &5810276431001000005
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81180773991d8724ab7f2d216912b564, type: 3}
+  m_Name: ChromaticAberration
+  m_EditorClassIdentifier: 
+  active: 1
+  intensity:
+    m_OverrideState: 1
+    m_Value: 0.07

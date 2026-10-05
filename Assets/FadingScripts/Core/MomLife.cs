@@ -183,6 +183,8 @@ public class MomLife : MonoBehaviour
         for (float t = 0f; t < 4f && mom.IsReacting; t += Time.deltaTime) yield return null;     // let her finish looking at something
         if (!IsNight || mom.IsAsleep) yield break;
         mom.SetAsleep(true);
+        Collider body = mom.GetComponent<Collider>();
+        if (body != null) body.enabled = false;                            // so nothing bumps into her (and the bed check cannot hit her)
 
         float top;
         Bounds bed;
@@ -195,19 +197,46 @@ public class MomLife : MonoBehaviour
 
         MeasurePoseExactly();
         pose.Play(lying, 0.3f);
-        for (int i = 0; i < 4; i++) yield return null;                    // let the pose settle before measuring her
+        yield return new WaitForSeconds(0.5f);                              // she is fully in the lying pose now
+        LieOnBed(top, bed);
+        yield return new WaitForSeconds(0.3f);
+        LieOnBed(top, bed);                                                 // once more, now that she has settled
+    }
 
-        // Lie along the bed, in the middle of it, on top of the mattress.
+    // Put her hips on the mattress with her head toward the pillow (the end of the bed against the wall).
+    // Uses her skeleton (hips and head bones), which is exact whatever the animation does.
+    void LieOnBed(float top, Bounds bed)
+    {
         Transform root = mom.transform;
-        Bounds body = ModelBounds();
-        if ((bed.size.x >= bed.size.z) != (body.size.x >= body.size.z)) { root.Rotate(0f, 90f, 0f, Space.World); body = ModelBounds(); }
-        root.position += new Vector3(bed.center.x - body.center.x, top - 0.08f - body.min.y, bed.center.z - body.center.z);
+        Animator a = mom.animator != null ? mom.animator : mom.GetComponentInChildren<Animator>();
+        Transform hips = a != null && a.isHuman ? a.GetBoneTransform(HumanBodyBones.Hips) : null;
+        Transform head = a != null && a.isHuman ? a.GetBoneTransform(HumanBodyBones.Head) : null;
+        Transform house = Playground.HouseTransform();
+        if (hips == null || head == null || house == null)
+        {
+            Bounds body = ModelBounds();
+            root.position += new Vector3(bed.center.x - body.center.x, top - 0.05f - body.min.y, bed.center.z - body.center.z);
+            return;
+        }
+
+        Vector3 pillow = house.TransformPoint(12.15f, top, 14.05f);            // house-model point (-12.15, z 14.05): the pillow
+        Vector3 hipsSpot = house.TransformPoint(12.15f, top, 13.05f);          // her hips, about a metre toward the foot
+
+        Vector3 now = head.position - hips.position; now.y = 0f;
+        Vector3 want = pillow - hipsSpot; want.y = 0f;
+        if (now.sqrMagnitude > 0.01f) root.RotateAround(hips.position, Vector3.up, Vector3.SignedAngle(now, want, Vector3.up));
+
+        Vector3 move = hipsSpot - hips.position;
+        move.y = top + 0.12f - hips.position.y;                                 // the hips rest just on the mattress
+        root.position += move;
     }
 
     void WakeUp()
     {
         if (!mom.IsAsleep) return;
         pose.Stop(0.3f);
+        Collider body = mom.GetComponent<Collider>();
+        if (body != null) body.enabled = true;
         Vector3 standAt = bedSpot != null ? bedSpot.position : mom.transform.position;
         mom.transform.position = standAt + Vector3.up * standHeight;
         mom.transform.rotation = Quaternion.Euler(0f, mom.transform.eulerAngles.y, 0f);
@@ -360,7 +389,7 @@ public class MomLife : MonoBehaviour
         {
             string line = clue != null ? FamilyLines.MomLine(clue.name) : null;           // her own words for this object
             FamilyLife.Say("Mom", line ?? NoticeLines[Random.Range(0, NoticeLines.Length)], mom.transform.position);
-if (clue != null) FamilyProgress.Award(FamilyProgress.Who.Mom, "mom:" + clue.name, 6f, 1f, "Mom noticed the " + FamilyProgress.Pretty(clue.name));
+if (clue != null)FamilyProgress.Award(FamilyProgress.Who.Mom, "mom:" + clue.name, 8f, 2f, "Mom noticed the " + FamilyProgress.Pretty(clue.name));
         }
     }
 

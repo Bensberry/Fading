@@ -10,7 +10,7 @@ public class ChapterGoals : MonoBehaviour
     const int MomGoal = 4;                             // there are more clues now
     const int LunaGoal = 3;
     const float DayBonus = 4f;                         // on BOTH bars
-    const float NightComesAfter = 25f;                  // seconds after the day's goals are done
+
 
     public static bool Active;          // ChapterRules switches it on after the chapter's first message
 
@@ -25,12 +25,7 @@ public class ChapterGoals : MonoBehaviour
         if (cycle != null) cycle.onPhaseChanged.AddListener(delegate { dayDone = false; });
     }
 
-    System.Collections.IEnumerator BringTheNight(DayNightCycle.Phase day)
-    {
-        yield return new WaitForSeconds(NightComesAfter);
-        while (CutsceneRunner.IsPlaying) yield return null;
-        if (cycle != null && cycle.Current == day) cycle.AdvancePhase();      // still the same day: the night begins
-    }
+
 
     void Update()
     {
@@ -44,12 +39,11 @@ public class ChapterGoals : MonoBehaviour
         {
             dayDone = true;
 FamilyProgress.Award(FamilyProgress.Who.Both, "day-goal:" + (cycle != null ? cycle.Current.ToString() : "day"), DayBonus, 0f, "They felt you today");
-            FadingHud.Toast("They felt you today. Night will come soon...", 3.5f);
-            StartCoroutine(BringTheNight(cycle != null ? cycle.Current : DayNightCycle.Phase.Day1));
+            FadingHud.Toast("They felt you today.", 3.5f);
         }
 
         FadingHud.SetObjective(dayDone
-            ? "Today's signs are done. Keep reaching them, or wait for the night."
+            ? "Today's signs are done. Keep reaching them until night falls."
             : "Today:  let Mom SEE  " + mom + "/" + MomGoal + " things     -     let Luna feel you  " + luna + "/" + LunaGoal);
     }
 }

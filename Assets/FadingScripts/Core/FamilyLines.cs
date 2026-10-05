@@ -38,6 +38,7 @@ public static class FamilyLines
         { "RubberDuck", "(squeaks along with the duck)" },
         { "Doll", "(reaches for her doll and hugs the air)" },
         { "ToyAirplane", "(\"vvvrrr...\" she babbles, waving her arms)" },
+        { "CeilingFan", "(stares up at the turning fan, mouth open)" },
         { "PiggyBank", "(giggles at the rattling)" },
         { "Present", "(claps her hands at the present)" },
         { "MusicBox", "(sways to the music, eyes wide)" },

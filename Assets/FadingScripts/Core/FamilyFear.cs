@@ -14,14 +14,14 @@ using UnityEngine;
 // Change the numbers below to make the game kinder or harsher.
 public class FamilyFear : MonoBehaviour
 {
-    public const float ScarePoints = 9f;             // how much the bars drop at once (a bar is full at FamilyProgress.BarPoints)
-    public const float DrainPerSecond = 1f;          // and how fast they keep draining while the family is afraid
-    const int TooManySigns = 3;
-    const float SpamSeconds = 10f;
-    const float CloseToBaby = 2f;
-    const float StartleMom = 2f;
-    const float WakeRange = 4f;
-    const float DoorScareRange = 7f;
+    public const float ScarePoints = 6f;             // how much the bars drop at once (a bar is full at FamilyProgress.BarPoints)
+    public const float DrainPerSecond = 0.6f;          // and how fast they keep draining while the family is afraid
+    const int TooManySigns = 4;
+    const float SpamSeconds = 9f;
+    const float CloseToBaby = 1.5f;
+    const float StartleMom = 1.5f;
+    const float WakeRange = 3f;
+    const float DoorScareRange = 6f;
     const float CalmDownSeconds = 10f;
     const float MinSecondsBetweenScares = 4f;
 

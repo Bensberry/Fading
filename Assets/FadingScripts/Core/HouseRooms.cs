@@ -77,7 +77,7 @@ public static class HouseRooms
         top = 0f;
         if (!TryGetObjectBounds(bedName, out bounds)) return false;
         GameObject bed = GameObject.Find(bedName);
-        top = bounds.min.y + bounds.size.y * 0.45f;                    // a guess, used if the ray below finds nothing
+        top = bounds.max.y - 0.08f;                                     // a guess (just below the top), used if the ray below finds nothing
 
         Vector3 above = new Vector3(bounds.center.x, bounds.max.y + 1f, bounds.center.z);
         float best = float.MinValue;

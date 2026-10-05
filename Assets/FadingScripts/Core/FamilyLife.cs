@@ -88,7 +88,7 @@ public class FamilyLife : MonoBehaviour
             BabyLife babyLife = GetComponent<BabyLife>();
             if (babyLife != null) babyLife.Delight();
             Say("LUNA", FamilyLines.LunaReaction(touched.name), baby.transform.position);
-FamilyProgress.Award(FamilyProgress.Who.Luna, "luna:" + touched.name, 4f, 1f, "Luna felt you near the " + FamilyProgress.Pretty(touched.name));
+FamilyProgress.Award(FamilyProgress.Who.Luna, "luna:" + touched.name, 5f, 2f, "Luna felt you near the " + FamilyProgress.Pretty(touched.name));
         }
         StartCoroutine(TellIfNobodySaw(touched.name));
     }
