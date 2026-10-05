@@ -211,6 +211,7 @@ public class CutsceneContext
     // 'voice' is optional: the name of a voice file in Assets/Resources/Audio/ (e.g. "voice_mom_eyes"). Played if it exists.
     public IEnumerator Say(string speaker, string line, float seconds, string voice = null)
     {
+        if (voice != null) seconds = Mathf.Max(seconds, GameAudio.Length(voice) + 0.4f);   // never cut the voice short
         FadingHud.Subtitle(speaker, line, seconds);
         if (voice != null) GameAudio.Play(voice, 1f);
         yield return new WaitForSeconds(seconds);

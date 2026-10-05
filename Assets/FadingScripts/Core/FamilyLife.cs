@@ -37,7 +37,11 @@ public class FamilyLife : MonoBehaviour
         if (CutsceneRunner.IsPlaying || Time.time < nextLine || Camera.main == null) return;
         if (Vector3.Distance(Camera.main.transform.position, where) > maxDistance) return;
         nextLine = Time.time + SecondsBetweenLines;
-        FadingHud.Subtitle(speaker, line, 3.5f);
+        string voice = GameAudio.VoiceFor(line);                          // the spoken line (Assets/Resources/Audio/voice_line_...)
+        FadingHud.Subtitle(speaker, line, Mathf.Max(3.5f, GameAudio.Length(voice) + 0.5f));
+        if (line.StartsWith("(")) return;                                 // Luna's reactions are actions, not words
+        if (speaker == "") GameAudio.Play(voice, 0.9f);                   // the ghost's own thoughts: in your head
+        else GameAudio.PlayVoiceAt(voice, where + Vector3.up * 1.5f, 1f); // Mom: from where she is
     }
 
     // ---------- doors

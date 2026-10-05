@@ -1,0 +1,392 @@
+[
+ [
+  "voice_dream_mom1_a",
+  "MOM",
+  "You always stepped on my feet."
+ ],
+ [
+  "voice_dream_mom1_b",
+  "FATHER",
+  "I was nervous. I still am."
+ ],
+ [
+  "voice_dream_mom1_c",
+  "MOM",
+  "Stay a little longer... please."
+ ],
+ [
+  "voice_dream_mom2_a",
+  "MOM",
+  "You always made the coffee too strong."
+ ],
+ [
+  "voice_dream_mom2_b",
+  "FATHER",
+  "And you drank it anyway."
+ ],
+ [
+  "voice_dream_mom2_c",
+  "MOM",
+  "I still make two cups."
+ ],
+ [
+  "voice_dream_mom3_a",
+  "MOM",
+  "Tomorrow we leave this house."
+ ],
+ [
+  "voice_dream_mom3_b",
+  "FATHER",
+  "The house was never what I loved."
+ ],
+ [
+  "voice_dream_mom3_c",
+  "MOM",
+  "...I know."
+ ],
+ [
+  "voice_dream_luna1_a",
+  "FATHER",
+  "Every star up there is a night I'll watch over you."
+ ],
+ [
+  "voice_dream_luna2_a",
+  "FATHER",
+  "Come here... that's it."
+ ],
+ [
+  "voice_dream_luna2_b",
+  "FATHER",
+  "That's my girl."
+ ],
+ [
+  "voice_dream_luna3_a",
+  "FATHER",
+  "You won't remember me, little one."
+ ],
+ [
+  "voice_dream_luna3_b",
+  "FATHER",
+  "That's all right. I'll remember for both of us."
+ ],
+ [
+  "voice_arrival_a",
+  "GHOST",
+  "I know this road. I walked it home every night."
+ ],
+ [
+  "voice_arrival_b",
+  "GHOST",
+  "The house is still here. Someone left a candle burning."
+ ],
+ [
+  "voice_grandma_candle",
+  "GRANDMA",
+  "They say the light shows you the way home. Just until it burns out."
+ ],
+ [
+  "voice_ghost_calling",
+  "GHOST",
+  "A light in the dark. Someone is calling me home."
+ ],
+ [
+  "voice_grandma_isthatyou",
+  "GRANDMA",
+  "...Is that you?"
+ ],
+ [
+  "voice_grandma_latehome",
+  "GRANDMA",
+  "You always came home late."
+ ],
+ [
+  "voice_grandma_son",
+  "GRANDMA",
+  "I know you're here, son."
+ ],
+ [
+  "voice_grandma_gotothem",
+  "GRANDMA",
+  "Go see them. They need you more than I do."
+ ],
+ [
+  "voice_grandma_lookafter",
+  "GRANDMA",
+  "Look after them, wherever you are."
+ ],
+ [
+  "voice_mom_eyes",
+  "MOM",
+  "She has your eyes. I keep waiting for you to walk through that door."
+ ],
+ [
+  "voice_ghost_mobile",
+  "GHOST",
+  "The mobile turns, though nobody touched it."
+ ],
+ [
+  "voice_ghost_luna",
+  "FATHER",
+  "Luna... you can see me?"
+ ],
+ [
+  "voice_ghost_giggles",
+  "GHOST",
+  "Luna giggles and reaches for something I can't hold."
+ ],
+ [
+  "voice_mom_whosmiling",
+  "MOM",
+  "Who are you smiling at, baby?"
+ ],
+ [
+  "voice_mom_isityou",
+  "MOM",
+  "...Is it you?"
+ ],
+ [
+  "voice_end1_mom",
+  "MOM",
+  "I can't stay here another night. Something in this house won't let us rest."
+ ],
+ [
+  "voice_end1_ghost",
+  "GHOST",
+  "I only wanted them to know I was here."
+ ],
+ [
+  "voice_end2_mom_a",
+  "MOM",
+  "I know it's you. I always knew."
+ ],
+ [
+  "voice_end2_mom_b",
+  "MOM",
+  "Thank you for staying with us. You can rest now."
+ ],
+ [
+  "voice_end3_mom",
+  "MOM",
+  "Who are you smiling at, Luna?"
+ ],
+ [
+  "voice_end3_ghost",
+  "GHOST",
+  "She will not remember me. But she knew I was here."
+ ],
+ [
+  "voice_end4_mom_a",
+  "MOM",
+  "We'll be okay. Both of us."
+ ],
+ [
+  "voice_end4_mom_b",
+  "MOM",
+  "Go home, love."
+ ],
+ [
+  "voice_end4_ghost",
+  "GHOST",
+  "I'm home."
+ ],
+ [
+  "voice_line_my_coffee_i_didn_t_leave_it_there",
+  "MOM",
+  "My coffee... I didn't leave it there."
+ ],
+ [
+  "voice_line_that_song_we_danced_to_it_in_this_kitche",
+  "MOM",
+  "That song... we danced to it in this kitchen."
+ ],
+ [
+  "voice_line_our_wedding_photo_moved_you_always_hated",
+  "MOM",
+  "Our wedding photo moved... you always hated that picture."
+ ],
+ [
+  "voice_line_the_family_photo_it_s_crooked_again",
+  "MOM",
+  "The family photo... it's crooked again."
+ ],
+ [
+  "voice_line_three_days_left_i_can_t_believe_we_re_re",
+  "MOM",
+  "Three days left. I can't believe we're really leaving."
+ ],
+ [
+  "voice_line_the_candle_is_burning_brighter_is_that_y",
+  "MOM",
+  "The candle is burning brighter... is that you?"
+ ],
+ [
+  "voice_line_someone_wrote_on_the_window_my_name",
+  "MOM",
+  "Someone wrote on the window... my name?"
+ ],
+ [
+  "voice_line_luna_s_music_box_you_used_to_hum_that_so",
+  "MOM",
+  "Luna's music box... you used to hum that song."
+ ],
+ [
+  "voice_line_the_mobile_is_turning_there_s_no_wind_in",
+  "MOM",
+  "The mobile is turning... there's no wind in here."
+ ],
+ [
+  "voice_line_the_nightlight_i_m_sure_i_switched_it_of",
+  "MOM",
+  "The nightlight... I'm sure I switched it off."
+ ],
+ [
+  "voice_line_her_teddy_fell_over_again",
+  "MOM",
+  "Her teddy fell over again."
+ ],
+ [
+  "voice_line_my_tea_moved_you_always_made_it_for_me_e",
+  "MOM",
+  "My tea moved. You always made it for me, every night."
+ ],
+ [
+  "voice_line_the_flowers_are_moving_is_a_window_open",
+  "MOM",
+  "The flowers are moving. Is a window open?"
+ ],
+ [
+  "voice_line_who_turned_the_fan_on",
+  "MOM",
+  "Who turned the fan on?"
+ ],
+ [
+  "voice_line_you_used_to_spin_that_globe_and_promise",
+  "MOM",
+  "You used to spin that globe and promise we'd travel."
+ ],
+ [
+  "voice_line_the_alarm_it_s_not_even_morning",
+  "MOM",
+  "The alarm? It's not even morning..."
+ ],
+ [
+  "voice_line_the_ceiling_fan_is_turning_by_itself",
+  "MOM",
+  "The ceiling fan is turning by itself."
+ ],
+ [
+  "voice_line_our_anniversary_glass_i_can_t_pack_it_no",
+  "MOM",
+  "Our anniversary glass... I can't pack it. Not yet."
+ ],
+ [
+  "voice_line_luna_did_you_throw_your_doll_again",
+  "MOM",
+  "Luna, did you throw your doll again?"
+ ],
+ [
+  "voice_line_bath_time_already_little_duck",
+  "MOM",
+  "Bath time already, little duck?"
+ ],
+ [
+  "voice_line_you_bought_her_that_plane_she_s_still_to",
+  "MOM",
+  "You bought her that plane. She's still too small for it."
+ ],
+ [
+  "voice_line_your_old_piggy_bank_you_were_saving_for",
+  "MOM",
+  "Your old piggy bank... you were saving for her."
+ ],
+ [
+  "voice_line_her_birthday_present_you_wrapped_it_befo",
+  "MOM",
+  "Her birthday present. You wrapped it before..."
+ ],
+ [
+  "voice_line_did_that_door_just_move",
+  "MOM",
+  "Did that door just move?"
+ ],
+ [
+  "voice_line_did_you_see_that",
+  "MOM",
+  "Did you see that?"
+ ],
+ [
+  "voice_line_hm_that_moved",
+  "MOM",
+  "Hm? That moved..."
+ ],
+ [
+  "voice_line_that_s_strange",
+  "MOM",
+  "That's strange..."
+ ],
+ [
+  "voice_line_who_s_there",
+  "MOM",
+  "Who's there?"
+ ],
+ [
+  "voice_line_was_that_you_luna",
+  "MOM",
+  "Was that you, Luna?"
+ ],
+ [
+  "voice_line_so_many_memories_in_these_boxes",
+  "MOM",
+  "So many memories in these boxes."
+ ],
+ [
+  "voice_line_almost_done_with_this_room",
+  "MOM",
+  "Almost done with this room."
+ ],
+ [
+  "voice_line_we_ll_be_all_right",
+  "MOM",
+  "We'll be all right."
+ ],
+ [
+  "voice_line_your_father_loved_this_house",
+  "MOM",
+  "Your father loved this house."
+ ],
+ [
+  "voice_line_sleep_little_one_mommy_s_here",
+  "MOM",
+  "Sleep, little one. Mommy's here."
+ ],
+ [
+  "voice_line_luna_i_m_coming_baby",
+  "MOM",
+  "Luna?! I'm coming, baby!"
+ ],
+ [
+  "voice_line_who_s_there_stop_it",
+  "MOM",
+  "Who's there?! Stop it!"
+ ],
+ [
+  "voice_line_stop_please_stop",
+  "MOM",
+  "Stop... please, stop."
+ ],
+ [
+  "voice_line_she_cries_when_she_thinks_nobody_can_see",
+  "GHOST",
+  "She cries when she thinks nobody can see her."
+ ],
+ [
+  "voice_line_i_m_right_here_i_m_right_here",
+  "GHOST",
+  "I'm right here. I'm right here..."
+ ],
+ [
+  "voice_line_i_wish_i_could_hold_her",
+  "GHOST",
+  "I wish I could hold her."
+ ]
+]

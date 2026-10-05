@@ -32,8 +32,63 @@ public static class GameAudio
     {
         AudioClip clip = Get(name);
         if (clip == null) return;
-        Vector3 at = Camera.main != null ? Camera.main.transform.position : Vector3.zero;
-        AudioSource.PlayClipAtPoint(clip, at, volume);
+        FlatSource().PlayOneShot(clip, volume);                 // "in your head": same volume wherever the camera is (also in cutscenes)
+    }
+
+    static AudioSource flat;
+
+    static AudioSource FlatSource()
+    {
+        if (flat == null)
+        {
+            GameObject g = new GameObject("GameAudio2D");
+            Object.DontDestroyOnLoad(g);
+            flat = g.AddComponent<AudioSource>();
+            flat.spatialBlend = 0f;
+            flat.playOnAwake = false;
+        }
+        return flat;
+    }
+
+    // How long a sound file is (0 if it does not exist).
+    public static float Length(string name)
+    {
+        AudioClip clip = Get(name);
+        return clip != null ? clip.length : 0f;
+    }
+
+    // The voice file for a line someone says in the game (FamilyLife.Say): "Did you see that?" -> voice_line_did_you_see_that
+    public static string VoiceFor(string line)
+    {
+        System.Text.StringBuilder b = new System.Text.StringBuilder();
+        bool gap = false;
+        foreach (char ch in line.ToLowerInvariant())
+        {
+            bool ok = (ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9');
+            if (ok) { if (gap && b.Length > 0) b.Append('_'); b.Append(ch); gap = false; }
+            else gap = true;
+        }
+        string s = b.ToString();
+        if (s.Length > 40) s = s.Substring(0, 40);
+        return "voice_line_" + s.TrimEnd('_');
+    }
+
+    // A spoken line from a place in the house: you hear the direction, and it stays clear up to ~20 m.
+    public static void PlayVoiceAt(string name, Vector3 position, float volume = 1f)
+    {
+        AudioClip clip = Get(name);
+        if (clip == null) return;
+        GameObject g = new GameObject("Voice_" + name);
+        g.transform.position = position;
+        AudioSource s = g.AddComponent<AudioSource>();
+        s.clip = clip;
+        s.volume = volume;
+        s.spatialBlend = 0.7f;
+        s.rolloffMode = AudioRolloffMode.Linear;
+        s.minDistance = 3f;
+        s.maxDistance = 22f;
+        s.Play();
+        Object.Destroy(g, clip.length + 0.2f);
     }
 
     // Play a sound once at a place in the house (3D: louder when the player is close). Does nothing if the file is missing.
