@@ -14,6 +14,13 @@ public class CutsceneRunner : MonoBehaviour
     static CutsceneRunner instance;
 
     readonly List<Behaviour> frozen = new List<Behaviour>();
+    readonly List<Coroutine> background = new List<Coroutine>();
+
+    // A step that runs at the same time as the next ones (CutsceneContext.Together). Stopped when the cutscene ends.
+    public static void Background(IEnumerator step)
+    {
+        if (instance != null && IsPlaying) instance.background.Add(instance.StartCoroutine(step));
+    }
     bool finished;
 
     public static void Play(Cutscene cutscene, System.Action onFinished = null)
@@ -41,6 +48,8 @@ public class CutsceneRunner : MonoBehaviour
             yield return null;
         }
 
+        foreach (Coroutine c in background) if (c != null) StopCoroutine(c);
+        background.Clear();
         FadingHud.ShowSkipHint(false);
         yield return context.Finish(skipped);
         UnfreezePlayer();

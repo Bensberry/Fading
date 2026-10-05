@@ -247,7 +247,7 @@ public class ChapterRules : MonoBehaviour
     IEnumerator OpeningCutscene()
     {
         yield return new WaitForSeconds(3.5f);
-        CutsceneRunner.Play(new IntroCutscene(), AddTutorial);
+        CutsceneRunner.Play(new ArrivalCutscene(), AddTutorial);       // he comes home through the fog, then the candle scene
     }
 
     void AddTutorial()

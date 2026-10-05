@@ -45,6 +45,7 @@ public class Playground : MonoBehaviour
         BuildGazebo();
         BuildFrontYard();
         BuildTrees();
+        BuildForestEdge();
         BuildBushesAndFlowers();
         BuildFence();
         BuildPath();
@@ -107,6 +108,43 @@ public class Playground : MonoBehaviour
         for (int i = 0; i < 6; i++) Place("Nature/mushroom_redGroup", Rand(-22f, 6f), Rand(28f, 32f), Rand(0f, 360f), 0.2f, false, false);
         Place("Nature/log", -20.5f, 18f, 35f, 1.8f, true, true);
         Place("Nature/rock_largeB", 4f, 20f, 60f, 1.2f, true, true);
+    }
+
+    // ---------- the forest around everything
+    // The ground of the house model ends at x -40..24, z -28..36. Between the play area and that edge a thick wood
+    // hides the end of the world, and invisible walls keep the player inside the play area.
+    static readonly Rect PlayArea = Rect.MinMaxRect(-25f, -19f, 9f, 34f);              // house-model x / z
+    static readonly string[] ForestTrees = { "tree_pineTallA", "tree_pineRoundB", "tree_tall", "tree_detailed", "tree_oak_dark", "tree_fat" };
+
+    void BuildForestEdge()
+    {
+        const float step = 2.8f;
+        for (float x = -40f; x <= 24f; x += step)
+            for (float z = -28f; z <= 36f; z += step)
+            {
+                if (x > PlayArea.xMin - 0.5f && x < PlayArea.xMax + 0.5f && z > PlayArea.yMin - 0.5f && z < PlayArea.yMax + 0.5f) continue;
+                string kind = ForestTrees[random.Next(ForestTrees.Length)];
+                GameObject t = Place("Nature/" + kind, x + Rand(-1f, 1f), z + Rand(-1f, 1f), Rand(0f, 360f), Rand(6f, 9.5f), false, false);
+                if (t != null) foreach (Renderer r in t.GetComponentsInChildren<Renderer>()) r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            }
+
+        // invisible walls on the four sides of the play area
+        Wall(PlayArea.xMin, PlayArea.yMin, PlayArea.xMax, PlayArea.yMin);
+        Wall(PlayArea.xMin, PlayArea.yMax, PlayArea.xMax, PlayArea.yMax);
+        Wall(PlayArea.xMin, PlayArea.yMin, PlayArea.xMin, PlayArea.yMax);
+        Wall(PlayArea.xMax, PlayArea.yMin, PlayArea.xMax, PlayArea.yMax);
+    }
+
+    void Wall(float x1, float z1, float x2, float z2)
+    {
+        Vector3 a = house != null ? house.TransformPoint(-x1, 0f, z1) : new Vector3(-x1, 0f, z1);
+        Vector3 b = house != null ? house.TransformPoint(-x2, 0f, z2) : new Vector3(-x2, 0f, z2);
+        GameObject w = new GameObject("YardEdge");
+        w.transform.SetParent(yard, false);
+        w.transform.position = (a + b) / 2f + Vector3.up * 1.5f;
+        Vector3 along = b - a;
+        w.transform.rotation = Quaternion.LookRotation(along.normalized, Vector3.up);
+        w.AddComponent<BoxCollider>().size = new Vector3(0.5f, 6f, along.magnitude + 1f);
     }
 
     void Tree(float x, float z)
@@ -175,13 +213,17 @@ public class Playground : MonoBehaviour
         for (int s = -1; s <= 1; s += 2) Part(root, PrimitiveType.Cube, new Vector3(s * 0.3f, 0.75f, -0.6f), new Vector3(0.06f, 1.5f, 0.06f), Metal, Vector3.zero);
         for (int r = 0; r < 4; r++) Part(root, PrimitiveType.Cube, new Vector3(0f, 0.3f + r * 0.35f, -0.6f), new Vector3(0.6f, 0.04f, 0.04f), Metal, Vector3.zero);
         Part(root, PrimitiveType.Cube, new Vector3(0f, 1.5f, -0.35f), new Vector3(0.7f, 0.06f, 0.6f), Wood, Vector3.zero);
-        Part(root, PrimitiveType.Cube, new Vector3(0f, 0.78f, 0.75f), new Vector3(0.55f, 0.05f, 1.9f), Red, new Vector3(-38f, 0f, 0f));
+        // The ramp: from the platform edge (z -0.05, 1.5 m high) down to the ground (z 1.75).
+        Part(root, PrimitiveType.Cube, new Vector3(0f, 0.82f, 0.85f), new Vector3(0.55f, 0.05f, 2.25f), Red, new Vector3(37f, 0f, 0f));
+        for (int s = -1; s <= 1; s += 2)                                                       // side rails
+            Part(root, PrimitiveType.Cube, new Vector3(s * 0.29f, 0.92f, 0.85f), new Vector3(0.04f, 0.14f, 2.25f), Red, new Vector3(37f, 0f, 0f));
+        Part(root, PrimitiveType.Cube, new Vector3(0f, 0.1f, 1.85f), new Vector3(0.55f, 0.05f, 0.35f), Red, Vector3.zero);   // the run-out at the bottom
 
         RestSpot ride = root.gameObject.AddComponent<RestSpot>();
         ride.kind = RestSpot.Kind.Slide;
-        ride.seatPoint = root.TransformPoint(new Vector3(0f, 1.55f, -0.3f));
-        ride.endPoint = root.TransformPoint(new Vector3(0f, 0.15f, 1.65f));
-        ride.exitPoint = root.TransformPoint(new Vector3(0f, 0.05f, 2.3f));
+        ride.seatPoint = root.TransformPoint(new Vector3(0f, 1.55f, -0.2f));
+        ride.endPoint = root.TransformPoint(new Vector3(0f, 0.15f, 1.85f));
+        ride.exitPoint = root.TransformPoint(new Vector3(0f, 0.05f, 2.6f));
         ride.facing = root.forward;
         ride.ApplyDefaults();
         MakeTouchable(root.gameObject);

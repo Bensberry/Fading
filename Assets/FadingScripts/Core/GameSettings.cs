@@ -2,14 +2,14 @@ using UnityEngine;
 
 // Goes in: nowhere (a static helper). The player's settings from the pause menu, saved between runs.
 // Every setting is a number from 0 to 100 (what the sliders show):
-//   Fog         50 = the game's fog (default: a little thicker than the scene's own fog), 0 = no fog, 100 = twice as thick
+//   Fog         50 = the game's fog (default: a little thinner than the scene's own fog), 0 = no fog, 100 = twice as thick
 //               Scenes without fog (Chapter 1-3) get the game's house fog, so every chapter is misty.
 //   Lighting    50 = normal (default), 0 = darker, 100 = much brighter (sun/moon, ambient light and the player's candle)
 //   Sensitivity 0 = very slow, 100 = very fast (default 35, which turns 0.1 degrees per mouse count like most FPS games)
 // ChapterRules calls ApplyAll() when a chapter starts; the pause menu calls the single Apply... methods while you drag a slider.
 public static class GameSettings
 {
-    const string FogKey = "fading_fog_percent_v2";          // v2: the new, thicker default replaces old saved values
+    const string FogKey = "fading_fog_percent_v3";          // v3: the new, lighter default replaces old saved values
     const string LightingKey = "fading_lighting_percent";
     const string SensitivityKey = "fading_sensitivity_percent";
 
@@ -17,8 +17,8 @@ public static class GameSettings
     public const float DefaultLighting = 50f;
     public const float DefaultSensitivity = 35f;
 
-    const float DefaultFogBoost = 1.2f;                       // the default fog is 20% thicker than the scene's own
-    const float HouseFogDensity = 0.22f;                      // for chapter scenes that have no fog of their own
+    const float DefaultFogBoost = 0.85f;                      // the default fog is a little thinner than the scene's own (so things stay visible)
+    const float HouseFogDensity = 0.16f;                      // for chapter scenes that have no fog of their own
 
     static float sceneFogDensity;
     static bool sceneFogOn;
@@ -42,7 +42,7 @@ public static class GameSettings
     }
 
     // ---------- slider value (0-100) -> real value
-    public static float FogScale { get { return Fog / 50f * DefaultFogBoost; } }                // 0 .. 1.2 (default) .. 2.4
+    public static float FogScale { get { return Fog / 50f * DefaultFogBoost; } }                // 0 .. 0.85 (default) .. 1.7
 
     public static float LightingScale                                                           // 0.5 .. 1 (normal) .. 2.5
     {

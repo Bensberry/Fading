@@ -75,11 +75,17 @@ public class CutsceneContext
             if (type == "GrandmaAI" || type == "BabyAI") Hide(b.GetComponentsInChildren<Renderer>());
         }
         savedFog = RenderSettings.fog;
-        RenderSettings.fog = false;                          // cutscenes are shown clearly, without the game's fog
+        savedFogDensity = RenderSettings.fogDensity;
+        savedFogColor = RenderSettings.fogColor;
+        savedFogMode = RenderSettings.fogMode;
+        RenderSettings.fog = false;                          // cutscenes are shown clearly, without the game's fog (unless one asks for Fog)
         for (int i = 0; i < 4; i++) yield return null;
     }
 
     bool savedFog;
+    float savedFogDensity;
+    Color savedFogColor;
+    FogMode savedFogMode;
 
     void Hide(Renderer[] renderers)
     {
@@ -103,6 +109,10 @@ public class CutsceneContext
         foreach (Mannequin m in standIns.Values) if (m.root != null) Object.Destroy(m.root);
         foreach (Renderer r in hidden) if (r != null) r.enabled = true;
         RenderSettings.fog = savedFog;
+        RenderSettings.fogDensity = savedFogDensity;
+        RenderSettings.fogColor = savedFogColor;
+        RenderSettings.fogMode = savedFogMode;
+        foreach (DoorToggle d in reLock) if (d != null) { d.CloseInstant(); d.SetLocked(true); }
         barTop.color = barBottom.color = new Color(0f, 0f, 0f, 0f);
 
         yield return Fade(0f, 1f);
@@ -458,6 +468,37 @@ public class CutsceneContext
                 m.SetColor("_EmissionColor", pale * 0.35f);
             }
         }
+    }
+
+    // Run a step (e.g. MoveActor) WHILE the next steps play:  yield return c.Together(c.MoveActor("Father", ..., 8f));
+    public IEnumerator Together(IEnumerator step)
+    {
+        CutsceneRunner.Background(step);
+        yield break;
+    }
+
+    // ---------------------------------------------------------------- fog and doors
+    // Thick fog for this cutscene only (the game's own fog comes back when it ends). density 0 = no fog.
+    public IEnumerator Fog(float density, Color color)
+    {
+        RenderSettings.fog = density > 0f;
+        RenderSettings.fogMode = FogMode.ExponentialSquared;
+        RenderSettings.fogDensity = density;
+        RenderSettings.fogColor = color;
+        yield break;
+    }
+
+    readonly List<DoorToggle> reLock = new List<DoorToggle>();
+
+    // A door swings open by itself (even a locked one: it is locked again and shut when the cutscene ends).
+    public IEnumerator OpenDoor(string doorName)
+    {
+        Interactable i = FindInteractable(doorName);
+        DoorToggle door = i as DoorToggle;
+        if (door == null || door.IsOpen) yield break;
+        if (door.locked) { reLock.Add(door); door.SetLocked(false); }
+        door.TryInteract();
+        yield break;
     }
 
     // ---------------------------------------------------------------- dreams

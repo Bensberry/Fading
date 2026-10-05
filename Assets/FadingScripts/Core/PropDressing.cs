@@ -5,7 +5,7 @@ using UnityEngine;
 // new touchable CLUES (each has its own small script in FadingScripts/Objects, like every other sign):
 //   Mom notices:   cup of tea, flowers, desk fan, globe, alarm clock, ceiling fan, the anniversary glass
 //   Luna feels:    her doll, rubber duck, toy airplane, piggy bank, a wrapped present
-// plus a few things that are only decoration (books, a candlestick, a lamp, a plant, a telescope, a packing box).
+// plus a few things that are only decoration (books, a candlestick, a plant, a telescope, a trophy, a packing box).
 // Positions are house-model points (x, height of the furniture top, z), measured from FadingHouse.glb.
 // Each clue can have its own sound in Assets/Resources/Audio/ (the last word of each line below; see the audio list).
 // Several of them get packed away in later chapters (HouseEmptying).
@@ -35,7 +35,7 @@ public static class PropDressing
         // ---- decoration only
         Decor("Books", "Prop_Books", -6.8f, 1.8f, 1.73f, 0.25f, true, 0f);
         Decor("Candlestick", "Prop_Candlestick", -6.85f, 0.82f, 2.68f, 0.28f, false, 0f);
-        Decor("LampWithShade", "Prop_Lamp", -2.04f, 0.6f, 4.1f, 0.4f, false, 0f);
+
         Decor("PottedPlant", "Prop_Plant", -7.45f, 0.01f, 13.9f, 0.5f, false, 0f);
         Decor("Telescope", "Prop_Telescope", -15.5f, 0.01f, 13.8f, 1.0f, false, 135f);
         Decor("Trophy", "Prop_Trophy", -4.15f, 0.85f, 14.25f, 0.25f, false, 180f);

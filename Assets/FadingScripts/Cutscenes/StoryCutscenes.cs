@@ -3,6 +3,7 @@ using UnityEngine;
 
 // Goes in: nowhere (ChapterRules plays these at the right moments of the story).
 // The story cutscenes, in game order. Each one is a list of steps ("yield return c.something"):
+//   0. ArrivalCutscene        before Chapter 0: the father's ghost walks up to the house in thick fog (then the Intro follows)
 //   1. IntroCutscene          start of Chapter 0: the candle is lit, the ghost wakes
 //   2. ChapterZeroEndCutscene end of Chapter 0: Grandma speaks to him, sends him to his family, leaves
 //   3. NightOneCutscene       Chapter 1, when Night 1 begins: Mom by the bed, the baby sees him
@@ -13,6 +14,50 @@ using UnityEngine;
 // The last word of every Say is the name of an OPTIONAL voice file in Assets/Resources/Audio/ (see the audio list).
 // Positions are points of the house MODEL (x, height above floor, z): c.House(x, y, z). Nudge them if a shot looks off.
 // Mom and Baby are the real models (Resources/Cast) once those prefabs exist, otherwise simple stand-in figures.
+
+// ------------------------------------------------------------------------------------------------- 0
+// Before Chapter 0: the father's ghost walks up the path to his house through thick fog. The door opens by itself.
+public class ArrivalCutscene : Cutscene
+{
+    static readonly Color Mist = new Color(0.42f, 0.47f, 0.55f);
+
+    public override IEnumerator Play(CutsceneContext c)
+    {
+        yield return c.FadeNow(1f, Color.black);
+        yield return c.Letterbox(true, 0.3f);
+        yield return c.Fog(0.11f, Mist);                                         // very foggy, just for this scene
+        yield return c.CameraLight(true, 0.6f);
+        yield return c.Glow(new Vector3(-8.1f, 2.2f, -0.8f), new Color(1f, 0.78f, 0.5f), 2.5f, 7f);    // the porch light
+        yield return c.Spawn("Father", new Vector3(-8.1f, -0.45f, -15f), new Vector3(-8.1f, 0f, 0f));
+
+        // The road: a figure comes out of the fog.
+        yield return c.CutCamera(c.House(-4.2f, 1.3f, -17.5f), c.House(-8.1f, 1.4f, -9f), 45f);
+        yield return c.Together(c.MoveActor("Father", new Vector3(-8.1f, -0.45f, -8.5f), 9f));
+        yield return c.Fade(0f, 3f);
+        yield return c.Say("", "I know this road. I walked it home every night.", 4.5f, "voice_arrival_a");
+        yield return c.Wait(1.5f);
+        yield return c.Fade(1f, 1.2f);
+
+        // Close behind him: the house, a light in the window.
+        yield return c.CutCamera(c.House(-7.2f, 1.7f, -11.5f), c.House(-8.1f, 1.5f, -1f), 50f);
+        yield return c.Together(c.MoveActor("Father", new Vector3(-8.1f, 0f, -1.1f), 6.5f));
+        yield return c.Fade(0f, 1.5f);
+        yield return c.Say("", "The house is still here. Someone left a candle burning.", 4.5f, "voice_arrival_b");
+        yield return c.Wait(1f);
+
+        // The door opens for him.
+        yield return c.CutCamera(c.House(-6.6f, 1.4f, -4.2f), c.House(-8.1f, 1.3f, -0.3f), 45f);
+        yield return c.OpenDoor("INT_Door_Front");
+        yield return c.Wait(1f);
+        yield return c.MoveActor("Father", new Vector3(-8.1f, 0f, 1.2f), 2.5f);
+        yield return c.Fade(1f, 1.5f);
+        yield return c.Show("Father", false);
+        yield return c.Fog(0f, Mist);                                             // inside: clear again
+
+        // ...and straight on into the candle scene (one cutscene, so the game does not flash in between).
+        yield return new IntroCutscene().Play(c);
+    }
+}
 
 // ------------------------------------------------------------------------------------------------- 1
 public class IntroCutscene : Cutscene
