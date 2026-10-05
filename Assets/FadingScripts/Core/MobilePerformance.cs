@@ -4,15 +4,15 @@ using UnityEngine.Rendering.Universal;
 
 // Goes in: nowhere (it starts by itself, ONLY in a phone build; on PC and in the Editor it does nothing).
 // Makes the game run smoothly on Android phones by drawing a bit less:
-//   - draws the 3D picture at a lower resolution (text and buttons stay sharp), no HDR, no anti-aliasing
-//   - shorter, hard (cheaper) shadows; lamps and candles never cast shadows; at most 2 lamps light each object
+//   - draws the 3D picture at 85% resolution (text and buttons stay sharp), no anti-aliasing
+//   - shadows as far as on PC (25 m); lamps and candles never cast shadows; at most 3 lamps light each object
 //   - the camera does not draw very far away objects
 //   - heavy screen effects (bloom quality, depth of field, motion blur, film grain, lens flare) are switched off
 // Lights, cameras and effects made later (cutscenes, the candle...) are checked again every 2 seconds.
 public class MobilePerformance : MonoBehaviour
 {
-    const float RenderScale = 0.7f;           // 70% resolution for the 3D view
-    const float ShadowDistance = 18f;
+    const float RenderScale = 0.85f;          // 85% resolution for the 3D view (a phone screen is small and sharp)
+    const float ShadowDistance = 25f;          // the same as on PC
     const float ViewDistance = 90f;           // the whole house and yard still fit in this
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
@@ -41,10 +41,9 @@ public class MobilePerformance : MonoBehaviour
         if (urp == null) return;
         urp.renderScale = RenderScale;
         urp.msaaSampleCount = 1;
-        urp.supportsHDR = false;
         urp.shadowDistance = ShadowDistance;
         urp.shadowCascadeCount = 1;
-        urp.maxAdditionalLightsCount = 2;
+        urp.maxAdditionalLightsCount = 3;
     }
 
     void Start() { InvokeRepeating(nameof(TuneScene), 0f, 2f); }
@@ -53,21 +52,19 @@ public class MobilePerformance : MonoBehaviour
     {
         foreach (Light l in FindObjectsByType<Light>(FindObjectsSortMode.None))
         {
-            if (l.type == LightType.Directional) { if (l.shadows == LightShadows.Soft) l.shadows = LightShadows.Hard; }
-            else if (l.shadows != LightShadows.None) l.shadows = LightShadows.None;
+            if (l.type != LightType.Directional && l.shadows != LightShadows.None) l.shadows = LightShadows.None;
         }
 
         foreach (Camera c in Camera.allCameras)
         {
             if (c.farClipPlane > ViewDistance) c.farClipPlane = ViewDistance;
             c.allowMSAA = false;
-            c.allowHDR = false;
         }
 
         foreach (Volume v in FindObjectsByType<Volume>(FindObjectsSortMode.None))
         {
-            if (v.sharedProfile == null && v.profile == null) continue;
             VolumeProfile p = v.HasInstantiatedProfile() ? v.profile : v.sharedProfile;   // the build's copy, never saved
+            if (p == null) continue;
             Bloom bloom;
             if (p.TryGet(out bloom)) bloom.highQualityFiltering.Override(false);
             Off<DepthOfField>(p);
