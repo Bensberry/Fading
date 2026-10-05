@@ -12,6 +12,7 @@ public class PlayerInteractor : MonoBehaviour
     public LayerMask layers = 1 << 8;
 
     Interactable current;
+    public static bool HasTarget { get; private set; }          // the player is looking at something touchable (NightRest waits then)
     GUIStyle promptStyle, cueStyle;
     bool momSees, lunaNear;
     float nextCueCheck;
@@ -24,6 +25,7 @@ public class PlayerInteractor : MonoBehaviour
             current = hit.collider.GetComponentInParent<Interactable>();
 
         if (RestSpot.AnyoneResting) current = null;                                // sitting / swinging: F means "get up"
+        HasTarget = current != null;
         if (current != null && PressedThisFrame())
             current.TryInteract();
 

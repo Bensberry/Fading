@@ -14,6 +14,9 @@ public enum CastStance { Standing, Sitting }
 //   Camera:     CutCamera (instant), MoveCamera (smooth), CameraLight (soft light so dark nights can be seen)
 //   Characters: Spawn, MoveActor, TurnActor, Stance, Anim, AnimBool, Show
 //   The cradle: Cradle (a cradle, with Luna lying in it or empty), BabyLooksUpAndSmiles (close-up: she looks at us and smiles)
+//   Poses:      Pose (play an animation such as "mom_sit" / "mom_sleep" / "sleeping"), LieDown (lay someone on a bed or
+//               the floor by their skeleton), SitAt (seat someone, e.g. on a bench), BabyAsleep (eyes closed, a small smile)
+//   Positions:  ToHouse(world point) turns a world point into a house-model point (for Spawn)
 //   Dreams:     DreamHaze (soft white haze over the picture), Glow (a warm light), Glimmers (floating memory sparks),
 //               BabyLooksAt (Luna turns her head to a character or the camera, and smiles)
 //   "Father" is the ghost himself: a pale, softly glowing figure (or Resources/Cast/Father if a model is added).
@@ -476,6 +479,75 @@ public class CutsceneContext
     {
         CutsceneRunner.Background(step);
         yield break;
+    }
+
+    // ---------------------------------------------------------------- poses
+    // Play an extra animation on a character: "mom_sit", "mom_sleep", "mom_sad" ... or one of the baby's own ("sleeping").
+    public IEnumerator Pose(string name, string clip)
+    {
+        GameObject a = Actor(name);
+        if (a == null) yield break;
+        foreach (SkinnedMeshRenderer r in a.GetComponentsInChildren<SkinnedMeshRenderer>()) r.updateWhenOffscreen = true;
+        Animator animator = a.GetComponentInChildren<Animator>();
+        if (animator != null) animator.speed = 1f;
+        PosePlayer.On(a).Play(GameClips.Get(clip, a), 0.2f);
+        yield return new WaitForSeconds(0.4f);                  // fully in the pose before LieDown / SitAt measure it
+    }
+
+    // Lay a character down (after Pose "...sleep"): the hips on 'hips' (house point; y = the surface they lie on),
+    // the head toward 'headToward'. Uses the skeleton, so it is exact whatever the animation does.
+    public IEnumerator LieDown(string name, Vector3 hips, Vector3 headToward)
+    {
+        GameObject a = Actor(name);
+        Transform hipBone, headBone;
+        if (a == null || !Bones(a, out hipBone, out headBone)) yield break;
+        Vector3 hipsWorld = House(hips.x, hips.y, hips.z), headWorld = House(headToward.x, headToward.y, headToward.z);
+        Vector3 now = headBone.position - hipBone.position; now.y = 0f;
+        Vector3 want = headWorld - hipsWorld; want.y = 0f;
+        if (now.sqrMagnitude > 0.001f) a.transform.RotateAround(hipBone.position, Vector3.up, Vector3.SignedAngle(now, want, Vector3.up));
+        Vector3 move = hipsWorld - hipBone.position;
+        move.y = hipsWorld.y + 0.12f - hipBone.position.y;     // resting just on the surface
+        a.transform.position += move;
+    }
+
+    // Seat a character (after Pose "mom_sit") with the hips on 'hips' (house point), facing 'lookAt'.
+    public IEnumerator SitAt(string name, Vector3 hips, Vector3 lookAt)
+    {
+        GameObject a = Actor(name);
+        Transform hipBone, headBone;
+        if (a == null || !Bones(a, out hipBone, out headBone)) yield break;
+        Vector3 hipsWorld = House(hips.x, hips.y, hips.z);
+        Vector3 face = House(lookAt.x, lookAt.y, lookAt.z) - hipsWorld; face.y = 0f;
+        if (face.sqrMagnitude > 0.001f) a.transform.rotation = Quaternion.LookRotation(face);
+        yield return null;
+        a.transform.position += hipsWorld - hipBone.position;
+    }
+
+    // Luna asleep: eyes closed and the smallest smile.
+    public IEnumerator BabyAsleep()
+    {
+        GameObject baby = Actor("Baby");
+        if (baby == null) yield break;
+        BabyFace face = BabyFace.On(baby);
+        face.eyesClosed = true;
+        face.Smile(true);
+    }
+
+    static bool Bones(GameObject a, out Transform hips, out Transform head)
+    {
+        hips = head = null;
+        Animator animator = a.GetComponentInChildren<Animator>();
+        if (animator == null || !animator.isHuman) return false;
+        hips = animator.GetBoneTransform(HumanBodyBones.Hips);
+        head = animator.GetBoneTransform(HumanBodyBones.Head);
+        return hips != null && head != null;
+    }
+
+    // A world point as a house-model point (the opposite of House()).
+    public Vector3 ToHouse(Vector3 world)
+    {
+        Vector3 local = house != null ? house.InverseTransformPoint(world) : world;
+        return new Vector3(-local.x, local.y, local.z);
     }
 
     // ---------------------------------------------------------------- fog and doors

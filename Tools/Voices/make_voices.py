@@ -32,6 +32,9 @@ SPECIAL = {
     'voice_dream_luna2_b': (0.75, 0.35), 'voice_dream_luna3_b': (0.8, 0.3), 'voice_ghost_luna': (0.85, 0.3),
     # Grandma at the end of chapter 0
     'voice_grandma_gotothem': (0.75, 0.3), 'voice_grandma_isthatyou': (0.7, 0.3),
+    # resting at night: tender, sleepy, whispered
+    'voice_rest_luna_a': (0.55, 0.3), 'voice_rest_luna_c': (0.6, 0.3), 'voice_rest_mom_a': (0.7, 0.3),
+    'voice_rest_mom_b': (0.4, 0.3), 'voice_rest_mom_c': (0.6, 0.3), 'voice_rest_stars_b': (0.45, 0.3),
     # the ghost at his lowest
     'voice_end1_ghost': (0.7, 0.3), 'voice_end4_ghost': (0.6, 0.3),
 }

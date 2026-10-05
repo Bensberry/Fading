@@ -216,6 +216,7 @@ public class MainMenuController : MonoBehaviour
     IEnumerator SwitchToLevels(bool toLevels)
     {
         if (!toLevels) choosing = false;
+        SetMainOptionsActive(true);                                   // (they are switched off while the levels are shown)
         playButton.Interactable = creditsButton.Interactable = quitButton.Interactable = false;
         SetLevelButtons(false);
         for (float t = 0f; t < 0.5f; t += Time.deltaTime)
@@ -229,6 +230,14 @@ public class MainMenuController : MonoBehaviour
         SetLevelPage(toLevels ? 1f : 0f);
         SetLevelButtons(toLevels);
         playButton.Interactable = creditsButton.Interactable = quitButton.Interactable = !toLevels;
+        SetMainOptionsActive(!toLevels);                              // PLAY / CREDITS / QUIT are gone while you choose
+    }
+
+    void SetMainOptionsActive(bool on)
+    {
+        playButton.gameObject.SetActive(on);
+        creditsButton.gameObject.SetActive(on);
+        quitButton.gameObject.SetActive(on);
     }
 
     void ChooseLevel(Difficulty.Level level)

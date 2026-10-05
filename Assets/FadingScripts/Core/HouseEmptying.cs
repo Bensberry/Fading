@@ -23,7 +23,7 @@ public class HouseEmptying : MonoBehaviour
                 "INT_Hallway_Calendar", "INT_Mom_TablePhoto", "INT_Prop_WineGlass", "Prop_Books", "Prop_Trophy" },   // stage 2 (adds to stage 1)
         new[] { "Frame_Hallway_3", "Frame_Guest_1", "Frame_Guest_2", "Frame_Child_1", "Plant_Guest",
                 "Rug_Runner", "Rug_Guest", "Rug_Child", "Rug_Living", "Coat_Rack",
-                "Bookshelf_Guest", "Bookshelf_Child", "CoffeeTable", "ToyChest",
+"CoffeeTable",                                // (the bookshelves and the toy chest stay: toys and books sit on them)
                 "Armchair_Mother", "Armchair", "FloorLamp_Living", "Mom_PhotoBox",
                 "INT_Hallway_FamilyPhoto", "INT_Child_Mobile", "INT_Prop_Globe", "INT_Prop_Present",
                 "INT_Prop_Flowers", "Prop_Telescope", "Prop_Lamp" },    // stage 3 (adds to stages 1 and 2)

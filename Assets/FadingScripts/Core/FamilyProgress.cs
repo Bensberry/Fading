@@ -59,8 +59,14 @@ public class FamilyProgress : MonoBehaviour
     public static float SecondsSinceLastAward { get { return Time.time - lastAwardTime; } }
 
     // A new game (Chapter 0 calls this): both bars start empty.
+    // How many dreams the player has brought to Mom / to Luna in this playthrough (NightRest needs at least one).
+    static int momDreams, lunaDreams;
+    public static void DreamGiven(bool toMom) { if (toMom) momDreams++; else lunaDreams++; }
+    public static int DreamsGiven(bool toMom) { return toMom ? momDreams : lunaDreams; }
+
     public static void ResetAll()
     {
+        momDreams = lunaDreams = 0;
         momCarried = lunaCarried = mom = luna = 0f;
         rewarded.Clear();
         momFullShown = lunaFullShown = false;

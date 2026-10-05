@@ -20,6 +20,8 @@ public class RestSpot : Interactable
     public Vector3 endPoint;             // world: the bottom of the slide (Slide only)
     public Vector3 facing = Vector3.forward;
     public Vector3 exitPoint;            // world: where the ghost stands up again (on the ground)
+    public SwingSway swing;              // Swing: the swing that really moves with the ghost (optional)
+    public bool restsTheNight;           // the bench in front of the house: at night, sitting here ends the night (StarsCutscene)
 
     const float EyesAboveSeat = 0.75f;
 
@@ -62,14 +64,27 @@ public class RestSpot : Interactable
         if (look.sqrMagnitude > 0.01f) player.transform.rotation = Quaternion.LookRotation(look);
         yield return MoveEyesTo(seatPoint + Vector3.up * EyesAboveSeat, eyeHeight, 0.6f);
 
-        if (kind == Kind.Slide) yield return SlideDown(eyeHeight);
+        if (restsTheNight && NightQuest.Running && !NightQuest.Complete && !NightQuest.Carrying)
+        {
+            yield return new WaitForSeconds(0.8f);                          // a breath, then he looks up at the stars...
+            CutsceneRunner.Play(new StarsCutscene(seatPoint, facing), NightQuest.FinishNight);
+            yield return null;
+            while (CutsceneRunner.IsPlaying) yield return null;
+        }
+        else if (kind == Kind.Slide) yield return SlideDown(eyeHeight);
         else
         {
             float t = 0f;
             while (!GetUpPressed())
             {
                 t += Time.deltaTime;
-                if (kind == Kind.Swing)
+                if (kind == Kind.Swing && swing != null)
+                {
+                    swing.held = true;
+                    float swingAngle = Mathf.Sin(t * 1.7f) * 24f * Mathf.Min(1f, t / 2f);
+                    SetEyes(swing.SwingTo(swingAngle) + Vector3.up * EyesAboveSeat, eyeHeight);
+                }
+                else if (kind == Kind.Swing)
                 {
                     float angle = Mathf.Sin(t * 1.7f) * 24f * Mathf.Min(1f, t / 2f);
                     Vector3 pivot = seatPoint + Vector3.up * 1.9f;
@@ -80,6 +95,8 @@ public class RestSpot : Interactable
                 yield return null;
             }
         }
+
+        if (swing != null) swing.held = false;
 
         // Stand up again next to it.
         yield return MoveEyesTo(exitPoint + Vector3.up * (eyeHeight + 0.05f), eyeHeight, 0.4f);
@@ -115,6 +132,12 @@ public class RestSpot : Interactable
     }
 
     void SetEyes(Vector3 eyes, float eyeHeight) { player.transform.position = eyes - Vector3.up * eyeHeight; }
+
+    void Update()
+    {
+        if (!restsTheNight || resting) return;
+        prompt = NightQuest.Running && !NightQuest.Complete && !NightQuest.Carrying ? "Rest under the stars  (until morning)" : "Sit on the bench";
+    }
 
     bool GetUpPressed()
     {

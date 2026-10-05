@@ -55,9 +55,8 @@ public class Playground : MonoBehaviour
     // ---------- the back yard playground
     void BuildPlayground()
     {
-        // Swing set (sit on it and swing)
-        GameObject swings = Place("Outdoor/SwingSet", -11.5f, 23f, 0f, 2.3f, false, true);
-        if (swings != null) AddRest(swings, RestSpot.Kind.Swing, ToHouseDir(0f, -1f), 0.45f);
+        // Swing set made of parts, so the swings really move (sit on one and swing)
+        BuildSwingSet(-11.5f, 23f);
 
         // Slide (simple shapes; ride it down)
         BuildSlide(-6.2f, 23.5f);
@@ -87,6 +86,10 @@ public class Playground : MonoBehaviour
     void BuildFrontYard()
     {
         GameObject fountain = Place("Outdoor/Fountain", -13.5f, -6.5f, 0f, 1.7f, false, true);
+
+        // The bench right in front of the front door (beside the path, facing the house): rest here at night under the stars.
+        GameObject starBench = Place("Outdoor/ParkBench", -10.5f, -5.2f, 0f, 1.6f, true, true, true);
+        if (starBench != null) AddRest(starBench, RestSpot.Kind.Sit, ToHouseDir(0.4f, 1f), 0.5f).restsTheNight = true;
         GameObject bench = Place("Outdoor/ParkBench", -13.5f, -3.6f, 0f, 1.6f, true, true, true);
         if (bench != null) AddRest(bench, RestSpot.Kind.Sit, ToHouseDir(0f, -1f), 0.5f);
         Place("Props/Mailbox", -9.6f, -9.6f, 90f, 1.1f, false, true);
@@ -229,6 +232,44 @@ public class Playground : MonoBehaviour
         MakeTouchable(root.gameObject);
     }
 
+    // Two A-frames, a top bar and two swings that hang from hinges (SwingSway) and sway by themselves.
+    void BuildSwingSet(float x, float z)
+    {
+        Vector3 g;
+        if (!GroundAt(x, z, out g)) return;
+        Transform root = new GameObject("SwingSet").transform;
+        root.SetParent(yard, false);
+        root.position = g;
+        root.rotation = HouseRotation() * Quaternion.Euler(0f, 180f, 0f);        // the seats face the house
+        for (int side = -1; side <= 1; side += 2)
+            for (int leg = -1; leg <= 1; leg += 2)
+                Part(root, PrimitiveType.Cylinder, new Vector3(side * 1.4f, 1.12f, leg * 0.45f), new Vector3(0.08f, 1.16f, 0.08f), Metal, new Vector3(leg * 12f, 0f, 0f));
+        Part(root, PrimitiveType.Cylinder, new Vector3(0f, 2.25f, 0f), new Vector3(0.09f, 1.45f, 0.09f), Metal, new Vector3(0f, 0f, 90f));
+
+        for (int s = -1; s <= 1; s += 2)
+        {
+            Transform hinge = new GameObject("Swing").transform;
+            hinge.SetParent(root, false);
+            hinge.localPosition = new Vector3(s * 0.65f, 2.22f, 0f);
+            for (int chain = -1; chain <= 1; chain += 2)
+            {
+                GameObject c = Part(hinge, PrimitiveType.Cylinder, new Vector3(chain * 0.21f, -0.8f, 0f), new Vector3(0.02f, 0.8f, 0.02f), Metal, Vector3.zero);
+                Destroy(c.GetComponent<Collider>());
+            }
+            Part(hinge, PrimitiveType.Cube, new Vector3(0f, -1.62f, 0f), new Vector3(0.5f, 0.05f, 0.22f), Red, Vector3.zero);
+            SwingSway sway = hinge.gameObject.AddComponent<SwingSway>();
+
+            RestSpot ride = hinge.gameObject.AddComponent<RestSpot>();       // sit on THIS swing and swing
+            ride.kind = RestSpot.Kind.Swing;
+            ride.swing = sway;
+            ride.facing = root.forward;
+            ride.seatPoint = sway.SeatPoint;
+            ride.exitPoint = root.position + root.forward * 1.2f + root.right * s * 0.65f;
+            ride.ApplyDefaults();
+            MakeTouchable(hinge.gameObject);
+        }
+    }
+
     void BuildSandbox(float x, float z)
     {
         Vector3 g;
@@ -321,7 +362,7 @@ public class Playground : MonoBehaviour
     }
 
     // Make a bench / swing set a place to rest. 'seatHeight' = the seat as a fraction of the model's height.
-    void AddRest(GameObject g, RestSpot.Kind kind, Vector3 facing, float seatHeight)
+    RestSpot AddRest(GameObject g, RestSpot.Kind kind, Vector3 facing, float seatHeight)
     {
         TurnSideways(g, facing);
         Bounds b = BoundsOf(g);
@@ -332,6 +373,7 @@ public class Playground : MonoBehaviour
         rest.exitPoint = new Vector3(b.center.x, b.min.y, b.center.z) + facing.normalized * 1.1f;
         rest.ApplyDefaults();
         MakeTouchable(g);
+        return rest;
     }
 
     // A bench (or swing set) is long along the seat: turn it so that long side runs across the way the ghost faces.

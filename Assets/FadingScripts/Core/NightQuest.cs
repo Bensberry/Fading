@@ -21,6 +21,16 @@ public class NightQuest : MonoBehaviour
     public static NightQuest Instance { get; private set; }
     public static bool Complete { get; private set; }          // ChapterRules ends the night soon after this
     public static bool Running { get { return Instance != null && Instance.active; } }
+    public static bool Carrying { get { return Instance != null && Instance.carrying; } }
+
+    // Resting (NightRest, the star bench): the night is over, morning comes a few seconds later.
+    public static void FinishNight()
+    {
+        if (Instance == null) return;
+        Instance.Stop();
+        Complete = true;
+        FadingHud.SetObjective("");
+    }
 
     readonly List<Transform> lights = new List<Transform>();
     DayNightCycle cycle;
@@ -69,6 +79,15 @@ public class NightQuest : MonoBehaviour
         FadingHud.Toast("The family is asleep. Memories are glowing in the house... and outside.\n" +
                         "Each night hides two secret dreams: whose bed you choose decides which one you see.", 6f);
         ShowGoal();
+        CancelInvoke(nameof(RestHint));
+        Invoke(nameof(RestHint), 25f);
+    }
+
+    // Tell the player they can also rest (NightRest, the star bench).
+    void RestHint()
+    {
+        if (!active || Complete || CutsceneRunner.IsPlaying) return;
+        FadingHud.Toast("Tired? You can rest: the bench in front of the house,\nor beside someone you have brought a dream.", 5f);
     }
 
     void Stop()
@@ -158,6 +177,7 @@ public class NightQuest : MonoBehaviour
 
     void AfterDream(bool toMom, int night)
     {
+        FamilyProgress.DreamGiven(toMom);
         if (toMom) FamilyProgress.Award(FamilyProgress.Who.Mom, "dream:mom:" + night, 15f, 0f, "Mom dreamed of you");
         else
         {

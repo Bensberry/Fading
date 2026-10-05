@@ -117,6 +117,7 @@ public class ChapterRules : MonoBehaviour
         gameObject.AddComponent<NightQuest>();         // the night's memory lights (and the dream cutscenes)
         gameObject.AddComponent<Playground>();         // the back yard playground
         gameObject.AddComponent<NightSky>();           // stars and the moon at night
+        gameObject.AddComponent<NightRest>();          // rest beside Mom or Luna to end the night (after bringing her a dream)
 
         gameObject.AddComponent<HouseEmptying>();      // boxes appear, things on shelves and walls disappear
         if (Difficulty.LosesAbilities) AbilityLoss.StartFor(gameObject, chapter);     // vision, then speed, then hearing (not in Story / Easy)
