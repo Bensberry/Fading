@@ -12,7 +12,7 @@ using UnityEngine;
 public class NightQuest : MonoBehaviour
 {
     const int LightsInside = 3;
-    const int LightsOutside = 2;
+    const int LightsOutside = 3;                       // hidden in the yard: behind the gazebo, under trees, by the fountain...
     const float GatherDistance = 1.4f;
     const float DeliverDistance = 2.4f;
 
@@ -62,9 +62,9 @@ public class NightQuest : MonoBehaviour
             string room = rooms[Random.Range(0, rooms.Count)];
             rooms.Remove(room);
             Vector3 p;
-            if (HouseRooms.RandomPoint(room, out p)) lights.Add(MakeLight(p + Vector3.up * 1.1f));
+            if (HouseRooms.RandomPoint(room, out p)) lights.Add(MakeLight(p + Vector3.up * Random.Range(0.25f, 1.5f)));   // sometimes low, under furniture
         }
-        foreach (Vector3 p in Playground.OutdoorSpots(LightsOutside)) lights.Add(MakeLight(p + Vector3.up * 1.1f));
+        foreach (Vector3 p in Playground.OutdoorSpots(LightsOutside)) lights.Add(MakeLight(p + Vector3.up * Random.Range(0.3f, 1.2f)));
         if (lights.Count == 0) { active = false; return; }
         FadingHud.Toast("The family is asleep. Memories are glowing in the house... and outside.", 4f);
         ShowGoal();
@@ -83,7 +83,7 @@ public class NightQuest : MonoBehaviour
         g.name = "MemoryLight";
         Destroy(g.GetComponent<Collider>());
         g.transform.position = at;
-        g.transform.localScale = Vector3.one * 0.16f;
+        g.transform.localScale = Vector3.one * 0.1f;
         Renderer r = g.GetComponent<Renderer>();
         r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
         Color c = new Color(0.7f, 0.85f, 1f);
@@ -94,8 +94,8 @@ public class NightQuest : MonoBehaviour
         Light glow = g.AddComponent<Light>();
         glow.type = LightType.Point;
         glow.color = c;
-        glow.range = 3.5f;
-        glow.intensity = 1.8f;
+        glow.range = 1.8f;                             // dim and small: you have to look for them
+        glow.intensity = 0.8f;
         glow.shadows = LightShadows.None;
         return g.transform;
     }
@@ -127,9 +127,9 @@ public class NightQuest : MonoBehaviour
         Vector3 p = l.position;
         p.y += Mathf.Sin(t * 1.6f) * 0.12f * Time.deltaTime;
         l.position = p;
-        l.localScale = Vector3.one * (0.15f + Mathf.Sin(t * 3f) * 0.02f);
+        l.localScale = Vector3.one * (0.1f + Mathf.Sin(t * 3f) * 0.015f);
         Light glow = l.GetComponent<Light>();
-        if (glow != null) glow.intensity = 1.6f + Mathf.Sin(t * 2.3f) * 0.4f;
+        if (glow != null) glow.intensity = 0.7f + Mathf.Sin(t * 2.3f) * 0.3f;
     }
 
     void Gather(int index)

@@ -94,6 +94,10 @@ Record them yourselves or use text-to-speech. Each file is one line.
 | `voice_dream_luna1_a` ... `voice_dream_luna3_b` | Luna's three dreams (the ghost speaks, 5 lines) |
 | `voice_end1_mom` ... `voice_end4_ghost` | the four new endings (9 lines) |
 
+## 7. Sounds of the new clues (new)
+`tea_clink`, `flowers_rustle`, `fan_whir`, `globe_spin`, `clock_ring`, `ceiling_fan`, `glass_ring`, `doll_thump`, `duck_squeak`,
+`airplane_whoosh`, `piggy_rattle`, `present_shake` (one short sound each, see the Word doc).
+
 ## The four endings (picked by the two bars at the end of the last night)
 1. **THE FLIGHT** - nobody felt him; his desperate signs frightened them and Mom flees the house with Luna
 2. **THE SMILE** - only Mom felt him; she smiles and speaks to him

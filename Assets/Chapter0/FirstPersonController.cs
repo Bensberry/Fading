@@ -34,6 +34,9 @@ public class FirstPersonController : MonoBehaviour
 
     public Transform playerCameraRoot; // Drag your 'Head' object here
 
+    // While true the player cannot walk (but can still look around): sitting on a bench, swinging, sliding (RestSpot).
+    [HideInInspector] public bool movementLocked;
+
     [Header("Safety Net")]
     [Tooltip("If the player falls below this height, they are teleported back to where they started.")]
     public float fallLimitY = -5f;
@@ -75,6 +78,7 @@ public class FirstPersonController : MonoBehaviour
     void Update()
     {
         HandleMouseLook();
+        if (movementLocked) return;
         HandleMovement();
         RespawnIfFallen();
     }
@@ -156,7 +160,8 @@ public class FirstPersonController : MonoBehaviour
         // Clamp downward movement if trying to sink below initial floor Y
         Vector3 movementVector = horizontalVelocity + (Vector3.up * verticalVelocity);
 
-        if (hasLanded && transform.position.y <= floorY && verticalVelocity < 0f)
+        // (Outside the house the ground is lower than the floor: if there is ground below, just fall onto it.)
+        if (hasLanded && transform.position.y <= floorY && verticalVelocity < 0f && !GroundBelow())
         {
             // Zero out downward gravity to prevent sinking below floorY
             movementVector.y = Mathf.Max(movementVector.y, 0f);
@@ -164,6 +169,13 @@ public class FirstPersonController : MonoBehaviour
 
         // Single Move call per frame eliminates stutter
         controller.Move(movementVector * Time.deltaTime);
+    }
+
+    // Is there something to stand on within 3 m below the player? (then gravity may work normally)
+    bool GroundBelow()
+    {
+        Vector3 from = transform.position + Vector3.up * 0.1f;
+        return Physics.Raycast(from, Vector3.down, 3f, ~0, QueryTriggerInteraction.Ignore);
     }
 
     // =========================================================

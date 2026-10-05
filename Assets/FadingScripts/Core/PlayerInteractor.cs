@@ -23,6 +23,7 @@ public class PlayerInteractor : MonoBehaviour
         if (Physics.SphereCast(ray, aimRadius, out RaycastHit hit, reach, layers, QueryTriggerInteraction.Ignore))
             current = hit.collider.GetComponentInParent<Interactable>();
 
+        if (RestSpot.AnyoneResting) current = null;                                // sitting / swinging: F means "get up"
         if (current != null && PressedThisFrame())
             current.TryInteract();
 
@@ -56,7 +57,7 @@ public class PlayerInteractor : MonoBehaviour
         }
         float cx = Screen.width / 2f, cy = Screen.height / 2f;
         GUI.Label(new Rect(cx - 20, cy - 15, 40, 30), current != null ? "( + )" : "+", promptStyle);
-        if (current != null && !current.IsBusy && !FriendPromptShowing())
+        if (current != null && !current.IsBusy && !FriendPromptShowing() && current.prompt.Length > 0)
         {
             GUI.Label(new Rect(cx - 250, cy + 30, 500, 30), current.prompt + "  [F]", promptStyle);
             if (cueStyle == null) cueStyle = new GUIStyle(promptStyle) { fontSize = 15 };

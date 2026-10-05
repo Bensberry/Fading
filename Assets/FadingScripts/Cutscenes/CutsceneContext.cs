@@ -285,6 +285,7 @@ public class CutsceneContext
         {
             go = Object.Instantiate(prefab);
             spawned.Add(go);
+            if (who == "Father") MakeGhostly(go);
             // The baby's only animation is crawling: when she should sit still, freeze it.
             Animator animator = go.GetComponentInChildren<Animator>();
             if (animator != null && stance == CastStance.Sitting && who == "Baby") animator.speed = 0f;
@@ -443,6 +444,22 @@ public class CutsceneContext
 
     // ---------------------------------------------------------------- positions
     // Turn a point of the house MODEL (x, height above the floor, z) into a world position.
+    // The ghost's own model: paler, softly glowing, no shadow.
+    static void MakeGhostly(GameObject g)
+    {
+        foreach (Renderer r in g.GetComponentsInChildren<Renderer>())
+        {
+            r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            foreach (Material m in r.materials)
+            {
+                Color pale = Color.Lerp(m.color, new Color(0.8f, 0.88f, 1f), 0.45f);
+                m.color = pale;
+                m.EnableKeyword("_EMISSION");
+                m.SetColor("_EmissionColor", pale * 0.35f);
+            }
+        }
+    }
+
     // ---------------------------------------------------------------- dreams
     // A soft haze over the whole picture (amount 0 = none, 0.15 = dreamy). Uses the fade layer, so call it after fading in.
     public IEnumerator DreamHaze(float amount, float seconds)

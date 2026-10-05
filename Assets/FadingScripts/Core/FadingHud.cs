@@ -129,7 +129,7 @@ public class FadingHud : MonoBehaviour
     void DrawProgress()
     {
         if (!progressShown) return;
-        float w = Screen.width * 0.2f, h = Screen.height * 0.018f, gap = Screen.width * 0.04f;
+        float w = Screen.width * 0.26f, h = Screen.height * 0.024f, gap = Screen.width * 0.045f;
         float y = Screen.height * 0.04f;
         float momX = Screen.width / 2f - gap / 2f - w, lunaX = Screen.width / 2f + gap / 2f;
         float scare = Mathf.Clamp01(1f - (Time.unscaledTime - progressScareTime) / 2.5f);

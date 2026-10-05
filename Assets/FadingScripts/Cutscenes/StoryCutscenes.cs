@@ -173,7 +173,8 @@ public class EndingCutscene : Cutscene
 
         // A short credits card, then the main menu.
         yield return c.Title("FADING  -  made for the jam \"Everything Is Temporary\"", 4f);
-        yield return c.Title("Furniture by Kenney  -  Textures by Poly Haven  -  Models from Poly Pizza", 4.5f);
+        yield return c.Title("Furniture and nature by Kenney (CC0)  -  Textures by Poly Haven (CC0)", 4f);
+        yield return c.Title("Models by Poly by Google and Ray Larson (CC-BY), via Poly Pizza  -  Characters and animations: Mixamo", 4.5f);
         yield return c.Title("Thank you for playing.", 3.5f);
         yield return c.Letterbox(false, 0.3f);
     }

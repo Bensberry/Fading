@@ -20,12 +20,13 @@ public class HouseEmptying : MonoBehaviour
         new[] { "Vase_Living", "Frame_Living_2", "Frame_Mother_1", "Plant_Hallway" },   // stage 1
         new[] { "Gramophone", "Frame_Dresser_1", "Frame_Dresser_2", "Kettle", "Plant_Kitchen",
                 "Frame_Hallway_1", "Frame_Hallway_2", "Frame_Living_1", "Plant_Living",
-                "INT_Hallway_Calendar", "INT_Mom_TablePhoto" },   // stage 2 (adds to stage 1)
+                "INT_Hallway_Calendar", "INT_Mom_TablePhoto", "INT_Prop_WineGlass", "Prop_Books", "Prop_Trophy" },   // stage 2 (adds to stage 1)
         new[] { "Frame_Hallway_3", "Frame_Guest_1", "Frame_Guest_2", "Frame_Child_1", "Plant_Guest",
                 "Rug_Runner", "Rug_Guest", "Rug_Child", "Rug_Living", "Coat_Rack",
                 "Bookshelf_Guest", "Bookshelf_Child", "CoffeeTable", "ToyChest",
                 "Armchair_Mother", "Armchair", "FloorLamp_Living", "Mom_PhotoBox",
-                "INT_Hallway_FamilyPhoto", "INT_Child_Mobile" },    // stage 3 (adds to stages 1 and 2)
+                "INT_Hallway_FamilyPhoto", "INT_Child_Mobile", "INT_Prop_Globe", "INT_Prop_DeskFan", "INT_Prop_Present",
+                "INT_Prop_Flowers", "Prop_Telescope", "Prop_Lamp" },    // stage 3 (adds to stages 1 and 2)
     };
 
     readonly Dictionary<string, GameObject> byName = new Dictionary<string, GameObject>();

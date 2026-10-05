@@ -11,11 +11,18 @@ using UnityEditor;
 public class FadingAnimationImport : AssetPostprocessor
 {
     const string Folder = "Assets/Resources/Animations/";
+    const string CharacterFolder = "Assets/Characters/Father/";     // characters that use the human animations (rig only)
 
     void OnPreprocessModel()
     {
-        if (!assetPath.StartsWith(Folder)) return;
         ModelImporter importer = (ModelImporter)assetImporter;
+        if (assetPath.StartsWith(CharacterFolder))
+        {
+            importer.animationType = ModelImporterAnimationType.Human;
+            importer.avatarSetup = ModelImporterAvatarSetup.CreateFromThisModel;
+            return;
+        }
+        if (!assetPath.StartsWith(Folder)) return;
         importer.animationType = ModelImporterAnimationType.Human;
         importer.avatarSetup = ModelImporterAvatarSetup.CreateFromThisModel;
         importer.importAnimation = true;

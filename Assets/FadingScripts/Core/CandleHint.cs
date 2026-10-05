@@ -205,7 +205,7 @@ public class CandleHint : MonoBehaviour
         float best = float.MaxValue;
         foreach (Interactable i in FindObjectsByType<Interactable>(FindObjectsSortMode.None))
         {
-            if (!i.isActiveAndEnabled || i is DoorToggle || touched.Contains(i)) continue;
+            if (!i.isActiveAndEnabled || i is DoorToggle || i is RestSpot || touched.Contains(i)) continue;
             float d = (i.transform.position - transform.position).sqrMagnitude;
             if (d < best) { best = d; target = i.transform; }
         }

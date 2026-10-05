@@ -7,8 +7,8 @@ using UnityEngine;
 // The numbers below make the days easier or harder.
 public class ChapterGoals : MonoBehaviour
 {
-    const int MomGoal = 3;
-    const int LunaGoal = 2;
+    const int MomGoal = 4;                             // there are more clues now
+    const int LunaGoal = 3;
     const float DayBonus = 4f;                         // on BOTH bars
     const float NightComesAfter = 25f;                  // seconds after the day's goals are done
 

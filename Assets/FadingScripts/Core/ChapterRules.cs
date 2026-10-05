@@ -23,7 +23,7 @@ using UnityEngine.SceneManagement;
 public class ChapterRules : MonoBehaviour
 {
     const int LastChapter = 3;
-    const float LastNightSeconds = 180f;                 // the longest the last night can last before the ending (N skips the wait)
+    const float LastNightSeconds = 180f;                 // nights last as long as days (DayNightCycle.daySeconds)                 // the longest the last night can last before the ending (N skips the wait)
     const float NightSeconds = 180f;                     // the longest Night 1 and Night 2 can last before the next day begins
                                                          // (each night ends ~5 s after its quest is done: see NightQuest)
     const float SecondsAfterNightQuest = 5f;
@@ -105,6 +105,7 @@ public class ChapterRules : MonoBehaviour
 
         gameObject.AddComponent<AmbientAudio>();       // quiet room sound, footsteps, a chime when touching things
         SetUpMusic();
+        PropDressing.Run();                            // more things in the house, and 12 new clues (before the signs are counted)
         TrackSigns();
         FamilyReactions.Run();                         // Mom and the baby react to what the ghost touches
         gameObject.AddComponent<FamilyLife>();         // doors for the family, Mom's words, floating dust

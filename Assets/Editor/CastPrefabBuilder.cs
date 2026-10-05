@@ -9,6 +9,7 @@ using UnityEngine;
 // pointing at the existing model files (no 47 MB copy):
 //     Assets/Resources/Cast/Mom.prefab    = femeie_1 model + WifeAnimator controller, about 1.7 m tall
 //     Assets/Resources/Cast/Baby.prefab   = Baby 1+motions model + KidAnimator controller, about 0.75 m long
+//     Assets/Resources/Cast/Father.prefab = the Father character (Characters/Father) + Mom's controller, about 1.8 m tall
 // Each prefab also gets a ClipLibrary: the list of animation clips inside its model (the baby's sleeping pose etc.).
 // They are created automatically when Unity recompiles and the files do not exist yet (or have no ClipLibrary yet).
 // To make them again (e.g. after changing a model): Tools > Fading > Rebuild cast prefabs.
@@ -19,6 +20,7 @@ public static class CastPrefabBuilder
     const string MomController = "Assets/WifeAnimator.controller";
     const string BabyModel = "Assets/Chandran-20261003T171444Z-1-001/Chandran/source/Baby 1+motions.fbx";
     const string BabyController = "Assets/KidAnimator.controller";
+    const string FatherModel = "Assets/Characters/Father/Ch31_nonPBR.fbx";       // the ghost in the dreams (Mixamo character)
 
     static CastPrefabBuilder()
     {
@@ -34,6 +36,7 @@ public static class CastPrefabBuilder
         bool changed = false;
         changed |= Make("Mom", MomModel, MomController, 1.7f, true, force);
         changed |= Make("Baby", BabyModel, BabyController, 0.75f, false, force);
+        changed |= Make("Father", FatherModel, MomController, 1.8f, true, force);   // idle / walk from Mom's controller
         if (changed) AssetDatabase.SaveAssets();
     }
 

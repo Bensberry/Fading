@@ -7,19 +7,23 @@ using UnityEngine;
 //   - makes too many signs at once (TooManySigns signs within SpamSeconds)
 //   - touches something right next to the baby (closer than CloseToBaby metres; her own toys are fine)
 //   - slams a door shut while Mom or the baby is close (DoorScareRange metres)
+//   - touches something right next to Mom (StartleMom metres): she jumps
+//   - touches something near them while they SLEEP (WakeRange metres): they wake up frightened
 // A scare: the bars drop at once and keep draining for a few seconds, the baby cries, Mom panics.
 // Scaring them too much is how the worst ending happens: they flee the house.
 // Change the numbers below to make the game kinder or harsher.
 public class FamilyFear : MonoBehaviour
 {
-    public const float ScarePoints = 7f;             // how much the bars drop at once (a bar is full at FamilyProgress.BarPoints)
-    public const float DrainPerSecond = 0.8f;        // and how fast they keep draining while the family is afraid
-    const int TooManySigns = 4;
-    const float SpamSeconds = 8f;
-    const float CloseToBaby = 1.2f;
-    const float DoorScareRange = 5f;
+    public const float ScarePoints = 9f;             // how much the bars drop at once (a bar is full at FamilyProgress.BarPoints)
+    public const float DrainPerSecond = 1f;          // and how fast they keep draining while the family is afraid
+    const int TooManySigns = 3;
+    const float SpamSeconds = 10f;
+    const float CloseToBaby = 2f;
+    const float StartleMom = 2f;
+    const float WakeRange = 4f;
+    const float DoorScareRange = 7f;
     const float CalmDownSeconds = 10f;
-    const float MinSecondsBetweenScares = 5f;
+    const float MinSecondsBetweenScares = 4f;
 
     // True while FamilyLife opens a door for Mom or the baby (that is not a scare).
     public static bool FamilyUsingDoor;
@@ -58,9 +62,24 @@ public class FamilyFear : MonoBehaviour
             return;
         }
 
-        if (baby != null && baby.isActiveAndEnabled && !IsBabyToy(sign.transform) &&
-            Flat(sign.transform.position, baby.transform.position) < CloseToBaby)
+        Vector3 at = sign.transform.position;
+        bool momHere = mom != null && mom.isActiveAndEnabled;
+        bool babyHere = baby != null && baby.isActiveAndEnabled;
+
+        // While they sleep: anything close wakes them, frightened.
+        if ((momHere && mom.IsAsleep && Flat(at, mom.transform.position) < WakeRange) ||
+            (babyHere && baby.asleep && Flat(at, baby.transform.position) < WakeRange))
+        {
+            Scare("You woke them... they are frightened.", ScarePoints, ScarePoints);
+            return;
+        }
+        if (babyHere && !IsBabyToy(sign.transform) && Flat(at, baby.transform.position) < CloseToBaby)
+        {
             Scare("Too close... Luna is frightened.", ScarePoints * 0.5f, ScarePoints * 1.3f);
+            return;
+        }
+        if (momHere && !mom.IsAsleep && Flat(at, mom.transform.position) < StartleMom)
+            Scare("Too close... you startled Mom.", ScarePoints * 1.3f, ScarePoints * 0.4f);
     }
 
     void OnDoor(DoorToggle door)
@@ -96,9 +115,13 @@ public class FamilyFear : MonoBehaviour
     }
 
     // The teddy, the music box and the nightlight are meant for her: touching them near her is not scary.
+    static readonly string[] LunasThings = { "Doll", "RubberDuck", "ToyAirplane", "PiggyBank", "Present", "MusicBox", "Mobile", "Nightlight", "StuffedToy" };
+
     bool IsBabyToy(Transform t)
     {
-        return IsOrUnder(t, baby.teddy) || IsOrUnder(t, baby.windbox) || IsOrUnder(t, baby.lamp);
+        if (IsOrUnder(t, baby.teddy) || IsOrUnder(t, baby.windbox) || IsOrUnder(t, baby.lamp)) return true;
+        foreach (string toy in LunasThings) if (t.name.Contains(toy)) return true;
+        return false;
     }
 
     static bool IsOrUnder(Transform t, Transform toy)

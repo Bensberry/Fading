@@ -358,7 +358,8 @@ public class MomLife : MonoBehaviour
         }
         else
         {
-            FamilyLife.Say("Mom", NoticeLines[Random.Range(0, NoticeLines.Length)], mom.transform.position);
+            string line = clue != null ? FamilyLines.MomLine(clue.name) : null;           // her own words for this object
+            FamilyLife.Say("Mom", line ?? NoticeLines[Random.Range(0, NoticeLines.Length)], mom.transform.position);
 if (clue != null) FamilyProgress.Award(FamilyProgress.Who.Mom, "mom:" + clue.name, 6f, 1f, "Mom noticed the " + FamilyProgress.Pretty(clue.name));
         }
     }
