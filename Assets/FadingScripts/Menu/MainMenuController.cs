@@ -189,6 +189,12 @@ public class MainMenuController : MonoBehaviour
 
     void SetLevelPage(float v)
     {
+        // A hidden page is switched OFF completely: its invisible buttons sit on top of PLAY / CREDITS / QUIT
+        // and would otherwise catch every click.
+        bool on = v > 0.001f;
+        levelHeader.gameObject.SetActive(on);
+        for (int i = 0; i < 4; i++) { levelButtons[i].gameObject.SetActive(on); levelNotes[i].gameObject.SetActive(on); }
+        levelBack.gameObject.SetActive(on);
         levelHeader.alpha = v * 0.8f;
         for (int i = 0; i < 4; i++) { levelButtons[i].Visibility = v; levelNotes[i].alpha = v * 0.7f; }
         levelBack.Visibility = v;
@@ -259,6 +265,8 @@ public class MainMenuController : MonoBehaviour
         backButton.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
         backButton.Visibility = 0f;
         backButton.Interactable = false;
+        backButton.gameObject.SetActive(false);                  // switched on only while the credits are shown
+        creditsText.gameObject.SetActive(false);
     }
 
     void ShowCredits()
@@ -277,6 +285,8 @@ public class MainMenuController : MonoBehaviour
 
     IEnumerator SwitchPage(bool toCredits)
     {
+        backButton.gameObject.SetActive(true);
+        creditsText.gameObject.SetActive(true);
         playButton.Interactable = creditsButton.Interactable = quitButton.Interactable = false;
         backButton.Interactable = false;
         for (float t = 0f; t < 0.5f; t += Time.deltaTime)
@@ -290,6 +300,8 @@ public class MainMenuController : MonoBehaviour
         SetTextVisibility(toCredits ? 0f : 1f);
         creditsText.alpha = backButton.Visibility = toCredits ? 1f : 0f;
         backButton.Interactable = toCredits;
+        backButton.gameObject.SetActive(toCredits);              // hidden page = switched off, so it cannot block clicks
+        creditsText.gameObject.SetActive(toCredits);
         playButton.Interactable = creditsButton.Interactable = quitButton.Interactable = !toCredits;
     }
 
