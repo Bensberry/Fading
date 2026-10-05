@@ -3,6 +3,7 @@ using UnityEngine;
 
 // Goes in: nowhere (NightRest and the star bench play these). Three ways for the ghost to REST and end the night:
 //   StarsCutscene        the bench in front of the house: he looks up at the stars and falls asleep
+//   DayPassCutscene      the same bench by day: he watches the house while the day passes (then night falls)
 //   SleepBesideCutscene  he stands beside Luna's bed (false) or Mom's (true) and quietly watches her sleep
 // "Father" is the ghost's own model (Resources/Cast/Father), poses come from Assets/Resources/Animations.
 // Positions are house-model points c.House(x, height, z), like the other cutscenes. The text can be changed freely;
@@ -39,6 +40,39 @@ public class StarsCutscene : Cutscene
         yield return c.MoveCamera(cam + Vector3.up * 0.3f, seat + Vector3.up * 30f + facing * 18f, 5f, 62f);
         yield return c.Say("", "Just for a moment... I'll close my eyes.", 4f, "voice_rest_stars_b");
         yield return c.Fade(1f, 3f);
+        yield return c.Letterbox(false, 0.3f);
+    }
+}
+
+// By day, on the same bench: he sits and watches the house while the day slips away, until the light turns to evening.
+public class DayPassCutscene : Cutscene
+{
+    readonly Vector3 seat, facing;
+
+    public DayPassCutscene(Vector3 seatWorld, Vector3 facingWorld)
+    {
+        seat = seatWorld;
+        facing = new Vector3(facingWorld.x, 0f, facingWorld.z).normalized;
+    }
+
+    public override IEnumerator Play(CutsceneContext c)
+    {
+        yield return c.FadeNow(1f, Color.black);
+        yield return c.Letterbox(true, 0.3f);
+        Vector3 houseSeat = c.ToHouse(seat), houseAhead = c.ToHouse(seat + facing * 4f);
+        yield return c.Spawn("Father", houseSeat, houseAhead);
+        yield return c.Pose("Father", "mom_sit");
+        yield return c.SitAt("Father", houseSeat + Vector3.up * 0.08f, houseAhead);
+
+        // Behind him, over his shoulder: the house he is watching.
+        Vector3 right = Vector3.Cross(Vector3.up, facing);
+        Vector3 cam = seat - facing * 2.2f + right * 0.9f + Vector3.up * 1.3f;
+        yield return c.CutCamera(cam, seat + facing * 8f + Vector3.up * 1.5f, 50f);
+        yield return c.Fade(0f, 2f);
+        yield return c.Say("", "From here I can see the whole house. Every window. Every goodbye.", 5f, "voice_rest_day_a");
+        yield return c.MoveCamera(cam + Vector3.up * 0.6f - facing * 0.8f, seat + facing * 8f + Vector3.up * 2.5f, 5f, 55f);
+        yield return c.Title("The day slips away...", 3f);
+        yield return c.Fade(1f, 2.5f);
         yield return c.Letterbox(false, 0.3f);
     }
 }

@@ -21,7 +21,8 @@ public class RestSpot : Interactable
     public Vector3 facing = Vector3.forward;
     public Vector3 exitPoint;            // world: where the ghost stands up again (on the ground)
     public SwingSway swing;              // Swing: the swing that really moves with the ghost (optional)
-    public bool restsTheNight;           // the bench in front of the house: at night, sitting here ends the night (StarsCutscene)
+    public bool restsTheNight;           // the fountain bench: sitting here at night ends the night (StarsCutscene),
+                                         // and by day lets the day pass until night (DayPassCutscene)
 
     const float EyesAboveSeat = 0.75f;
 
@@ -64,7 +65,15 @@ public class RestSpot : Interactable
         if (look.sqrMagnitude > 0.01f) player.transform.rotation = Quaternion.LookRotation(look);
         yield return MoveEyesTo(seatPoint + Vector3.up * EyesAboveSeat, eyeHeight, 0.6f);
 
-        if (restsTheNight && NightQuest.Running && !NightQuest.Complete)
+        DayNightCycle cycle = FindAnyObjectByType<DayNightCycle>();
+        if (restsTheNight && CanSkipDay(cycle))
+        {
+            yield return new WaitForSeconds(0.8f);                          // he settles in and watches the day go by...
+            CutsceneRunner.Play(new DayPassCutscene(seatPoint, facing), () => { if (cycle != null && !cycle.IsNight) cycle.AdvancePhase(); });
+            yield return null;
+            while (CutsceneRunner.IsPlaying) yield return null;
+        }
+        else if (restsTheNight && NightQuest.Running && !NightQuest.Complete)
         {
             yield return new WaitForSeconds(0.8f);                          // a breath, then he looks up at the stars...
             CutsceneRunner.Play(new StarsCutscene(seatPoint, facing), NightQuest.FinishNight);
@@ -136,7 +145,15 @@ public class RestSpot : Interactable
     void Update()
     {
         if (!restsTheNight || resting) return;
-        prompt = NightQuest.Running && !NightQuest.Complete ? "Rest under the stars  (skip to morning)" : "Sit on the bench";
+        if (NightQuest.Running && !NightQuest.Complete) prompt = "Rest under the stars  (skip to morning)";
+        else if (CanSkipDay(FindAnyObjectByType<DayNightCycle>())) prompt = "Sit and let the day pass  (skip to night)";
+        else prompt = "Sit on the bench";
+    }
+
+    // A day of Chapter 1-3 (not a cutscene): the bench can let it pass.
+    static bool CanSkipDay(DayNightCycle cycle)
+    {
+        return cycle != null && !cycle.IsNight && cycle.Current != DayNightCycle.Phase.Night0 && !CutsceneRunner.IsPlaying;
     }
 
     bool GetUpPressed()
