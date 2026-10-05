@@ -23,8 +23,8 @@ using UnityEngine.SceneManagement;
 public class ChapterRules : MonoBehaviour
 {
     const int LastChapter = 3;
-    const float LastNightSeconds = 90f;                  // the longest a night lasts (days last 2 minutes: DayNightCycle.daySeconds)                 // the longest the last night can last before the ending (N skips the wait)
-    const float NightSeconds = 90f;                     // the longest Night 1 and Night 2 can last before the next day begins
+    const float LastNightSeconds = 120f;                 // the longest the last night lasts before the ending (N skips the wait); days last 2 minutes too
+    const float NightSeconds = 120f;                     // the longest Night 1 and Night 2 can last before the next day begins
                                                          // (each night ends ~5 s after its quest is done: see NightQuest)
     const float SecondsAfterNightQuest = 8f;
                                                          // (Mom and Luna sleep at night; time during a cutscene does not count)
@@ -116,9 +116,10 @@ public class ChapterRules : MonoBehaviour
         gameObject.AddComponent<ChapterGoals>();       // the day's checklist on the goal line
         gameObject.AddComponent<NightQuest>();         // the night's memory lights (and the dream cutscenes)
         gameObject.AddComponent<Playground>();         // the back yard playground
+        gameObject.AddComponent<NightSky>();           // stars and the moon at night
 
         gameObject.AddComponent<HouseEmptying>();      // boxes appear, things on shelves and walls disappear
-        AbilityLoss.StartFor(gameObject, chapter);     // vision, then speed, then hearing
+        if (Difficulty.LosesAbilities) AbilityLoss.StartFor(gameObject, chapter);     // vision, then speed, then hearing (not in Story / Easy)
         gameObject.AddComponent<PauseMenu>();          // Esc opens the pause menu
         GameSettings.ApplyAll();                       // the player's saved fog / lighting / sensitivity
     }

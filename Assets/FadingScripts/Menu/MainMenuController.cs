@@ -8,6 +8,7 @@ using UnityEngine.UI;
 // The menu: a pitch black screen, the title lit by a candle burning on the right, PLAY and QUIT on the left.
 // PLAY: the text fades away, the candle flares, then the screen fades to black while the game scene
 //       loads in the background, and the game starts.
+// PLAY first asks HOW to play (Story / Easy / Medium / Hard, see Difficulty.cs), then the candle flares into the game.
 // CREDITS: shows who made what (GameCredits.cs). BACK, Esc or the right mouse button goes back.
 // QUIT: closes the game (in the Unity Editor it just stops Play mode).
 // Everything is built from code at start, so the scene file stays tiny. The look comes from 'style'
@@ -66,10 +67,11 @@ public class MainMenuController : MonoBehaviour
         MusicPlayer.Create().Play("music_menu", 3f);
         Canvas canvas = MenuKit.MakeCanvas("MenuCanvas", 0);
         title = MenuKit.MakeTitle(canvas.transform, style);
-        playButton = MenuKit.MakeOption(canvas.transform, "PLAY", 0, style, StartGame);
+        playButton = MenuKit.MakeOption(canvas.transform, "PLAY", 0, style, OpenLevels);
         creditsButton = MenuKit.MakeOption(canvas.transform, "CREDITS", 1, style, ShowCredits);
         quitButton = MenuKit.MakeOption(canvas.transform, "QUIT", 2, style, QuitGame);
         MakeCredits(canvas.transform);
+        MakeLevelPage(canvas.transform);
         memoriesText = MenuKit.MakeLabel(canvas.transform, "Memories", SecretMemories.Summary, new Vector2(0.5f, 0.06f), new Vector2(0.5f, 0.5f),
                                          new Vector2(1600f, 60f), 26, 2f, style, TextAlignmentOptions.Center);
         MakeGlow(canvas.transform);                       // under the full-screen overlay
@@ -157,6 +159,92 @@ public class MainMenuController : MonoBehaviour
         return image;
     }
 
+    // ---------- difficulty (after PLAY)
+    MenuButton[] levelButtons;
+    TextMeshProUGUI[] levelNotes;
+    TextMeshProUGUI levelHeader;
+    MenuButton levelBack;
+    bool choosing;
+
+    void MakeLevelPage(Transform canvas)
+    {
+        int small = Mathf.RoundToInt(style.optionFontSize * 0.55f);
+        levelHeader = MenuKit.MakeLabel(canvas, "LevelHeader", "HOW DO YOU WANT TO REMEMBER?", new Vector2(style.leftMargin, style.firstOptionHeight + 0.11f),
+                                        new Vector2(0f, 0.5f), new Vector2(1400f, 80f), Mathf.RoundToInt(style.optionFontSize * 0.7f), style.optionSpacing, style,
+                                        TextAlignmentOptions.MidlineLeft);
+        levelButtons = new MenuButton[4];
+        levelNotes = new TextMeshProUGUI[4];
+        for (int i = 0; i < 4; i++)
+        {
+            Difficulty.Level level = (Difficulty.Level)i;
+            levelButtons[i] = MenuKit.MakeOption(canvas, Difficulty.Name(level), i, style, () => ChooseLevel(level));
+            float height = style.firstOptionHeight - i * style.optionGap;
+            levelNotes[i] = MenuKit.MakeLabel(canvas, "LevelNote" + i, Difficulty.Describe(level), new Vector2(style.leftMargin + 0.2f, height),
+                                              new Vector2(0f, 0.5f), new Vector2(1200f, 80f), small, 1f, style, TextAlignmentOptions.MidlineLeft);
+        }
+        levelBack = MenuKit.MakeOption(canvas, "BACK", 4, style, () => { if (choosing) StartCoroutine(SwitchToLevels(false)); });
+        SetLevelPage(0f);
+        SetLevelButtons(false);
+    }
+
+    void SetLevelPage(float v)
+    {
+        levelHeader.alpha = v * 0.8f;
+        for (int i = 0; i < 4; i++) { levelButtons[i].Visibility = v; levelNotes[i].alpha = v * 0.7f; }
+        levelBack.Visibility = v;
+    }
+
+    void SetLevelButtons(bool on)
+    {
+        foreach (MenuButton b in levelButtons) b.Interactable = on;
+        levelBack.Interactable = on;
+    }
+
+    void OpenLevels()
+    {
+        if (starting || choosing || showingCredits) return;
+        choosing = true;
+        StartCoroutine(SwitchToLevels(true));
+    }
+
+    IEnumerator SwitchToLevels(bool toLevels)
+    {
+        if (!toLevels) choosing = false;
+        playButton.Interactable = creditsButton.Interactable = quitButton.Interactable = false;
+        SetLevelButtons(false);
+        for (float t = 0f; t < 0.5f; t += Time.deltaTime)
+        {
+            float k = Mathf.SmoothStep(0f, 1f, t / 0.5f);
+            SetTextVisibility(toLevels ? 1f - k : k);
+            SetLevelPage(toLevels ? k : 1f - k);
+            yield return null;
+        }
+        SetTextVisibility(toLevels ? 0f : 1f);
+        SetLevelPage(toLevels ? 1f : 0f);
+        SetLevelButtons(toLevels);
+        playButton.Interactable = creditsButton.Interactable = quitButton.Interactable = !toLevels;
+    }
+
+    void ChooseLevel(Difficulty.Level level)
+    {
+        if (!choosing || starting) return;
+        Difficulty.Current = level;                         // saved: GameSettings, FamilyFear, FamilyProgress ... read it
+        StartCoroutine(BeginAtLevel());
+    }
+
+    IEnumerator BeginAtLevel()
+    {
+        SetLevelButtons(false);
+        for (float t = 0f; t < 0.6f; t += Time.deltaTime)
+        {
+            SetLevelPage(1f - Mathf.SmoothStep(0f, 1f, t / 0.6f));
+            yield return null;
+        }
+        SetLevelPage(0f);
+        choosing = false;
+        StartGame();                                        // the candle flares and floods the screen with light, as before
+    }
+
     // ---------- credits
     void MakeCredits(Transform canvas)
     {
@@ -207,10 +295,12 @@ public class MainMenuController : MonoBehaviour
 
     void Update()
     {
-        if (!showingCredits) return;
-        bool back = (UnityEngine.InputSystem.Keyboard.current != null && UnityEngine.InputSystem.Keyboard.current.escapeKey.wasPressedThisFrame) ||
+        if (!showingCredits && !choosing) return;
+        bool back =  (UnityEngine.InputSystem.Keyboard.current != null && UnityEngine.InputSystem.Keyboard.current.escapeKey.wasPressedThisFrame) ||
                     (UnityEngine.InputSystem.Mouse.current != null && UnityEngine.InputSystem.Mouse.current.rightButton.wasPressedThisFrame);
-        if (back) HideCredits();
+        if (!back) return;
+        if (showingCredits) HideCredits();
+        else if (choosing && levelBack.Interactable) StartCoroutine(SwitchToLevels(false));
     }
 
     // ---------- buttons
@@ -240,7 +330,7 @@ public class MainMenuController : MonoBehaviour
         AsyncOperation load = SceneManager.LoadSceneAsync(sceneName);
         load.allowSceneActivation = false;
 
-        yield return FadeText(1f, 0f, textFadeOutSeconds);          // the text disappears, leaving the candle
+        if (title.alpha > 0.01f) yield return FadeText(1f, 0f, textFadeOutSeconds);          // the text disappears, leaving the candle
 
         // The flame swells until it is blinding; the screen floods with light while it does.
         whiteOutDone = false;

@@ -32,7 +32,7 @@ public class FamilyProgress : MonoBehaviour
     // Something good happened. 'key' says what (e.g. "mom:INT_Mom_CoffeeMug"); the first time gives 'first' points, later 'repeat'.
     public static void Award(Who who, string key, float first, float repeat, string message)
     {
-        float points = rewarded.Add(key) ? first : repeat;
+        float points = (rewarded.Add(key) ? first : repeat) * Difficulty.ProgressMultiplier;   // Story fills fastest, Hard slowest
         if (points <= 0f) return;
         if (who != Who.Luna) mom = Mathf.Min(mom + points, BarPoints - momCarried + 0.01f);
         if (who != Who.Mom) luna = Mathf.Min(luna + points, BarPoints - lunaCarried + 0.01f);

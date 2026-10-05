@@ -11,17 +11,18 @@ using UnityEngine;
 //   - touches something near them while they SLEEP (WakeRange metres): they wake up frightened
 // A scare: the bars drop at once and keep draining for a few seconds, the baby cries, Mom panics.
 // Scaring them too much is how the worst ending happens: they flee the house.
-// Change the numbers below to make the game kinder or harsher.
+// Change the numbers below to make the game kinder or harsher. The DIFFICULTY (Difficulty.cs) scales them:
+// Story = no scares at all, Easy = gentle, Medium = these numbers, Hard = they scare easily and it hurts more.
 public class FamilyFear : MonoBehaviour
 {
-    public const float ScarePoints = 6f;             // how much the bars drop at once (a bar is full at FamilyProgress.BarPoints)
-    public const float DrainPerSecond = 0.6f;          // and how fast they keep draining while the family is afraid
-    const int TooManySigns = 4;
+    public static float ScarePoints { get { return 6f * Difficulty.ScareStrength; } }        // how much the bars drop at once
+    public static float DrainPerSecond { get { return 0.6f * Difficulty.ScareStrength; } }  // and how fast they keep draining
+    static int TooManySigns { get { return Difficulty.TooManySigns; } }
     const float SpamSeconds = 9f;
-    const float CloseToBaby = 1.5f;
-    const float StartleMom = 1.5f;
-    const float WakeRange = 3f;
-    const float DoorScareRange = 6f;
+    static float CloseToBaby { get { return 1.5f * Difficulty.ScareReach; } }
+    static float StartleMom { get { return 1.5f * Difficulty.ScareReach; } }
+    static float WakeRange { get { return 3f * Difficulty.ScareReach; } }
+    static float DoorScareRange { get { return 6f * Difficulty.ScareReach; } }
     const float CalmDownSeconds = 10f;
     const float MinSecondsBetweenScares = 4f;
 
@@ -92,6 +93,7 @@ public class FamilyFear : MonoBehaviour
 
     void Scare(string message, float momPoints, float lunaPoints)
     {
+        if (!Difficulty.Scares) return;                                     // Story: nothing ever frightens them
         if (Time.time - lastScare < MinSecondsBetweenScares) return;
         lastScare = Time.time;
         fear = 1f;

@@ -481,6 +481,7 @@ public class CutsceneContext
     // Thick fog for this cutscene only (the game's own fog comes back when it ends). density 0 = no fog.
     public IEnumerator Fog(float density, Color color)
     {
+        density *= Mathf.Min(1f, Difficulty.FogMultiplier);                // Story: no fog anywhere
         RenderSettings.fog = density > 0f;
         RenderSettings.fogMode = FogMode.ExponentialSquared;
         RenderSettings.fogDensity = density;

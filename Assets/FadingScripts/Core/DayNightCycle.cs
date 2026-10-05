@@ -106,9 +106,9 @@ public class DayNightCycle : MonoBehaviour
         daySeconds = 120f;                // how long each day lasts before the night comes (sooner when the day's goals are done)
         transitionSeconds = 8f;           // how slowly the light changes between day and night
 
-        nightLightColor = new Color(0.45f, 0.55f, 0.95f);
-        nightIntensity = 0.12f;
-        nightAmbient = new Color(0.025f, 0.03f, 0.06f);
+        nightLightColor = new Color(0.62f, 0.72f, 1f);     // silver-blue moonlight through the windows
+        nightIntensity = 0.35f;
+        nightAmbient = new Color(0.035f, 0.045f, 0.085f);
         nightSkyExposure = 0.08f;
 
         dayLightColor = new Color(1f, 0.92f, 0.78f);

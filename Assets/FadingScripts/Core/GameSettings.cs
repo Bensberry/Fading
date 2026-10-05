@@ -42,7 +42,7 @@ public static class GameSettings
     }
 
     // ---------- slider value (0-100) -> real value
-    public static float FogScale { get { return Fog / 50f * DefaultFogBoost; } }                // 0 .. 0.85 (default) .. 1.7
+    public static float FogScale { get { return Fog / 50f * DefaultFogBoost * Difficulty.FogMultiplier; } }   // Story: no fog                // 0 .. 0.85 (default) .. 1.7
 
     public static float LightingScale                                                           // 0.5 .. 1 (normal) .. 2.5
     {
