@@ -64,7 +64,7 @@ public class RestSpot : Interactable
         if (look.sqrMagnitude > 0.01f) player.transform.rotation = Quaternion.LookRotation(look);
         yield return MoveEyesTo(seatPoint + Vector3.up * EyesAboveSeat, eyeHeight, 0.6f);
 
-        if (restsTheNight && NightQuest.Running && !NightQuest.Complete && !NightQuest.Carrying)
+        if (restsTheNight && NightQuest.Running && !NightQuest.Complete)
         {
             yield return new WaitForSeconds(0.8f);                          // a breath, then he looks up at the stars...
             CutsceneRunner.Play(new StarsCutscene(seatPoint, facing), NightQuest.FinishNight);
@@ -136,7 +136,7 @@ public class RestSpot : Interactable
     void Update()
     {
         if (!restsTheNight || resting) return;
-        prompt = NightQuest.Running && !NightQuest.Complete && !NightQuest.Carrying ? "Rest under the stars  (until morning)" : "Sit on the bench";
+        prompt = NightQuest.Running && !NightQuest.Complete ? "Rest under the stars  (skip to morning)" : "Sit on the bench";
     }
 
     bool GetUpPressed()

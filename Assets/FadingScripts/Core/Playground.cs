@@ -87,11 +87,10 @@ public class Playground : MonoBehaviour
     {
         GameObject fountain = Place("Outdoor/Fountain", -13.5f, -6.5f, 0f, 1.7f, false, true);
 
-        // The bench right in front of the front door (beside the path, facing the house): rest here at night under the stars.
-        GameObject starBench = Place("Outdoor/ParkBench", -10.5f, -5.2f, 0f, 1.6f, true, true, true);
-        if (starBench != null) AddRest(starBench, RestSpot.Kind.Sit, ToHouseDir(0.4f, 1f), 0.5f).restsTheNight = true;
+
+        // The bench by the fountain, in front of the house: at night, sit here to rest under the stars until morning.
         GameObject bench = Place("Outdoor/ParkBench", -13.5f, -3.6f, 0f, 1.6f, true, true, true);
-        if (bench != null) AddRest(bench, RestSpot.Kind.Sit, ToHouseDir(0f, -1f), 0.5f);
+        if (bench != null) AddRest(bench, RestSpot.Kind.Sit, ToHouseDir(0f, -1f), 0.5f).restsTheNight = true;
         Place("Props/Mailbox", -9.6f, -9.6f, 90f, 1.1f, false, true);
         YardLamp(-11.2f, -4.2f);
         if (fountain != null) FlowerRing(-13.5f, -6.5f, 2.1f, 10);

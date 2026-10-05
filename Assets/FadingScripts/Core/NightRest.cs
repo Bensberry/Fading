@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 
 // Goes in: nowhere (ChapterRules adds it in the chapters where Mom and Luna live).
 // At night the ghost can REST and end the night early, beside someone he has reached:
-//   stand next to sleeping Luna's bed (or Mom's) and press F (TOUCH): he lies down beside her (SleepBesideCutscene),
+//   stand next to sleeping Luna's bed (or Mom's) and press F (TOUCH): he watches over her while she sleeps (SleepBesideCutscene),
 //   and morning comes. This is only possible once you have brought her a memory (a dream) at least once in this game.
 // (The third way to rest is the bench in front of the house: see Playground / RestSpot / StarsCutscene.)
 public class NightRest : MonoBehaviour
@@ -64,8 +64,8 @@ public class NightRest : MonoBehaviour
         bool allowed = FamilyProgress.DreamsGiven(nearMom) >= DreamsNeeded;
         style.normal.textColor = allowed ? new Color(0.75f, 0.85f, 1f, 0.95f) : new Color(1f, 1f, 1f, 0.45f);
         string who = nearMom ? "Mom" : "Luna";
-        string text = allowed ? "Lie down beside " + who + "  " + MobileControls.Label("F") + "   (rest until morning)"
-                              : "Bring " + who + " a memory first, then you can rest beside her";
+        string text = allowed ? "Watch over " + who + "  " + MobileControls.Label("F") + "   (rest until morning)"
+                              : "Bring " + who + " a memory first, then you can watch over her";
         GUI.Label(new Rect(0, Screen.height * 0.62f, Screen.width, 40f), text, style);
     }
 
