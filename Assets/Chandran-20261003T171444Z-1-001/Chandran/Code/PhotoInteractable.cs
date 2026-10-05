@@ -185,6 +185,7 @@ public class PhotoInteractable : MonoBehaviour
         // automatically returns to its original position.
 
 
+        bool heldLastFrame = wasHeld;                    // the tap that picks the photo up must not also inspect it
         wasHeld = isHeldNow;
 
 
@@ -192,9 +193,10 @@ public class PhotoInteractable : MonoBehaviour
         // INSPECT PHOTO
         // =====================================================
 
-        if (isHeldNow &&
-            UnityEngine.InputSystem.Mouse.current != null &&
-            UnityEngine.InputSystem.Mouse.current.leftButton.wasPressedThisFrame)
+        if (isHeldNow && heldLastFrame &&
+            ((UnityEngine.InputSystem.Mouse.current != null &&
+              UnityEngine.InputSystem.Mouse.current.leftButton.wasPressedThisFrame) ||
+             MobileControls.TappedOn(gameObject)))
         {
             ToggleInspectMode();
         }

@@ -33,7 +33,8 @@ public class NightRest : MonoBehaviour
         Vector3 me = Camera.main.transform.position;
         nearMom = mom != null && mom.IsAsleep && Flat(me, mom.transform.position) < Reach;
         nearLuna = !nearMom && baby != null && baby.asleep && Flat(me, baby.transform.position) < Reach;
-        if (!(nearMom || nearLuna) || PlayerInteractor.HasTarget || !Pressed()) return;
+        if (!(nearMom || nearLuna)) return;
+        if (MobileControls.Active ? !TappedHer() : (PlayerInteractor.HasTarget || !Pressed())) return;
 
         if (FamilyProgress.DreamsGiven(nearMom) < DreamsNeeded)
         {
@@ -45,6 +46,13 @@ public class NightRest : MonoBehaviour
         }
         bool besideMom = nearMom;
         CutsceneRunner.Play(new SleepBesideCutscene(besideMom), NightQuest.FinishNight);   // he sleeps beside her; morning comes
+    }
+
+    // Phones: tap Mom or Luna herself.
+    bool TappedHer()
+    {
+        GameObject her = nearMom ? mom.gameObject : baby.gameObject;
+        return MobileControls.TappedOn(her, Reach + 2f);
     }
 
     static bool Pressed()

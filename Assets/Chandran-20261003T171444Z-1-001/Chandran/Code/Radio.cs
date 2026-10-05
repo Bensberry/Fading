@@ -106,7 +106,8 @@ public class RadioClue : MonoBehaviour
         // F INTERACTION
         // ========================================================
 
-        if (lookingAtRadio && FKeyPressedThisFrame())
+        // Phones: tap the radio itself. PC: look at it and press F.
+        if (MobileControls.Active ? MobileControls.TappedOn(gameObject) : lookingAtRadio && FKeyPressedThisFrame())
         {
             if (isRadioOn)
             {

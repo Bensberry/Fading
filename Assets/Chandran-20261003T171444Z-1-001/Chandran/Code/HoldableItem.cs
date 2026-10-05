@@ -109,7 +109,8 @@ public class HoldableItem : MonoBehaviour
                 promptUI.SetActive(isPlayerNearby);
 
             // Press F to pick up.
-            if (isPlayerNearby && IsAimedAt() && FKeyPressedThisFrame())
+            // Phones: tap the item itself (anywhere on the screen). PC: look at it and press F.
+            if (isPlayerNearby && (MobileControls.Active ? MobileControls.TappedOn(gameObject) : IsAimedAt() && FKeyPressedThisFrame()))
             {
                 PickUpItem();
             }
@@ -124,8 +125,8 @@ public class HoldableItem : MonoBehaviour
             if (promptUI != null)
                 promptUI.SetActive(false);
 
-            // Press F to throw.
-            if (FKeyPressedThisFrame())
+            // Press F to throw. (Phones: tap anywhere except the held item; tapping the item inspects it.)
+            if (FKeyPressedThisFrame() && !MobileControls.TappedOn(gameObject))
             {
                 ThrowItem();
             }

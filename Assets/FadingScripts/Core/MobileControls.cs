@@ -183,6 +183,52 @@ public class MobileControls : MonoBehaviour
 
     static float Dpi() { return Screen.dpi > 50f ? Screen.dpi : Screen.width / 6f; }
 
+    // True on the frame the player TAPPED this object (or one of its parts), within 'reach' metres.
+    // Any script can use it: if (MobileControls.TappedOn(gameObject)) ...
+    // It counts as a hit when the tap's ray hits the object first, or (for objects without a solid collider)
+    // when the tap lands close to the object on screen.
+    public static bool TappedOn(GameObject target, float reach = 4.5f)
+    {
+        if (!Active || target == null || !InteractPressed) return false;
+        Camera cam = Camera.main;
+        if (cam == null) return false;
+        Ray ray = cam.ScreenPointToRay(TapPosition);
+        if (Physics.Raycast(ray, out RaycastHit hit, reach, ~0, QueryTriggerInteraction.Ignore) && hit.transform.IsChildOf(target.transform))
+            return true;
+
+        Bounds b;
+        if (!AreaOf(target, out b)) return false;
+        if (Vector3.Distance(cam.transform.position, b.center) > reach + b.extents.magnitude) return false;
+        Vector3 onScreen = cam.WorldToScreenPoint(b.center);
+        if (onScreen.z <= 0f) return false;                                    // behind the camera
+        float size = Mathf.Max(0.35f * Dpi(), ScreenSize(cam, b));
+        return Vector2.Distance(new Vector2(onScreen.x, onScreen.y), TapPosition) < size;
+    }
+
+    // Where the object is: its visible parts, or (for an invisible trigger zone, like Grandma's clock) its colliders.
+    static bool AreaOf(GameObject target, out Bounds b)
+    {
+        b = new Bounds();
+        bool found = false;
+        foreach (Renderer r in target.GetComponentsInChildren<Renderer>())
+        {
+            if (!found) { b = r.bounds; found = true; } else b.Encapsulate(r.bounds);
+        }
+        if (found) return true;
+        foreach (Collider c in target.GetComponentsInChildren<Collider>())
+        {
+            if (!found) { b = c.bounds; found = true; } else b.Encapsulate(c.bounds);
+        }
+        return found;
+    }
+
+    // About how big (in pixels) these bounds look on screen.
+    static float ScreenSize(Camera cam, Bounds b)
+    {
+        float distance = Mathf.Max(0.1f, Vector3.Distance(cam.transform.position, b.center));
+        return b.extents.magnitude / (distance * Mathf.Tan(cam.fieldOfView * 0.5f * Mathf.Deg2Rad)) * Screen.height * 0.5f;
+    }
+
     // The fixed joystick, bottom left (screen pixels, measured from the bottom like touches are).
     static Vector2 PadCentre() { return new Vector2(19f * U, 19f * U); }
     static float PadRadius() { return 12f * U; }

@@ -24,7 +24,7 @@ public class PhotoAlbumInteraction : MonoBehaviour
     void Update()
     {
         ShowPromptIfUseful();
-        if (isPlayerInProximity &&((Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame) || MobileControls.InteractPressed) && !isInteracting)
+        if (isPlayerInProximity &&((Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame) || MobileControls.TappedOn(gameObject, 6f)) && !isInteracting)
         {
             TryStartSequence();
         }
