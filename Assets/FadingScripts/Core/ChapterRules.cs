@@ -23,8 +23,8 @@ using UnityEngine.SceneManagement;
 public class ChapterRules : MonoBehaviour
 {
     const int LastChapter = 3;
-    const float LastNightSeconds = 120f;                 // the longest the last night can last before the ending (N skips the wait)
-    const float NightSeconds = 120f;                     // the longest Night 1 and Night 2 can last before the next day begins
+    const float LastNightSeconds = 180f;                 // the longest the last night can last before the ending (N skips the wait)
+    const float NightSeconds = 180f;                     // the longest Night 1 and Night 2 can last before the next day begins
                                                          // (each night ends ~5 s after its quest is done: see NightQuest)
     const float SecondsAfterNightQuest = 5f;
                                                          // (Mom and Luna sleep at night; time during a cutscene does not count)
@@ -111,10 +111,11 @@ public class ChapterRules : MonoBehaviour
         gameObject.AddComponent<MomLife>();            // Mom's day and night (her room, sitting, crying) and her eyes
         gameObject.AddComponent<BabyLife>();           // Luna crawls around by day, smiles at the ghost, cries when frightened
         gameObject.AddComponent<FamilyFear>();         // scaring them pushes the progress bar back
-        gameObject.AddComponent<FamilyProgress>();     // the "they feel you" bar; when it is full the good ending plays
+        gameObject.AddComponent<FamilyProgress>();     // the two bars (Mom, Luna); at the end they pick the ending
         gameObject.AddComponent<ChapterGoals>();       // the day's checklist on the goal line
-        gameObject.AddComponent<NightQuest>();         // the night's memory lights
-        FamilyProgress.Filled += OnProgressFull;
+        gameObject.AddComponent<NightQuest>();         // the night's memory lights (and the dream cutscenes)
+        gameObject.AddComponent<Playground>();         // the back yard playground
+
         gameObject.AddComponent<HouseEmptying>();      // boxes appear, things on shelves and walls disappear
         AbilityLoss.StartFor(gameObject, chapter);     // vision, then speed, then hearing
         gameObject.AddComponent<PauseMenu>();          // Esc opens the pause menu
@@ -124,28 +125,10 @@ public class ChapterRules : MonoBehaviour
     void OnDestroy()
     {
         FinalCutsceneController.OnCutsceneFinished -= OnCutsceneFinished;
-        FamilyProgress.Filled -= OnProgressFull;
+
     }
 
-    // The progress bar is full: the family felt him. The good ending plays right away and the game is over (main menu).
-    void OnProgressFull()
-    {
-        if (gameOver) return;
-        gameOver = true;
-        endingStarted = true;
-        StopAllCoroutines();                       // cancels the night timers and any chapter change that was about to happen
-        StartCoroutine(PlayGoodEnding());
-    }
 
-    IEnumerator PlayGoodEnding()
-    {
-        FadingHud.Toast("They felt you.", 3f);
-        yield return new WaitForSeconds(1.5f);
-        while (CutsceneRunner.IsPlaying) yield return null;
-        foreach (GrandmaAI mom in FindObjectsByType<GrandmaAI>(FindObjectsInactive.Include, FindObjectsSortMode.None)) mom.gameObject.SetActive(false);
-        foreach (BabyAI baby in FindObjectsByType<BabyAI>(FindObjectsInactive.Include, FindObjectsSortMode.None)) baby.gameObject.SetActive(false);
-        CutsceneRunner.Play(new EndingCutscene(1), () => SceneManager.LoadScene(MainMenuScene));
-    }
 
     // ---------- the candle (all chapters)
     void AddCandle()

@@ -66,12 +66,12 @@ Record them yourselves or use text-to-speech. Each file is one line.
 | `voice_ghost_giggles` | the ghost | "Luna giggles and reaches for something I can't hold." |
 | `voice_mom_whosmiling` | Mom | "Who are you smiling at, baby?" |
 | `voice_mom_isityou` | Mom | "...Is it you?" |
-| `voice_mom_okay` | Mom (ending 1) | "It's okay. We're going to be okay." |
-| `voice_mom_yougonow` | Mom (ending 1) | "You can go now." |
-| `voice_mom_feelyou` | Mom (ending 2) | "Sometimes I feel you here. I don't know why." |
-| `voice_mom_goodbye` | Mom (ending 2) | "Goodbye, anyway." |
-| `voice_mom_letsgo` | Mom (ending 3) | "This house is so cold now. Come on, Luna. Let's go." |
-| `voice_ghost_nobody` | the ghost (ending 4) | "Nobody noticed. Nobody turned around." |
+| ~~`voice_mom_okay`~~ (not needed any more: the endings changed) | Mom (ending 1) | "It's okay. We're going to be okay." |
+| ~~`voice_mom_yougonow`~~ (not needed any more: the endings changed) | Mom (ending 1) | "You can go now." |
+| ~~`voice_mom_feelyou`~~ (not needed any more: the endings changed) | Mom (ending 2) | "Sometimes I feel you here. I don't know why." |
+| ~~`voice_mom_goodbye`~~ (not needed any more: the endings changed) | Mom (ending 2) | "Goodbye, anyway." |
+| ~~`voice_mom_letsgo`~~ (not needed any more: the endings changed) | Mom (ending 3) | "This house is so cold now. Come on, Luna. Let's go." |
+| ~~`voice_ghost_nobody`~~ (not needed any more: the endings changed) | the ghost (ending 4) | "Nobody noticed. Nobody turned around." |
 
 ## 5. Family life and scares (new)
 | File name | What | Length |
@@ -81,11 +81,21 @@ Record them yourselves or use text-to-speech. Each file is one line.
 | `mom_sigh` | a tired, sad sigh | 1-2 s |
 | `mom_gasp` | a frightened gasp (the ghost scared Mom) | 1 s |
 | `scare_sting` | a short uneasy sting when the family is frightened (the bar turns red) | 1-2 s |
-| `voice_ghost_smile` | the ghost (ending 1): "She smiles at me. She always knew I was here." | 4 s |
-| `voice_ghost_seesme` | the ghost (ending 2): "For a moment, she sees me." | 3 s |
+| ~~`voice_ghost_smile`~~ (not needed any more: the endings changed) | the ghost (ending 1): "She smiles at me. She always knew I was here." | 4 s |
+| ~~`voice_ghost_seesme`~~ (not needed any more: the endings changed) | the ghost (ending 2): "For a moment, she sees me." | 3 s |
 
-## The four endings (picked by how many different things the ghost touched)
-1. **THE LIGHT** - they feel him and let him go in peace
-2. **THE ECHO** - they half feel him
-3. **THE COLD** - they only sense the cold and leave
-4. **THE FADING** - nobody noticed
+## 6. Dreams, the yard, the new endings (new)
+| File name | What |
+|---|---|
+| `music_dream` | soft floating dream music (loops) |
+| `swing_creak` | the back yard swings creaking (loops) |
+| `notice_chime` / `memory_collect` / `dream_swell` | real versions of the made-up chimes (noticed / memory light / dream) |
+| `voice_dream_mom1_a` ... `voice_dream_mom3_c` | Mom's three dreams (3 lines each, see the Word doc for the text) |
+| `voice_dream_luna1_a` ... `voice_dream_luna3_b` | Luna's three dreams (the ghost speaks, 5 lines) |
+| `voice_end1_mom` ... `voice_end4_ghost` | the four new endings (9 lines) |
+
+## The four endings (picked by the two bars at the end of the last night)
+1. **THE FLIGHT** - nobody felt him; his desperate signs frightened them and Mom flees the house with Luna
+2. **THE SMILE** - only Mom felt him; she smiles and speaks to him
+3. **THE CRADLE** - only Luna felt him; she looks up from her cradle and smiles
+4. **HOME** - both felt him

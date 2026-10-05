@@ -148,7 +148,7 @@ public class BabyLife : MonoBehaviour
             yield return new WaitForSeconds(0.6f);
             face.Smile(true);
             GameAudio.PlayAt("baby_giggle", baby.transform.position, 0.8f);
-            FamilyProgress.Award("luna:sees-you", 4f, 2f, "Luna smiled at you");
+FamilyProgress.Award(FamilyProgress.Who.Luna, "luna:sees-you", 3f, 1f, "Luna smiled at you");
             yield return new WaitForSeconds(2.6f);
             face.Smile(false);
             face.LookAt(null);

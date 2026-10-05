@@ -7,12 +7,13 @@ using UnityEngine;
 //   - makes too many signs at once (TooManySigns signs within SpamSeconds)
 //   - touches something right next to the baby (closer than CloseToBaby metres; her own toys are fine)
 //   - slams a door shut while Mom or the baby is close (DoorScareRange metres)
-// A scare: the bar drops by ScarePoints at once and keeps draining for a few seconds, the baby cries, Mom panics.
+// A scare: the bars drop at once and keep draining for a few seconds, the baby cries, Mom panics.
+// Scaring them too much is how the worst ending happens: they flee the house.
 // Change the numbers below to make the game kinder or harsher.
 public class FamilyFear : MonoBehaviour
 {
-    public const float ScarePoints = 10f;            // how much the bar drops at once (the bar is full at FamilyProgress.FillPoints)
-    public const float DrainPerSecond = 1.2f;        // and how fast it keeps draining while they are afraid
+    public const float ScarePoints = 7f;             // how much the bars drop at once (a bar is full at FamilyProgress.BarPoints)
+    public const float DrainPerSecond = 0.8f;        // and how fast they keep draining while the family is afraid
     const int TooManySigns = 4;
     const float SpamSeconds = 8f;
     const float CloseToBaby = 1.2f;
@@ -53,13 +54,13 @@ public class FamilyFear : MonoBehaviour
         if (recentSigns.Count >= TooManySigns)
         {
             recentSigns.Clear();
-            Scare("Too much at once... you frightened them.");
+            Scare("Too much at once... you frightened them.", ScarePoints, ScarePoints);
             return;
         }
 
         if (baby != null && baby.isActiveAndEnabled && !IsBabyToy(sign.transform) &&
             Flat(sign.transform.position, baby.transform.position) < CloseToBaby)
-            Scare("Too close... Luna is frightened.");
+            Scare("Too close... Luna is frightened.", ScarePoints * 0.5f, ScarePoints * 1.3f);
     }
 
     void OnDoor(DoorToggle door)
@@ -67,16 +68,16 @@ public class FamilyFear : MonoBehaviour
         if (CutsceneRunner.IsPlaying || FamilyUsingDoor || door.IsOpen) return;          // only slamming it shut is scary
         bool momNear = mom != null && mom.isActiveAndEnabled && Flat(door.transform.position, mom.transform.position) < DoorScareRange;
         bool babyNear = baby != null && baby.isActiveAndEnabled && Flat(door.transform.position, baby.transform.position) < DoorScareRange;
-        if (momNear || babyNear) Scare("The slam frightened them.");
+        if (momNear || babyNear) Scare("The slam frightened them.", ScarePoints, ScarePoints);
     }
 
-    void Scare(string message)
+    void Scare(string message, float momPoints, float lunaPoints)
     {
         if (Time.time - lastScare < MinSecondsBetweenScares) return;
         lastScare = Time.time;
         fear = 1f;
 
-        FamilyProgress.AddPenalty(ScarePoints);
+        FamilyProgress.AddPenalty(momPoints, lunaPoints);
         FadingHud.ProgressScare();
         FadingHud.Toast(message, 3f);
         GameAudio.Play("scare_sting", 0.7f);
@@ -90,7 +91,7 @@ public class FamilyFear : MonoBehaviour
     void Update()
     {
         if (fear <= 0f) return;
-        FamilyProgress.AddPenalty(DrainPerSecond * Time.deltaTime);
+        FamilyProgress.AddPenalty(DrainPerSecond * Time.deltaTime, DrainPerSecond * Time.deltaTime);
         fear = Mathf.MoveTowards(fear, 0f, Time.deltaTime / CalmDownSeconds);
     }
 

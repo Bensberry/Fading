@@ -2,14 +2,17 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // Goes in: nowhere (ChapterRules adds it in the chapters where Mom and Luna live).
-// The NIGHT quest. While the family sleeps, MEMORY LIGHTS (small glowing lights) appear in the rooms of the house.
-//   1. Walk into the lights to gather them (LightsToFind).
-//   2. Bring them to Mom's bed (or Luna's): she DREAMS of you. +15 on the bar, and the night ends a few seconds later.
+// The NIGHT quest. While the family sleeps, MEMORY LIGHTS (small glowing lights) appear in the house AND outside
+// (in the yard and at the playground behind the house).
+//   1. Walk into the lights to gather them (LightsInside + LightsOutside).
+//   2. Bring them to Mom's bed OR Luna's bed (you choose): her DREAM plays (DreamCutscenes.cs), +15 on her bar,
+//      and the night ends a few seconds later.
 // The candle hint (H) points at the next light, then at the sleeping family.
 // The lights are made in code (no model files needed).
 public class NightQuest : MonoBehaviour
 {
-    const int LightsToFind = 3;
+    const int LightsInside = 3;
+    const int LightsOutside = 2;
     const float GatherDistance = 1.4f;
     const float DeliverDistance = 2.4f;
 
@@ -54,15 +57,16 @@ public class NightQuest : MonoBehaviour
         carrying = false;
 
         List<string> rooms = new List<string>(Rooms);
-        for (int i = 0; i < LightsToFind && rooms.Count > 0; i++)
+        for (int i = 0; i < LightsInside && rooms.Count > 0; i++)
         {
             string room = rooms[Random.Range(0, rooms.Count)];
             rooms.Remove(room);
             Vector3 p;
             if (HouseRooms.RandomPoint(room, out p)) lights.Add(MakeLight(p + Vector3.up * 1.1f));
         }
+        foreach (Vector3 p in Playground.OutdoorSpots(LightsOutside)) lights.Add(MakeLight(p + Vector3.up * 1.1f));
         if (lights.Count == 0) { active = false; return; }
-        FadingHud.Toast("The family is asleep. Memories are glowing in the house...", 4f);
+        FadingHud.Toast("The family is asleep. Memories are glowing in the house... and outside.", 4f);
         ShowGoal();
     }
 
@@ -137,7 +141,7 @@ public class NightQuest : MonoBehaviour
         if (lights.Count == 0)
         {
             carrying = true;
-            FadingHud.Toast("You hold their memories. Bring them to Mom or Luna while they sleep.", 4f);
+            FadingHud.Toast("You hold their memories. Choose: Mom's bed or Luna's bed. Her dream will be of you.", 4.5f);
         }
         else FadingHud.Toast("A memory... (" + found + "/" + (found + lights.Count) + ")", 2f);
         ShowGoal();
@@ -145,29 +149,38 @@ public class NightQuest : MonoBehaviour
 
     void Deliver(bool toMom)
     {
-        Complete = true;
         carrying = false;
-        GameAudio.Play("dream_swell", 0.9f);
-        if (toMom)
-        {
-            FamilyProgress.Award("dream:mom", 15f, 15f, "Mom dreams of you");
-            FadingHud.Subtitle("", "In her dream, I am home again.", 4f);
-        }
+        FadingHud.SetObjective("");
+        int night = NightNumber();
+        CutsceneRunner.Play(new DreamCutscene(night, toMom), () => AfterDream(toMom, night));
+    }
+
+    void AfterDream(bool toMom, int night)
+    {
+        if (toMom) FamilyProgress.Award(FamilyProgress.Who.Mom, "dream:mom:" + night, 15f, 0f, "Mom dreamed of you");
         else
         {
-            FamilyProgress.Award("dream:luna", 15f, 15f, "Luna dreams of you");
+            FamilyProgress.Award(FamilyProgress.Who.Luna, "dream:luna:" + night, 15f, 0f, "Luna dreamed of you");
             BabyLife babyLife = FindAnyObjectByType<BabyLife>();
             if (babyLife != null && babyLife.Face != null) babyLife.Face.Smile(true);
-            FadingHud.Subtitle("", "She smiles in her sleep.", 4f);
         }
         FadingHud.SetObjective("The night is quiet now...");
+        Complete = true;                                   // ChapterRules ends the night a few seconds later
+    }
+
+    // Chapter1 = night 1, Chapter2 = night 2, Chapter3 = night 3.
+    static int NightNumber()
+    {
+        string scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+        int n;
+        return scene.StartsWith("Chapter") && int.TryParse(scene.Substring(7), out n) ? Mathf.Clamp(n, 1, 3) : 1;
     }
 
     void ShowGoal()
     {
         if (!active) return;
         if (Complete) return;
-        if (carrying) FadingHud.SetObjective("Tonight:  bring the memories to Mom's bed or Luna's bed");
+        if (carrying) FadingHud.SetObjective("Tonight:  bring the memories to Mom's bed or Luna's bed  (her dream, her bar)");
         else FadingHud.SetObjective("Tonight:  gather the memory lights  " + found + "/" + (found + lights.Count) + "     [H] your candle shows the way");
     }
 
@@ -181,7 +194,7 @@ public class NightQuest : MonoBehaviour
         if (q.carrying)
         {
             target = q.mom != null ? q.mom.transform : (q.baby != null ? q.baby.transform : null);
-            text = "Bring the memories to her bed.";
+            text = "Bring the memories to Mom's bed (or Luna's).";
             return target != null;
         }
         float best = float.MaxValue;

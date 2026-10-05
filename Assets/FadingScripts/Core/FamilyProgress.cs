@@ -2,46 +2,51 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // Goes in: nowhere (ChapterRules adds it in every chapter).
-// The "they feel you" progress bar at the top of the screen.
+// TWO bars at the top of the screen: how much MOM feels you, and how much LUNA feels you.
 // Points come the MOMENT something good happens (FamilyProgress.Award):
-//   Mom SEES one of your signs        +10 (the same object again: +3)
-//   Luna feels a sign near her         +5 (again: +1),  Luna smiles at you  +4
-//   the day's goals are done          +15 (ChapterGoals)
-//   a night's dream is delivered      +15 (NightQuest)
-// Scares (FamilyFear) push it back. When the bar is full, ChapterRules plays the good ending straight away.
-// The bar CARRIES OVER between chapters (it only starts empty in a new game).
-// At the end of the last night the bar picks the ending (see PickEnding).
-// Change FillPoints to make the bar harder (bigger) or easier (smaller).
+//   Mom SEES one of your signs         Mom  +6 (the same object again: +1)
+//   Luna feels a sign near her          Luna +4 (again: +1),   Luna smiles at you  Luna +3 (again: +1)
+//   the day's goals are done            both +4 (ChapterGoals)
+//   a night's dream is delivered        Mom +15 or Luna +15 (NightQuest: you choose whose bed)
+// Scares (FamilyFear) push the bars back. The bars CARRY OVER between chapters (empty only in a new game).
+// A full bar does NOT end the game: at the end of the last night the two bars pick the ending (PickEnding):
+//   1 neither feels you (you scared them away)   2 only Mom   3 only Luna   4 both
+// Change BarPoints to make the bars harder (bigger) or easier (smaller), and FeltAt for how full "feels you" is.
 public class FamilyProgress : MonoBehaviour
 {
-    public const float FillPoints = 100f;
+    public const float BarPoints = 60f;
+    public const float FeltAt = 0.8f;                         // a bar at least this full at the end = "she noticed you"
 
-    public static event System.Action Filled;
+    public enum Who { Mom, Luna, Both }
 
-    static float carried;                                   // from the chapters before this one
-    static float earned;                                    // in this chapter
-    static float penalty;                                   // taken away by scares in this chapter
+    static float momCarried, lunaCarried, mom, luna;          // carried = from earlier chapters, mom/luna = this chapter
     static readonly HashSet<string> rewarded = new HashSet<string>();
     static float lastAwardTime = -100f;
+    static bool momFullShown, lunaFullShown;
 
-    float shown;
-    bool fired;
+    float momShown, lunaShown;
 
-    public static float Fraction { get { return Mathf.Clamp01(Total / FillPoints); } }
-    static float Total { get { return carried + earned - penalty; } }
+    public static float MomFraction { get { return Mathf.Clamp01((momCarried + mom) / BarPoints); } }
+    public static float LunaFraction { get { return Mathf.Clamp01((lunaCarried + luna) / BarPoints); } }
 
     // Something good happened. 'key' says what (e.g. "mom:INT_Mom_CoffeeMug"); the first time gives 'first' points, later 'repeat'.
-    public static void Award(string key, float first, float repeat, string message)
+    public static void Award(Who who, string key, float first, float repeat, string message)
     {
         float points = rewarded.Add(key) ? first : repeat;
         if (points <= 0f) return;
-        earned += points;
+        if (who != Who.Luna) mom = Mathf.Min(mom + points, BarPoints - momCarried + 0.01f);
+        if (who != Who.Mom) luna = Mathf.Min(luna + points, BarPoints - lunaCarried + 0.01f);
         lastAwardTime = Time.time;
-        FadingHud.ProgressGain("+" + Mathf.RoundToInt(points) + "   " + message);
+        FadingHud.ProgressGain("+" + Mathf.RoundToInt(points) + "   " + message, who != Who.Luna, who != Who.Mom);
         GameAudio.Play("notice_chime", 0.55f);
     }
 
-    public static void AddPenalty(float points) { penalty = Mathf.Min(penalty + points, carried + earned); }
+    // Scares: the bars go down (never below 0).
+    public static void AddPenalty(float momPoints, float lunaPoints)
+    {
+        mom = Mathf.Max(-momCarried, mom - momPoints);
+        luna = Mathf.Max(-lunaCarried, luna - lunaPoints);
+    }
 
     // How many DIFFERENT things got this kind of reward in this chapter ("mom:" = things Mom saw, "luna:" = things Luna felt).
     public static int CountOf(string prefix)
@@ -51,27 +56,32 @@ public class FamilyProgress : MonoBehaviour
         return n;
     }
 
-    public static bool WasRewarded(string key) { return rewarded.Contains(key); }
     public static float SecondsSinceLastAward { get { return Time.time - lastAwardTime; } }
 
-    // A new game (Chapter 0 calls this): the bar starts empty.
-    public static void ResetAll() { carried = earned = penalty = 0f; rewarded.Clear(); }
+    // A new game (Chapter 0 calls this): both bars start empty.
+    public static void ResetAll()
+    {
+        momCarried = lunaCarried = mom = luna = 0f;
+        rewarded.Clear();
+        momFullShown = lunaFullShown = false;
+    }
 
-    // 1 THE LIGHT ... 4 THE FADING, from how full the bar is at the end of the last night.
+    // 1 nobody (scared away), 2 only Mom, 3 only Luna, 4 both.
     public static int PickEnding()
     {
-        float f = Fraction;
-        if (f >= 0.999f) return 1;
-        if (f >= 0.6f) return 2;
-        if (f >= 0.3f) return 3;
-        return 4;
+        bool momFelt = MomFraction >= FeltAt, lunaFelt = LunaFraction >= FeltAt;
+        if (momFelt && lunaFelt) return 4;
+        if (momFelt) return 2;
+        if (lunaFelt) return 3;
+        return 1;
     }
 
     void Start()
     {
-        earned = penalty = 0f;
+        mom = luna = 0f;
         rewarded.Clear();
-        shown = Fraction;                                        // the bar starts where the last chapter left it
+        momShown = MomFraction;
+        lunaShown = LunaFraction;
         bool family = FindAnyObjectByType<GrandmaAI>(FindObjectsInactive.Include) != null ||
                       FindAnyObjectByType<BabyAI>(FindObjectsInactive.Include) != null;
         if (!family) enabled = false;                            // nobody lives here (Chapter 0)
@@ -79,22 +89,29 @@ public class FamilyProgress : MonoBehaviour
 
     void Update()
     {
-        float real = Fraction;
-        shown = Mathf.MoveTowards(shown, real, Time.deltaTime * (real < shown ? 0.6f : 0.5f));
-        FadingHud.SetProgress(shown);
+        momShown = Glide(momShown, MomFraction);
+        lunaShown = Glide(lunaShown, LunaFraction);
+        FadingHud.SetProgress(momShown, lunaShown);
 
-        if (!fired && shown >= 1f)
-        {
-            fired = true;
-            if (Filled != null) Filled();
-        }
+        // A bar reaching full is a quiet moment of its own (the game goes on).
+        if (!momFullShown && momShown >= 0.999f) { momFullShown = true; FullMoment("Mom feels you are here."); }
+        if (!lunaFullShown && lunaShown >= 0.999f) { lunaFullShown = true; FullMoment("Luna feels you are here."); }
+    }
+
+    static float Glide(float shown, float real) { return Mathf.MoveTowards(shown, real, Time.deltaTime * (real < shown ? 0.6f : 0.5f)); }
+
+    static void FullMoment(string text)
+    {
+        FadingHud.Toast(text, 3.5f);
+        GameAudio.Play("dream_swell", 0.6f);
     }
 
     // The chapter is over (the next scene is loading): keep what was earned for the next chapter.
     void OnDestroy()
     {
-        carried = Mathf.Max(0f, Total);
-        earned = penalty = 0f;
+        momCarried = Mathf.Max(0f, momCarried + mom);
+        lunaCarried = Mathf.Max(0f, lunaCarried + luna);
+        mom = luna = 0f;
         FadingHud.HideProgress();
     }
 

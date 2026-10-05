@@ -26,7 +26,8 @@ public class FadingHud : MonoBehaviour
     float subtitleStart = -100f, subtitleLength;
 
     bool progressShown;
-    float progress01;
+    float momBar01, lunaBar01;
+    bool gainMom, gainLuna;
     float progressScareTime = -100f;
     string gainText = "";
     float gainTime = -100f;
@@ -68,19 +69,24 @@ public class FadingHud : MonoBehaviour
     public static void ClearSubtitle() { Instance.subtitleLength = 0f; }
 
     // The "they feel you" bar at the top of the screen (0 to 1).
-    public static void SetProgress(float value01)
+    // The two bars at the top: how much Mom and Luna feel the ghost (0 to 1 each).
+    public static void SetProgress(float mom01, float luna01)
     {
         FadingHud h = Instance;
         h.progressShown = true;
-        h.progress01 = Mathf.Clamp01(value01);
+        h.momBar01 = Mathf.Clamp01(mom01);
+        h.lunaBar01 = Mathf.Clamp01(luna01);
     }
 
     // "+10  Mom noticed the coffee mug" under the bar for a moment, and the bar glows.
-    public static void ProgressGain(string text)
+    // "+6  Mom noticed the coffee mug" under the bar(s) that grew, and those bars glow for a moment.
+    public static void ProgressGain(string text, bool mom, bool luna)
     {
         FadingHud h = Instance;
         h.gainText = text;
         h.gainTime = Time.unscaledTime;
+        h.gainMom = mom;
+        h.gainLuna = luna;
     }
 
     // The bar flashes red for a moment (the ghost frightened the family).
@@ -123,27 +129,46 @@ public class FadingHud : MonoBehaviour
     void DrawProgress()
     {
         if (!progressShown) return;
-        float w = Screen.width * 0.34f, h = Screen.height * 0.022f;
-        float x = (Screen.width - w) / 2f, y = Screen.height * 0.035f;
-        smallStyle.alignment = TextAnchor.MiddleCenter;
-        smallStyle.normal.textColor = new Color(1f, 0.93f, 0.8f, 0.9f);
+        float w = Screen.width * 0.2f, h = Screen.height * 0.018f, gap = Screen.width * 0.04f;
+        float y = Screen.height * 0.04f;
+        float momX = Screen.width / 2f - gap / 2f - w, lunaX = Screen.width / 2f + gap / 2f;
         float scare = Mathf.Clamp01(1f - (Time.unscaledTime - progressScareTime) / 2.5f);
-        if (scare > 0f) smallStyle.normal.textColor = Color.Lerp(smallStyle.normal.textColor, new Color(1f, 0.35f, 0.3f, 1f), scare);
-        GUI.Label(new Rect(x, y - h * 1.7f, w, h * 1.6f), scare > 0f ? "You frightened them" : "They are starting to feel you", smallStyle);
-        smallStyle.alignment = TextAnchor.MiddleLeft;
-        DrawBox(new Rect(x - 3f, y - 3f, w + 6f, h + 6f), new Color(0f, 0f, 0f, 0.55f));
-        DrawBox(new Rect(x, y, w, h), new Color(0.2f, 0.16f, 0.1f, 0.9f));
         float gain = Mathf.Clamp01(1f - (Time.unscaledTime - gainTime) / 2.8f);
-        if (gain > 0f)
+
+        DrawBar(momX, y, w, h, momBar01, "MOM", gainMom ? gain : 0f, scare, new Color(1f, 0.62f, 0.3f));
+        DrawBar(lunaX, y, w, h, lunaBar01, "LUNA", gainLuna ? gain : 0f, scare, new Color(0.62f, 0.78f, 1f));
+
+        // a small candle flame between the bars
+        DrawBox(new Rect(Screen.width / 2f - h * 0.25f, y - h * 0.2f, h * 0.5f, h * 1.2f), new Color(1f, 0.8f, 0.45f, 0.85f));
+
+        smallStyle.alignment = TextAnchor.MiddleCenter;
+        if (scare > 0f)
         {
-            DrawBox(new Rect(x - 3f - 4f * gain, y - 3f - 4f * gain, w + 6f + 8f * gain, h + 6f + 8f * gain), new Color(1f, 0.85f, 0.5f, 0.35f * gain));
-            smallStyle.alignment = TextAnchor.MiddleCenter;
-            smallStyle.normal.textColor = new Color(1f, 0.9f, 0.6f, Mathf.Clamp01(gain * 1.6f));
-            GUI.Label(new Rect(x - w * 0.25f, y + h * 1.3f + (1f - gain) * 6f, w * 1.5f, h * 1.8f), gainText, smallStyle);
-            smallStyle.alignment = TextAnchor.MiddleLeft;
+            smallStyle.normal.textColor = new Color(1f, 0.35f, 0.3f, scare);
+            GUI.Label(new Rect(momX, y + h * 1.4f, lunaX + w - momX, h * 1.8f), "You frightened them", smallStyle);
         }
-        Color fill = Color.Lerp(new Color(1f, 0.6f, 0.2f), new Color(1f, 0.95f, 0.7f), progress01);
-        DrawBox(new Rect(x, y, w * progress01, h), Color.Lerp(fill, new Color(0.85f, 0.15f, 0.12f), scare));
+        else if (gain > 0f)
+        {
+            float left = gainMom && !gainLuna ? momX : (gainLuna && !gainMom ? lunaX : momX);
+            float width = gainMom && gainLuna ? lunaX + w - momX : w;
+            smallStyle.normal.textColor = new Color(1f, 0.9f, 0.65f, Mathf.Clamp01(gain * 1.6f));
+            GUI.Label(new Rect(left - w * 0.3f, y + h * 1.4f + (1f - gain) * 6f, width + w * 0.6f, h * 1.8f), gainText, smallStyle);
+        }
+        smallStyle.alignment = TextAnchor.MiddleLeft;
+    }
+
+    void DrawBar(float x, float y, float w, float h, float value, string label, float glow, float scare, Color tint)
+    {
+        smallStyle.alignment = TextAnchor.MiddleCenter;
+        smallStyle.normal.textColor = new Color(tint.r, tint.g, tint.b, 0.9f);
+        GUI.Label(new Rect(x, y - h * 1.6f, w, h * 1.5f), label, smallStyle);
+        if (glow > 0f) DrawBox(new Rect(x - 3f - 4f * glow, y - 3f - 4f * glow, w + 6f + 8f * glow, h + 6f + 8f * glow), new Color(tint.r, tint.g, tint.b, 0.35f * glow));
+        DrawBox(new Rect(x - 3f, y - 3f, w + 6f, h + 6f), new Color(0f, 0f, 0f, 0.55f));
+        DrawBox(new Rect(x, y, w, h), new Color(0.16f, 0.13f, 0.1f, 0.9f));
+        Color fill = Color.Lerp(tint * 0.85f, Color.Lerp(tint, Color.white, 0.5f), value);
+        fill.a = 1f;
+        DrawBox(new Rect(x, y, w * value, h), Color.Lerp(fill, new Color(0.85f, 0.15f, 0.12f), scare));
+        DrawBox(new Rect(x + w * FamilyProgress.FeltAt - 1f, y - 2f, 2f, h + 4f), new Color(1f, 1f, 1f, 0.35f));   // "feels you" mark
     }
 
     void DrawToast()

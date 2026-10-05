@@ -12,7 +12,9 @@ public class PlayerInteractor : MonoBehaviour
     public LayerMask layers = 1 << 8;
 
     Interactable current;
-    GUIStyle promptStyle;
+    GUIStyle promptStyle, cueStyle;
+    bool momSees, lunaNear;
+    float nextCueCheck;
 
     void Update()
     {
@@ -23,6 +25,16 @@ public class PlayerInteractor : MonoBehaviour
 
         if (current != null && PressedThisFrame())
             current.TryInteract();
+
+        // Cues under the prompt: will Mom SEE this? Is Luna close enough to feel it? (checked a few times a second)
+        if (current == null) { momSees = lunaNear = false; }
+        else if (Time.time >= nextCueCheck)
+        {
+            nextCueCheck = Time.time + 0.2f;
+            momSees = MomLife.MomCanSee(current.transform);
+            BabyAI baby = FindAnyObjectByType<BabyAI>();
+            lunaNear = baby != null && !baby.asleep && baby.isActiveAndEnabled && Vector3.Distance(baby.transform.position, current.transform.position) <= 8f;
+        }
     }
 
     bool PressedThisFrame()
@@ -45,7 +57,20 @@ public class PlayerInteractor : MonoBehaviour
         float cx = Screen.width / 2f, cy = Screen.height / 2f;
         GUI.Label(new Rect(cx - 20, cy - 15, 40, 30), current != null ? "( + )" : "+", promptStyle);
         if (current != null && !current.IsBusy && !FriendPromptShowing())
+        {
             GUI.Label(new Rect(cx - 250, cy + 30, 500, 30), current.prompt + "  [F]", promptStyle);
+            if (cueStyle == null) cueStyle = new GUIStyle(promptStyle) { fontSize = 15 };
+            if (momSees)
+            {
+                cueStyle.normal.textColor = new Color(1f, 0.72f, 0.42f);
+                GUI.Label(new Rect(cx - 250, cy + 56, 500, 24), "Mom can see this", cueStyle);
+            }
+            if (lunaNear)
+            {
+                cueStyle.normal.textColor = new Color(0.65f, 0.8f, 1f);
+                GUI.Label(new Rect(cx - 250, cy + (momSees ? 78 : 56), 500, 24), "Luna is close enough to feel it", cueStyle);
+            }
+        }
     }
 
     // Chapter 0: Granny's puzzle shows its own "[F] Interact" box; then this prompt stays away so they do not overlap.

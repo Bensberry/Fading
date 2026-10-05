@@ -14,6 +14,9 @@ public enum CastStance { Standing, Sitting }
 //   Camera:     CutCamera (instant), MoveCamera (smooth), CameraLight (soft light so dark nights can be seen)
 //   Characters: Spawn, MoveActor, TurnActor, Stance, Anim, AnimBool, Show
 //   The cradle: Cradle (a cradle, with Luna lying in it or empty), BabyLooksUpAndSmiles (close-up: she looks at us and smiles)
+//   Dreams:     DreamHaze (soft white haze over the picture), Glow (a warm light), Glimmers (floating memory sparks),
+//               BabyLooksAt (Luna turns her head to a character or the camera, and smiles)
+//   "Father" is the ghost himself: a pale, softly glowing figure (or Resources/Cast/Father if a model is added).
 //   World:      Touch (play an object's own sign), Extinguish (a candle goes out), Dawn (morning light)
 //   Sound:      Sound
 //   Positions:  House(x, y, z) turns house-model coordinates into world coordinates
@@ -440,6 +443,75 @@ public class CutsceneContext
 
     // ---------------------------------------------------------------- positions
     // Turn a point of the house MODEL (x, height above the floor, z) into a world position.
+    // ---------------------------------------------------------------- dreams
+    // A soft haze over the whole picture (amount 0 = none, 0.15 = dreamy). Uses the fade layer, so call it after fading in.
+    public IEnumerator DreamHaze(float amount, float seconds)
+    {
+        yield return Fade(amount, seconds, new Color(0.88f, 0.92f, 1f));
+    }
+
+    // A light at a house position (it goes away when the cutscene ends).
+    public IEnumerator Glow(Vector3 position, Color color, float intensity = 2f, float range = 5f)
+    {
+        GameObject g = new GameObject("CutsceneGlow");
+        g.transform.position = House(position.x, position.y, position.z);
+        Light l = g.AddComponent<Light>();
+        l.type = LightType.Point;
+        l.color = color;
+        l.intensity = intensity;
+        l.range = range;
+        l.shadows = LightShadows.None;
+        spawned.Add(g);
+        yield break;
+    }
+
+    // Small glowing sparks drifting around a house position.
+    public IEnumerator Glimmers(Vector3 center, int count = 12, float radius = 1.5f)
+    {
+        Vector3 c = House(center.x, center.y, center.z);
+        for (int i = 0; i < count; i++)
+        {
+            GameObject g = FadingMaterials.Primitive(PrimitiveType.Sphere);
+            Object.Destroy(g.GetComponent<Collider>());
+            g.name = "Glimmer";
+            g.transform.position = c + new Vector3(Random.Range(-radius, radius), Random.Range(-0.5f, 0.8f), Random.Range(-radius, radius));
+            g.transform.localScale = Vector3.one * Random.Range(0.025f, 0.05f);
+            Renderer r = g.GetComponent<Renderer>();
+            r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            Color col = Color.Lerp(new Color(1f, 0.9f, 0.7f), new Color(0.75f, 0.85f, 1f), Random.value);
+            r.material.color = col;
+            r.material.EnableKeyword("_EMISSION");
+            r.material.SetColor("_EmissionColor", col * 4f);
+            g.AddComponent<Glimmer>();
+            spawned.Add(g);
+        }
+        yield break;
+    }
+
+    // Luna (the spawned "Baby") turns her head toward another character ("Father", "Mom") or "camera", and smiles.
+    public IEnumerator BabyLooksAt(string target, bool smile = true)
+    {
+        GameObject baby = Actor("Baby");
+        if (baby == null) yield break;
+        foreach (SkinnedMeshRenderer r in baby.GetComponentsInChildren<SkinnedMeshRenderer>()) r.updateWhenOffscreen = true;
+        BabyFace face = BabyFace.On(baby);
+        Transform look;
+        if (target == "camera") look = cam.transform;
+        else if (standIns.ContainsKey(target)) look = standIns[target].head;              // a stand-in figure: its head
+        else look = HeadOf(Actor(target));
+        face.LookAt(look);
+        face.Smile(smile);
+        yield break;
+    }
+
+    static Transform HeadOf(GameObject a)
+    {
+        if (a == null) return null;
+        Animator animator = a.GetComponentInChildren<Animator>();
+        if (animator != null && animator.isHuman && animator.GetBoneTransform(HumanBodyBones.Head) != null) return animator.GetBoneTransform(HumanBodyBones.Head);
+        return a.transform;
+    }
+
     // ---------------------------------------------------------------- the cradle (ending)
     GameObject cradle;
     BabyFace cradleFace;
@@ -567,6 +639,18 @@ public class CutsceneContext
 
     static Mannequin BuildStandIn(string who)
     {
+        if (who == "Father")
+        {
+            Mannequin ghost = BuildMannequin("Father", new Color(0.78f, 0.85f, 0.97f), new Color(0.62f, 0.68f, 0.82f),
+                                             new Color(0.55f, 0.6f, 0.75f), new Color(0.7f, 0.76f, 0.9f), 1.05f, 1f);
+            foreach (Renderer r in ghost.root.GetComponentsInChildren<Renderer>())
+            {
+                r.material.EnableKeyword("_EMISSION");
+                r.material.SetColor("_EmissionColor", r.material.color * 0.55f);
+                r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            }
+            return ghost;
+        }
         if (who == "Baby" || who == "Luna")
             return BuildMannequin("Baby", new Color(0.62f, 0.80f, 0.90f), Skin, Skin, Color.white, 0.45f, 1.35f);          // white beanie, light blue diaper
         return BuildMannequin(who, new Color(0.20f, 0.20f, 0.22f), new Color(0.22f, 0.32f, 0.47f),                       // dark grey top, blue jeans

@@ -7,8 +7,8 @@ using UnityEngine;
 //   2. ChapterZeroEndCutscene end of Chapter 0: Grandma speaks to him, sends him to his family, leaves
 //   3. NightOneCutscene       Chapter 1, when Night 1 begins: Mom by the bed, the baby sees him
 //   4. DayTwoCutscene         Chapter 2, start of Day 2: the baby laughs at nothing, Mom wonders
-//   5. EndingCutscene(1-4)    Chapter 3 after the last night, or any chapter when the progress bar is full (ending 1):
-//                             Mom by Luna's cradle, and in the good endings Luna looks up at the ghost and smiles
+//   5. EndingCutscene(1-4)    Chapter 3 after the last night: one of four endings, picked by the Mom and Luna bars
+// (the six dream cutscenes of the nights are in DreamCutscenes.cs)
 // The dialogue lines are placeholders: change the text inside Say("WHO", "text", seconds, "voice_file") freely.
 // The last word of every Say is the name of an OPTIONAL voice file in Assets/Resources/Audio/ (see the audio list).
 // Positions are points of the house MODEL (x, height above floor, z): c.House(x, y, z). Nudge them if a shot looks off.
@@ -132,7 +132,11 @@ public class DayTwoCutscene : Cutscene
 }
 
 // ------------------------------------------------------------------------------------------------- 5
-// ending 1 = THE LIGHT, 2 = THE ECHO, 3 = THE COLD, 4 = THE FADING (picked by StoryProgress.PickEnding()).
+// The four endings, picked at the end of the last night by the two bars (FamilyProgress.PickEnding()):
+//   1 THE FLIGHT   nobody felt him: his desperate signs frightened them, Mom takes Luna and flees the house
+//   2 THE SMILE    only Mom felt him: she smiles and speaks to him
+//   3 THE CRADLE   only Luna felt him: she looks up from her cradle and smiles at him
+//   4 HOME         both felt him: Mom lets him go, Luna smiles, the candle burns bright and goes out gently
 public class EndingCutscene : Cutscene
 {
     readonly int ending;
@@ -146,62 +150,23 @@ public class EndingCutscene : Cutscene
         yield return c.Fade(1f, 1.5f, Color.black);
         yield return c.Dawn();                                                     // the world switches to morning light
 
-        // The bare living room at dawn: Mom beside Luna's cradle. In the worst ending nobody is there, only the empty cradle.
-        Vector3 cradleSpot = new Vector3(-11.7f, 0f, 2.3f);
-        if (ending != 4)
-        {
-            yield return c.Spawn("Mom", new Vector3(-12.6f, 0f, 1.8f), new Vector3(-12.6f, 1.6f, 4.4f), CastStance.Standing);
-            yield return c.Cradle(cradleSpot, new Vector3(-12.6f, 1.6f, 4.4f), true);
-        }
-        else yield return c.Cradle(cradleSpot, new Vector3(-12.6f, 1.6f, 4.4f), false);
-        yield return c.CutCamera(c.House(-12.6f, 1.50f, 4.4f), c.House(-12.6f, 1.60f, 0.0f), 55f);
-        yield return c.Fade(0f, 2.5f);
+        if (ending == 1) yield return TheFlight(c);
+        else yield return LivingRoom(c);
 
-        switch (ending)
-        {
-            case 1:                                                                // THE LIGHT: they feel him and let him go
-                yield return c.Say("MOM", "It's okay. We're going to be okay.", 4.5f, "voice_mom_okay");
-                yield return c.Say("MOM", "You can go now.", 4f, "voice_mom_yougonow");
-                break;
-            case 2:                                                                // THE ECHO: half felt
-                yield return c.Say("MOM", "Sometimes I feel you here. I don't know why.", 5f, "voice_mom_feelyou");
-                yield return c.Say("MOM", "Goodbye, anyway.", 3.5f, "voice_mom_goodbye");
-                break;
-            case 3:                                                                // THE COLD: they only sensed the cold and left
-                yield return c.Say("MOM", "This house is so cold now. Come on, Luna. Let's go.", 5.5f, "voice_mom_letsgo");
-                yield return c.TurnActor("Mom", new Vector3(-12.6f, 1.6f, -3f), 2f);   // she turns away from the room
-                break;
-            default:                                                               // THE FADING: nobody noticed
-                yield return c.Say("", "Nobody noticed. Nobody turned around.", 5f, "voice_ghost_nobody");
-                break;
-        }
-
-        // The good endings: Luna looks up from her cradle, straight at him, and smiles.
-        if (ending <= 2)
-        {
-            yield return c.Fade(1f, 1f);
-            yield return c.CameraLight(true, 0.5f);
-            yield return c.BabyLooksUpAndSmiles(6f);
-            if (ending == 1) yield return c.Say("", "She smiles at me. She always knew I was here.", 4.5f, "voice_ghost_smile");
-            else yield return c.Say("", "For a moment, she sees me.", 3.5f, "voice_ghost_seesme");
-            yield return c.CameraLight(false);
-        }
-        yield return c.Fade(1f, 1.5f);
-
-        // The memorial candle: it goes out (in THE ECHO it stays lit, small and faint).
+        // The memorial candle.
         yield return c.CutCamera(c.House(-8.4f, 1.00f, 2.45f), c.House(-7.3f, 0.90f, 2.45f), 22f);
         yield return c.Fade(0f, 1.5f);
-        if (ending != 2) { yield return c.Sfx("candle_out", 0.9f); yield return c.Extinguish("INT_Hallway_MemorialCandle", 4f); }
-        else yield return c.Wait(4f);
+        yield return c.Sfx("candle_out", 0.9f);
+        yield return c.Extinguish("INT_Hallway_MemorialCandle", ending == 4 ? 6f : 3.5f);
         yield return c.Wait(1.5f);
 
         string title;
         switch (ending)
         {
-            case 1: title = "Nothing lasts. Some things stay."; break;
-            case 2: title = "Some things echo."; break;
-            case 3: title = "He stayed behind."; break;
-            default: title = "Everything is temporary."; break;
+            case 1: title = "Everything is temporary."; break;
+            case 2: title = "Some things stay."; break;
+            case 3: title = "She will not remember. But she was loved."; break;
+            default: title = "Nothing lasts. Some things stay."; break;
         }
         yield return c.Title(title, 5f);
         yield return c.Fade(1f, 2f);
@@ -211,5 +176,54 @@ public class EndingCutscene : Cutscene
         yield return c.Title("Furniture by Kenney  -  Textures by Poly Haven  -  Models from Poly Pizza", 4.5f);
         yield return c.Title("Thank you for playing.", 3.5f);
         yield return c.Letterbox(false, 0.3f);
+    }
+
+    // 1: frightened, Mom leaves the house in a hurry. Nobody looks back.
+    IEnumerator TheFlight(CutsceneContext c)
+    {
+        yield return c.Spawn("Mom", new Vector3(-8.1f, 0f, 1.2f), new Vector3(-8.1f, 0f, -3f), CastStance.Standing);
+        yield return c.CutCamera(c.House(-8.1f, 1.5f, -6.0f), c.House(-8.1f, 1.2f, 0f), 45f);
+        yield return c.Fade(0f, 2f);
+        yield return c.Say("MOM", "I can't stay here another night. Something in this house won't let us rest.", 5.5f, "voice_end1_mom");
+        yield return c.Touch("INT_Door_Front");                                    // she opens the front door
+        yield return c.MoveActor("Mom", new Vector3(-8.1f, 0f, -4.5f), 3.5f);
+        yield return c.Say("", "I only wanted them to know I was here.", 4.5f, "voice_end1_ghost");
+        yield return c.Fade(1f, 1.5f);
+    }
+
+    // 2, 3, 4: the bare living room at dawn, Mom beside Luna's cradle.
+    IEnumerator LivingRoom(CutsceneContext c)
+    {
+        Vector3 cradleSpot = new Vector3(-11.7f, 0f, 2.3f);
+        yield return c.Spawn("Mom", new Vector3(-12.6f, 0f, 1.8f), new Vector3(-12.6f, 1.6f, 4.4f), CastStance.Standing);
+        yield return c.Cradle(cradleSpot, new Vector3(-12.6f, 1.6f, 4.4f), true);
+        yield return c.CutCamera(c.House(-12.6f, 1.50f, 4.4f), c.House(-12.6f, 1.60f, 0.0f), 55f);
+        yield return c.Fade(0f, 2.5f);
+
+        if (ending == 2)
+        {
+            yield return c.Say("MOM", "I know it's you. I always knew.", 4.5f, "voice_end2_mom_a");
+            yield return c.Say("MOM", "Thank you for staying with us. You can rest now.", 5f, "voice_end2_mom_b");
+        }
+        else if (ending == 3)
+        {
+            yield return c.Say("MOM", "Who are you smiling at, Luna?", 4f, "voice_end3_mom");
+            yield return c.Fade(1f, 1f);
+            yield return c.CameraLight(true, 0.5f);
+            yield return c.BabyLooksUpAndSmiles(6f);
+            yield return c.Say("", "She will not remember me. But she knew I was here.", 5f, "voice_end3_ghost");
+            yield return c.CameraLight(false);
+        }
+        else
+        {
+            yield return c.Say("MOM", "We'll be okay. Both of us.", 4f, "voice_end4_mom_a");
+            yield return c.Say("MOM", "Go home, love.", 3.5f, "voice_end4_mom_b");
+            yield return c.Fade(1f, 1f);
+            yield return c.CameraLight(true, 0.5f);
+            yield return c.BabyLooksUpAndSmiles(6f);
+            yield return c.Say("", "I'm home.", 3.5f, "voice_end4_ghost");
+            yield return c.CameraLight(false);
+        }
+        yield return c.Fade(1f, 1.5f);
     }
 }

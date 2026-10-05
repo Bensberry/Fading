@@ -44,6 +44,7 @@ public class MomLife : MonoBehaviour
         yield return new WaitForSeconds(0.5f);                    // the AI scripts have started by now
         mom = FindFirstObjectByType<GrandmaAI>();
         if (mom == null) { enabled = false; yield break; }
+        current = this;
 
         agent = mom.GetComponent<NavMeshAgent>();
         if (agent != null) baseSpeed = agent.speed;
@@ -66,6 +67,23 @@ public class MomLife : MonoBehaviour
     }
 
     bool IsNight { get { return cycle != null && cycle.IsNight; } }
+
+    static MomLife current;
+
+    // For the crosshair cue: could Mom's eyes see this object right now? (awake, close enough, in front of her, nothing in between)
+    public static bool MomCanSee(Transform target)
+    {
+        if (current == null || current.mom == null || target == null) return false;
+        GrandmaAI m = current.mom;
+        if (m.IsAsleep || !m.isActiveAndEnabled || m.eyePoint == null) return false;
+        Collider col = target.GetComponentInChildren<Collider>();
+        Vector3 point = col != null ? col.bounds.center : target.position;
+        Vector3 dir = point - m.eyePoint.position;
+        if (dir.magnitude > m.visionDistance || Vector3.Angle(m.eyePoint.forward, dir) > m.visionAngle * 0.5f) return false;
+        RaycastHit hit;
+        if (!Physics.Raycast(m.eyePoint.position, dir.normalized, out hit, m.visionDistance, m.lineOfSightLayers, QueryTriggerInteraction.Ignore)) return false;
+        return hit.transform == target || hit.transform.IsChildOf(target);
+    }
 
     // ---------- vision
     void GiveHerEyes()
@@ -341,7 +359,7 @@ public class MomLife : MonoBehaviour
         else
         {
             FamilyLife.Say("Mom", NoticeLines[Random.Range(0, NoticeLines.Length)], mom.transform.position);
-            if (clue != null) FamilyProgress.Award("mom:" + clue.name, 10f, 3f, "Mom noticed the " + FamilyProgress.Pretty(clue.name));
+if (clue != null) FamilyProgress.Award(FamilyProgress.Who.Mom, "mom:" + clue.name, 6f, 1f, "Mom noticed the " + FamilyProgress.Pretty(clue.name));
         }
     }
 

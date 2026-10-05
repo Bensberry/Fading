@@ -2,14 +2,14 @@ using UnityEngine;
 
 // Goes in: nowhere (ChapterRules adds it in the chapters where Mom and Luna live).
 // A small checklist on the goal line at the bottom of the screen, so every day has something clear to do:
-//   DAY:   "Let Mom SEE 3 things (1/3)   -   Let Luna feel you 2 times (0/2)"   -> done: +15 on the bar
+//   DAY:   "Let Mom SEE 3 things (1/3)   -   Let Luna feel you 2 times (0/2)"   -> done: +4 on both bars
 //   NIGHT: the night quest (NightQuest) writes its own goal.
 // The numbers below make the days easier or harder.
 public class ChapterGoals : MonoBehaviour
 {
     const int MomGoal = 3;
     const int LunaGoal = 2;
-    const float DayBonus = 15f;
+    const float DayBonus = 4f;                         // on BOTH bars
     const float NightComesAfter = 25f;                  // seconds after the day's goals are done
 
     public static bool Active;          // ChapterRules switches it on after the chapter's first message
@@ -43,7 +43,7 @@ public class ChapterGoals : MonoBehaviour
         if (!dayDone && mom >= MomGoal && luna >= LunaGoal)
         {
             dayDone = true;
-            FamilyProgress.Award("day-goal:" + (cycle != null ? cycle.Current.ToString() : "day"), DayBonus, 0f, "They felt you today");
+FamilyProgress.Award(FamilyProgress.Who.Both, "day-goal:" + (cycle != null ? cycle.Current.ToString() : "day"), DayBonus, 0f, "They felt you today");
             FadingHud.Toast("They felt you today. Night will come soon...", 3.5f);
             StartCoroutine(BringTheNight(cycle != null ? cycle.Current : DayNightCycle.Phase.Day1));
         }
