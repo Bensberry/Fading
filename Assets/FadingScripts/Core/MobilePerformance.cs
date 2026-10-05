@@ -147,7 +147,8 @@ public class MobilePerformance : MonoBehaviour
         int fingers = 0;
         if (UnityEngine.InputSystem.Touchscreen.current != null)
             foreach (var t in UnityEngine.InputSystem.Touchscreen.current.touches) if (t.press.isPressed) fingers++;
-        if (fingers >= 3 && !threeFingersDown) showReadout = !showReadout;
+        if (fingers >= 3 && !threeFingersDown) { showReadout = !showReadout; if (showReadout) recordUntil = Time.unscaledTime + 6f; }
+        if (Time.unscaledTime < recordUntil) RecordFrame();
         threeFingersDown = fingers >= 3;
         if (showReadout && fingers == 1 && UnityEngine.InputSystem.Touchscreen.current.primaryTouch.press.wasPressedThisFrame)
         {
@@ -158,6 +159,32 @@ public class MobilePerformance : MonoBehaviour
         fpsFrames++;
         fpsTimer += Time.unscaledDeltaTime;
         if (fpsTimer >= 0.5f) { shownFps = fpsFrames / fpsTimer; fpsFrames = 0; fpsTimer = 0f; }
+    }
+
+    // For testing: for 6 seconds after the readout opens, one line per frame goes to the phone's log (adb logcat),
+    // with the frame time, how far the player's body moved / turned, the camera, the touch look and the candle light.
+    float recordUntil;
+    Vector3 lastBodyPos;
+    float lastYaw;
+
+    void RecordFrame()
+    {
+        FirstPersonController player = FindAnyObjectByType<FirstPersonController>();
+        Camera cam = Camera.main;
+        if (player == null || cam == null) return;
+        Transform body = player.transform;
+        float yaw = body.eulerAngles.y;
+        GameObject flame = GameObject.Find("CandleFlame");
+        Light glow = flame != null ? flame.GetComponent<Light>() : null;
+        Debug.LogFormat(LogType.Log, LogOption.NoStacktrace, null,
+            "[REC] dt {0:F1} sdt {1:F1} move {2:F3} turn {3:F2} look {4:F2},{5:F2} joy {6:F2},{7:F2} y {8:F3} camY {9:F3} light {10:F2} lightPos {11}",
+            Time.unscaledDeltaTime * 1000f, Time.smoothDeltaTime * 1000f,
+            Vector3.Distance(new Vector3(body.position.x, 0f, body.position.z), new Vector3(lastBodyPos.x, 0f, lastBodyPos.z)),
+            Mathf.DeltaAngle(lastYaw, yaw), MobileControls.LookDegrees.x, MobileControls.LookDegrees.y,
+            MobileControls.Move.x, MobileControls.Move.y, body.position.y, cam.transform.position.y,
+            glow != null ? glow.intensity : -1f, flame != null ? (flame.transform.position - cam.transform.position).ToString("F3") : "-");
+        lastBodyPos = body.position;
+        lastYaw = yaw;
     }
 
     void OnGUI()
