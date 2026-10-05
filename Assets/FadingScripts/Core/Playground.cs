@@ -356,9 +356,21 @@ public class Playground : MonoBehaviour
             box.size = new Vector3(Mathf.Abs(s.x) * trunkOnly, Mathf.Abs(s.y), Mathf.Abs(s.z) * trunkOnly);
         }
         foreach (Renderer r in g.GetComponentsInChildren<Renderer>())
-            if (size < (Application.isMobilePlatform ? 2.5f : 1f)) r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;     // small things: no shadows (cheaper)
-        if (Application.isMobilePlatform) HideWhenTiny(g, size);
+            if (size < (Application.isMobilePlatform ? 4f : 1f)) r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;     // small things: no shadows (cheaper)
+        if (Application.isMobilePlatform)
+        {
+            HideWhenTiny(g, size);
+            if (size < 3f) SetLayer(g, SmallThingsLayer);       // phones: the camera skips these beyond a few metres (MobilePerformance)
+        }
         return g;
+    }
+
+    // Phones: small yard things (flowers, rocks, bushes, fence...) go on this layer; the camera does not draw it far away.
+    public const int SmallThingsLayer = 30;
+
+    static void SetLayer(GameObject g, int layer)
+    {
+        foreach (Transform t in g.GetComponentsInChildren<Transform>(true)) t.gameObject.layer = layer;
     }
 
     // Phones: a yard model is not drawn at all once it looks tiny on screen (far away). Up close nothing changes.

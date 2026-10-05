@@ -14,7 +14,7 @@ using UnityEngine.Rendering.Universal;
 //   2  ~2.2 megapixels, hard shadows 15 m, bloom, 2 lamps per object, view 70 m
 //   1  ~1.4 megapixels, no shadows, no bloom, 1 lamp per object, view 55 m, small yard things vanish sooner
 //   0  ~0.9 megapixels, like 1 but no screen effects at all and 30 fps (steady instead of stuttering)
-// Always: no anti-aliasing, lamps and candles never cast shadows, depth of field / motion blur / film grain / lens flare off.
+// Always: small yard things (flowers, rocks, bushes) are not drawn far away (14-32 m), no anti-aliasing, lamps and candles never cast shadows, depth of field / motion blur / film grain / lens flare off.
 public class MobilePerformance : MonoBehaviour
 {
     public static int Level { get; private set; } = -1;
@@ -28,6 +28,7 @@ public class MobilePerformance : MonoBehaviour
     static readonly int[] LampsPerObject = { 1, 1, 2, 3 };
     static readonly float[] ViewDistance = { 50f, 55f, 70f, 90f };
     static readonly float[] LodBias = { 0.5f, 0.6f, 0.8f, 1f };
+    static readonly float[] SmallThingsDistance = { 14f, 18f, 24f, 32f };     // flowers, rocks, bushes, fence (Playground.SmallThingsLayer)
 
     int ceiling = 3;                       // a level that was too slow is never tried again (this session)
     float measureStart, smoothSince;
@@ -177,6 +178,10 @@ public class MobilePerformance : MonoBehaviour
             if (!farClip.ContainsKey(c)) farClip[c] = c.farClipPlane;
             c.farClipPlane = Mathf.Min(farClip[c], ViewDistance[Level]);
             c.allowMSAA = false;
+            float[] cull = new float[32];
+            cull[Playground.SmallThingsLayer] = SmallThingsDistance[Level];
+            c.layerCullDistances = cull;
+            c.layerCullSpherical = true;
             UniversalAdditionalCameraData data = c.GetUniversalAdditionalCameraData();
             if (data != null && c.cameraType == CameraType.Game && farClip[c] > 1f) data.renderPostProcessing = Level > 0;
         }

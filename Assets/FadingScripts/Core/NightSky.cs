@@ -68,6 +68,7 @@ public class NightSky : MonoBehaviour
             p.startSize = Random.value < 0.06f ? Random.Range(2.5f, 3.6f) : Random.Range(0.6f, 2f);
             stars.Emit(p, 1);
         }
+        stars.Pause();                                                  // they never move: no need to simulate 700 particles every frame
     }
 
     Transform MakeQuad(string objectName, Material m, float size)
