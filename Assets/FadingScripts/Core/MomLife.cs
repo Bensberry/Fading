@@ -303,6 +303,11 @@ public class MomLife : MonoBehaviour
         AnimationClip sit = cry ? GameClips.First(mom.gameObject, "mom_sit_cry", "mom_sit") : GameClips.Get("mom_sit");
         bool sitting = pose.Play(sit, 0.7f);
         if (cry) Cry(sitting && sit.name.Contains("cry") ? 0.4f : 1f);
+        if (sitting)
+        {
+            yield return new WaitForSeconds(0.9f);                           // fully in the sitting pose
+            SitOnBedEdge();
+        }
         yield return new WaitForSeconds(stay);
         Finish();
     }
@@ -359,8 +364,42 @@ public class MomLife : MonoBehaviour
         if (Random.value < 0.5f) FamilyLife.Say("", CryLines[Random.Range(0, CryLines.Length)], mom.transform.position);
     }
 
+    // The sitting animation lowers her hips but her feet stay where she stood: move her (by her hip bone) so she
+    // really sits on the edge of the mattress. GetUp() puts her back where she stood.
+    bool seated;
+    Vector3 standingAt;
+
+    void SitOnBedEdge()
+    {
+        float top;
+        Bounds bed;
+        Animator a = mom.animator != null ? mom.animator : mom.GetComponentInChildren<Animator>();
+        Transform hips = a != null && a.isHuman ? a.GetBoneTransform(HumanBodyBones.Hips) : null;
+        if (hips == null || agent == null || !HouseRooms.TryGetBedTop("Bed_Mother", out top, out bed)) return;
+
+        standingAt = mom.transform.position;
+        agent.updatePosition = false;                                         // the walking system must not pull her back down
+        seated = true;
+
+        Vector3 edge = bed.ClosestPoint(new Vector3(hips.position.x, bed.center.y, hips.position.z));
+        Vector3 inward = bed.center - edge; inward.y = 0f;
+        Vector3 seat = edge + (inward.sqrMagnitude > 0.0001f ? inward.normalized * 0.22f : Vector3.zero);
+        Vector3 move = seat - hips.position;
+        move.y = top + 0.1f - hips.position.y;                                // the hips rest on the mattress
+        mom.transform.position += move;
+    }
+
+    void GetUp()
+    {
+        if (!seated) return;
+        seated = false;
+        mom.transform.position = standingAt;
+        if (agent != null) { agent.nextPosition = standingAt; agent.updatePosition = true; }
+    }
+
     void Finish()
     {
+        GetUp();
         pose.Stop(0.6f);
         pose.sob = 0f;
         mom.holdUntil = 0f;
@@ -369,6 +408,7 @@ public class MomLife : MonoBehaviour
 
     void StopAction()
     {
+        GetUp();
         if (action != null) StopCoroutine(action);
         action = null;
         pose.Stop(0.25f);

@@ -66,7 +66,8 @@ public class NightQuest : MonoBehaviour
         }
         foreach (Vector3 p in Playground.OutdoorSpots(LightsOutside)) lights.Add(MakeLight(p + Vector3.up * Random.Range(0.3f, 1.2f)));
         if (lights.Count == 0) { active = false; return; }
-        FadingHud.Toast("The family is asleep. Memories are glowing in the house... and outside.", 4f);
+        FadingHud.Toast("The family is asleep. Memories are glowing in the house... and outside.\n" +
+                        "Each night hides two secret dreams: whose bed you choose decides which one you see.", 6f);
         ShowGoal();
     }
 

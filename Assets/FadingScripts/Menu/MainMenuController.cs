@@ -51,7 +51,7 @@ public class MainMenuController : MonoBehaviour
     TextMeshProUGUI quoteLabel;
     TextMeshProUGUI title;
     MenuButton playButton, creditsButton, quitButton, backButton;
-    TextMeshProUGUI creditsText;
+    TextMeshProUGUI creditsText, memoriesText;
     bool showingCredits;
     bool starting;
 
@@ -70,6 +70,8 @@ public class MainMenuController : MonoBehaviour
         creditsButton = MenuKit.MakeOption(canvas.transform, "CREDITS", 1, style, ShowCredits);
         quitButton = MenuKit.MakeOption(canvas.transform, "QUIT", 2, style, QuitGame);
         MakeCredits(canvas.transform);
+        memoriesText = MenuKit.MakeLabel(canvas.transform, "Memories", SecretMemories.Summary, new Vector2(0.5f, 0.06f), new Vector2(0.5f, 0.5f),
+                                         new Vector2(1600f, 60f), 26, 2f, style, TextAlignmentOptions.Center);
         MakeGlow(canvas.transform);                       // under the full-screen overlay
         fadeImage = MakeFadeOverlay(canvas.transform);
         quoteLabel = MenuKit.MakeLabel(canvas.transform, "FlashQuote", flashQuote, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
@@ -302,6 +304,7 @@ public class MainMenuController : MonoBehaviour
     void SetTextVisibility(float v)
     {
         title.alpha = v;
+        if (memoriesText != null) memoriesText.alpha = v * 0.75f;
         playButton.Visibility = v;
         creditsButton.Visibility = v;
         quitButton.Visibility = v;

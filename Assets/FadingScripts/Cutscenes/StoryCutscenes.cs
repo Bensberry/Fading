@@ -191,6 +191,7 @@ public class EndingCutscene : Cutscene
     public override IEnumerator Play(CutsceneContext c)
     {
         MusicPlayer.Create().Play("music_ending", 4f);
+        SecretMemories.SawEnding(ending);
         yield return c.Letterbox(true, 0.5f);
         yield return c.Fade(1f, 1.5f, Color.black);
         yield return c.Dawn();                                                     // the world switches to morning light
@@ -221,6 +222,9 @@ public class EndingCutscene : Cutscene
         yield return c.Title("Furniture and nature by Kenney (CC0)  -  Textures by Poly Haven (CC0)", 4f);
         yield return c.Title("Models by Poly by Google and Ray Larson (CC-BY), via Poly Pizza  -  Characters and animations: Mixamo", 4.5f);
         yield return c.Title("Thank you for playing.", 3.5f);
+        yield return c.Title(SecretMemories.Found < SecretMemories.Total
+            ? "You found " + SecretMemories.Found + " of " + SecretMemories.Total + " secret memories. Choose other dreams, reach Mom or Luna differently, and see what else stays hidden."
+            : "You found every secret memory. Thank you for remembering them all.", 5.5f);
         yield return c.Letterbox(false, 0.3f);
     }
 

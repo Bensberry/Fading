@@ -71,13 +71,13 @@ public class PrologueTutorial : MonoBehaviour
         string tab = "      [Tab] skip tutorial";
         switch (step)
         {
-            case 0: FadingHud.SetObjective("You are a ghost. Move around with  W A S D." + tab); break;
-            case 1: FadingHud.SetObjective("Hold  Left Shift  to move faster." + tab); break;
-            case 2: FadingHud.SetObjective("Hold the RIGHT MOUSE button and move the mouse to look around." + tab); break;
-            case 3: FadingHud.SetObjective("Look at an object and press  F  to touch it. It drifts back after 5 seconds." + tab); break;
+            case 0: FadingHud.SetObjective("You are a ghost. Move around with  W A S D." + tab, true); break;
+            case 1: FadingHud.SetObjective("Hold  Left Shift  to move faster." + tab, true); break;
+            case 2: FadingHud.SetObjective("Hold the RIGHT MOUSE button and move the mouse to look around." + tab, true); break;
+            case 3: FadingHud.SetObjective("Look at an object and press  F  to touch it. It drifts back after 5 seconds." + tab, true); break;
             case 4:
                 FadingHud.CandleHudAllowed = true;                     // the candle display appears when the candle is explained
-                FadingHud.SetObjective("Your candle can show you what to touch next. Press  H.  It burns low after each use." + tab);
+                FadingHud.SetObjective("Your candle can show you what to touch next. Press  H.  It burns low after each use." + tab, true);
                 break;
         }
     }

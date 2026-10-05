@@ -21,6 +21,9 @@ public class FadingHud : MonoBehaviour
     string toast = "";
     float toastStart = -100f, toastLength;
     string objective = "";
+    float objectiveTime = -100f;
+    bool objectiveSticky;
+    const float ObjectiveSeconds = 12f;                   // a goal line fades away after this (it comes back when it changes)
     bool skipHint;
     string subtitleSpeaker = "", subtitleText = "";
     float subtitleStart = -100f, subtitleLength;
@@ -51,7 +54,17 @@ public class FadingHud : MonoBehaviour
         h.toastLength = seconds;
     }
 
-    public static void SetObjective(string text) { Instance.objective = text ?? ""; }
+    // The goal line at the bottom. It fades out after ObjectiveSeconds and shows again whenever the text changes.
+    // sticky = stays until replaced (the tutorial steps).
+    public static void SetObjective(string text, bool sticky = false)
+    {
+        FadingHud h = Instance;
+        text = text ?? "";
+        if (text == h.objective && sticky == h.objectiveSticky) return;
+        h.objective = text;
+        h.objectiveTime = Time.unscaledTime;
+        h.objectiveSticky = sticky;
+    }
 
     // "SPACE  skip" in the bottom-right corner (shown during cutscenes).
     public static void ShowSkipHint(bool on) { Instance.skipHint = on; }
@@ -211,10 +224,13 @@ public class FadingHud : MonoBehaviour
     void DrawObjective()
     {
         if (objective.Length == 0) return;
+        float age = Time.unscaledTime - objectiveTime;
+        float alpha = objectiveSticky ? 1f : Mathf.Clamp01(Mathf.Min(age / 0.4f, (ObjectiveSeconds - age) / 1.5f));
+        if (alpha <= 0f) return;
         float w = Screen.width * 0.7f, h = Screen.height * 0.09f;
         Rect box = new Rect((Screen.width - w) / 2f, Screen.height * 0.84f, w, h);
-        DrawBox(box, new Color(0f, 0f, 0f, 0.5f));
-        objectiveStyle.normal.textColor = new Color(0.9f, 0.95f, 1f, 1f);
+        DrawBox(box, new Color(0f, 0f, 0f, 0.5f * alpha));
+        objectiveStyle.normal.textColor = new Color(0.9f, 0.95f, 1f, alpha);
         GUI.Label(box, objective, objectiveStyle);
     }
 

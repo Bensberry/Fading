@@ -25,6 +25,7 @@ public class DreamCutscene : Cutscene
 
     public override IEnumerator Play(CutsceneContext c)
     {
+        SecretMemories.SawDream(night, mom);
         yield return c.FadeNow(1f, DreamWhite);
         yield return c.Letterbox(true, 0.3f);
         yield return c.CameraLight(true, 1f);
